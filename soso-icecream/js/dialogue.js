@@ -78,33 +78,33 @@ const DIALOGUE = {
 
   /* Momo — calm, a little ジト目, says exactly what she thinks */
   momo: {
-    arrive: ['…One order, please.', 'Hello, Soso.', 'I will wait. Patiently.'],
-    happy:  ['Efficient. Thank you.', 'Hm. Acceptable.', 'Good work, Soso.'],
-    thanks: ['…Thank you. Eventually.'],
+    arrive: ['Ice cream, ice cream!', 'Mo!', 'I want to order.'],
+    happy:  ['Thanks bro.', 'Momo!'],
+    thanks: ['Momo.'],
     slow:   ['I have research to do. Bye.'],
-    wrong:  { wrongFlavour: 'That is not what I ordered.', mixedUp: 'Wash the scoop, Soso.', needSpoon: 'How do I eat this?' },
+    wrong:  { wrongFlavour: 'That is not what I ordered.', mixedUp: 'Wash the scoop next time.', needSpoon: 'Spoon please?' },
   },
 
   /* Soso — cutesy and chaotic, quick to get mad */
   soso: {
-    arrive: ['Hiii~ ♪', 'Make it extra fluffy!', 'Soso is hungry~'],
-    happy:  ['Yaaay! Thank you~ ♡', 'So cute! So yummy!'],
-    thanks: ['Finally~!'],
-    slow:   ['Hmph!! Soso is leaving!'],
-    wrong:  { wrongFlavour: 'Thaaat\'s not it!', wantSprinkles: 'Where are my sprinkles?!' },
+    arrive: ['Soso ♪', 'So!', 'Sosososo!!!'],
+    happy:  ['So! ♡', 'Sososo!'],
+    thanks: ['Soso~'],
+    slow:   ['SOSOSO!!!'],
+    wrong:  { wrongFlavour: 'Soso......', wantSprinkles: 'Sososo!!!!' },
   },
 
   /* Kew — grumpy grey cat (edit to match Kew's personality) */
   kew: {
-    arrive: ['…', 'Hurry up.'],
-    happy:  ['…Not bad.', 'Fine. Thanks.'],
-    slow:   ['Tch. Forget it.'],
+    arrive: ['Kew.', 'Order please.'],
+    happy:  ['Kew...!', 'Thank you.'],
+    slow:   ['Maybe next time', 'Kew...'],
   },
 
   /* Rang — cheerful yellow bear (edit to match Rang's personality) */
   rang: {
-    arrive: ['Hellooo!', 'Ice cream time!'],
-    happy:  ['Wow, thank you!', 'Best ice cream ever!'],
-    slow:   ['Aww… maybe next time.'],
+    arrive: ['Raaaang!', 'Ice cream, ice cream, ice cream'],
+    happy:  ['Ranghahaha', 'Thanks~'],
+    slow:   ['Rang...', 'No time for this, kthxbye'],
   },
 };
