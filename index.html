@@ -2,71 +2,105 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#fff4e7">
-<title>TiniTomo Arcade | Jump into TiniTomo World and play games with MoSo Sisters!</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
-:root{font-family:'Fredoka',system-ui,sans-serif;color:#6c4d44;background:#fff4e7}
-*{box-sizing:border-box}body{margin:0}a{text-decoration:none;color:inherit}header{text-align:center;padding:64px 20px 42px;background:linear-gradient(160deg,#fff5e7,#ffe7df)}
-h1{font-size:clamp(2.6rem,8vw,5.1rem);margin:0;color:#ed8d8c;letter-spacing:.02em}header p{font-size:1.18rem;margin:9px 0 0}
-main{max-width:1110px;padding:38px 20px 65px;margin:auto}.toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px}
-.filter{font:inherit;cursor:pointer;background:#fff;border:2px solid #f4d6c9;color:#806258;padding:9px 20px;border-radius:99px}
-.filter[aria-pressed=true]{background:#efaaa4;color:#fff;border-color:#efaaa4}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:21px}
-.card{background:white;border:2px solid #f4e2d6;border-radius:24px;overflow:hidden;box-shadow:0 7px 0 #efdacf;transition:transform .2s;display:flex;flex-direction:column}
-.card:hover,.card:focus-visible{transform:translateY(-5px)}.art{min-height:150px;display:grid;place-items:center;font-size:70px;background:var(--bg,#f9eac9)}
-.content{padding:20px;display:flex;flex:1;flex-direction:column;gap:8px}.content h2{font-size:1.3rem;line-height:1.15;margin:0}.content p{color:#9a7b70;margin:0 0 12px;flex:1;font-size:.94rem}
-.play{align-self:flex-start;background:#92c7a7;color:#fff;padding:9px 19px;border-radius:16px;font-weight:600}
-footer{text-align:center;color:#a48779;padding:30px 14px;font-size:.9rem}
-@media(prefers-reduced-motion:reduce){.card{transition:none}}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#b9ddfb">
+<!-- Add to Home Screen: opens full screen without browser bars -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Soso Ice Cream">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+<title>Soso's Ice Cream Stand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header><h1>TiniTomo Arcade</h1><p>Little friends, big adventures!</p></header>
-<main>
-<nav class="toolbar" aria-label="Filter games">
-<button class="filter" data-filter="all" aria-pressed="true">All games</button>
-<button class="filter" data-filter="momo" aria-pressed="false">Momo</button>
-<button class="filter" data-filter="soso" aria-pressed="false">Soso</button>
-<button class="filter" data-filter="popo" aria-pressed="false">Popo</button>
-<button class="filter" data-filter="other" aria-pressed="false">Friends</button>
-</nav>
-<section class="grid" id="games" aria-label="Games"></section>
-</main>
-<footer>Made by TiniTomo Holdings</footer>
-<script>
-const games=[
-{name:"Momo Steakstack",slug:"momo-steakstack",group:"momo",description:"Build Momo a tall burger tower!",emoji:"🥩",bg:"#ffddd2"},
-{name:"Momo Pudding Panic",slug:"momo-puddingpanic",group:"momo",description:"Momo's big dream! Get all those pudding!",emoji:"🍮",bg:"#f9e9bb"},
-{name:"Momo Parasol Drop",slug:"momo-parasoldrop",group:"momo",description:"Not released",emoji:"☂️",bg:"#d9eaf8"},
-{name:"Momo Fries Fever",slug:"momo-friesfever",group:"momo",description:"Sneaky night with Momo, don't get caught!",emoji:"🍟",bg:"#ffe8bb"},
-{name:"Momo Cash Rush",slug:"momo-cashrush",group:"momo",description:"Not released",emoji:"💰",bg:"#d8edce"},
-{name:"Soso Stock Shuffle",slug:"soso-shelfstock",group:"soso",description:"Help Soso pack the stocks!",emoji:"📦",bg:"#d7eada"},
-{name:"Soso Donburi Skies",slug:"soso-donburiskies",group:"soso",description:"Float through the sky and make donburis with Soso",emoji:"🍚",bg:"#e0eaff"},
-{name:"Soso Lemonade Bar",slug:"soso-lemonadebar",group:"soso",description:"To be revamped!",emoji:"🍋",bg:"#fff0b9"},
-{name:"Popo's Pizza Party",slug:"popo-pizzaparty",group:"popo",description:"To be revamped!",emoji:"🍕",bg:"#ffddd2"},
-{name:"TiniTomo Toys",slug:"tinitomotoys",group:"other",description:"Work as the receptionist at TiniTomoToys and earn money to pull for TiniTomo Stickers!",emoji:"🧸",bg:"#e7dcf5"}
-];
-const target=document.getElementById("games");
-function render(filter="all"){
-const shown=games.filter(g=>filter==="all"||g.group===filter);
-target.replaceChildren();
-for(const g of shown){
-const a=document.createElement("a");a.className="card";a.href="https://inneyoh.github.io/"+g.slug+"/";a.target="_blank";a.rel="noopener noreferrer";a.setAttribute("aria-label","Play "+g.name);
-const art=document.createElement("div");art.className="art";art.style.setProperty("--bg",g.bg);art.textContent=g.emoji;
-const content=document.createElement("div");content.className="content";
-const h=document.createElement("h2");h.textContent=g.name;
-const p=document.createElement("p");p.textContent=g.description;
-const play=document.createElement("span");play.className="play";play.textContent="Play now →";
-content.append(h,p,play);a.append(art,content);target.append(a);
-}
-}
-document.querySelectorAll(".filter").forEach(button=>button.addEventListener("click",()=>{
-document.querySelectorAll(".filter").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
-render(button.dataset.filter);
-}));
-render();
-</script>
+
+<!-- ============ 1. GAME CANVAS ============ -->
+<canvas id="game"></canvas>
+
+<!-- ============ 2. TITLE SCREEN ============ -->
+<section id="title" class="screen">
+  <div class="panel title-panel">
+    <img class="title-soso" src="assets/customers/soso.png" alt="">
+    <h1 class="logo"><span class="l1">Soso's</span><span class="l2">Ice Cream Stand</span></h1>
+    <div class="menu-row">
+      <span class="chip c1">Cup</span><span class="chip c2">Waffle</span><span class="chip c3">Smoothie</span><span class="chip c4">Soda</span>
+    </div>
+    <button id="btn-start" class="btn big">Open the stand!</button>
+    <div class="btn-row">
+      <button id="btn-how" class="btn">How to play</button>
+      <button class="btn btn-sound">Sound: ON</button>
+      <button class="btn btn-fs" hidden>Full screen</button>
+    </div>
+    <div id="t-best" class="best"></div>
+    <div id="t-tip" class="tip-home" hidden>Tip: tap Share → <b>Add to Home Screen</b> to play full screen</div>
+  </div>
+</section>
+
+<!-- ============ 3. HOW TO PLAY ============ -->
+<section id="how" class="screen" hidden>
+  <div class="panel how-panel">
+    <h2>How to play</h2>
+    <p class="lead">Tap to pick things up and tap again to use them (dragging works too). Make what's in the bubble, then drag the finished cup to the customer (or tap it, then tap the customer) to serve it.</p>
+    <div class="recipes">
+      <div class="rc"><b>Ice cream cup</b>Cup on the mat → scoop (1–2) → sprinkles? → spoon</div>
+      <div class="rc"><b>Waffle cup</b>Ladle batter into the cooker → pull the lid down → pull it up when ✓ → put the waffle in a cup → scoops → sprinkles? → spoon</div>
+      <div class="rc"><b>Smoothie</b>Scoops into the blender → turn the knob ON → turn it OFF in <i>short</i> (yellow) or <i>long</i> (green) → pour into a drink cup → sprinkles? → cup cap → straw-spoon. Not sure which flavours a smoothie has? Check the recipe book beside the bin.</div>
+      <div class="rc"><b>Ice cream soda</b>Drink cup under the dispenser → hold the flavour button until full → 1 scoop → sprinkles? → straw-spoon</div>
+    </div>
+    <p class="tip">Rinse the scoop in the bowl before switching flavours · burnt waffles, overflowing cups and watery smoothies go in the bin.</p>
+    <button id="btn-how-back" class="btn">Back</button>
+  </div>
+</section>
+
+<!-- ============ 4. PAUSE ============ -->
+<section id="pause" class="screen dim" hidden>
+  <div class="panel small">
+    <h2>Paused</h2>
+    <button id="btn-resume" class="btn big">Resume</button>
+    <div class="btn-row">
+      <button id="btn-restart" class="btn">Restart day</button>
+      <button class="btn btn-sound">Sound: ON</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-layout">Layout: Classic</button>
+      <button class="btn btn-fs" hidden>Full screen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. RESULT ============ -->
+<section id="result" class="screen dim" hidden>
+  <div class="panel small">
+    <h2>Closing time!</h2>
+    <div id="r-stars" class="stars"></div>
+    <div class="r-grid">
+      <div><span>Earned</span><b id="r-money">$0</b></div>
+      <div><span>Served</span><b id="r-served">0</b></div>
+      <div><span>Missed</span><b id="r-missed">0</b></div>
+      <div><span>Best</span><b id="r-best">$0</b></div>
+    </div>
+    <p id="r-line" class="r-line"></p>
+    <div class="btn-row">
+      <button id="btn-again" class="btn big">Next day</button>
+      <button id="btn-title" class="btn">Title</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. ROTATE HINT (phones held upright) ============ -->
+<div id="rotate"><div>Turn your phone sideways to play 🍦</div></div>
+
+<!-- ============ 7. SCRIPTS ============ -->
+<script src="js/config.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/dialogue.js"></script>
+<script src="js/art.js"></script>
+<script src="js/game.js"></script>
 </body>
 </html>
