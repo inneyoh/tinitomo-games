@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#e4f7e9">
+<title>TiniTomo Arcade — Little friends, big adventures!</title>
+<link rel="icon" href="soso-icecream/assets/icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--mint:#e4f7e9;--mint-light:#f4fff7;--mint-mid:#b7e5c9;--mint-dark:#5c9980;--ink:#527365;--cream:#fffef8}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--mint);color:var(--ink);font:500 16px Fredoka,system-ui,sans-serif}
+.hero{background:radial-gradient(circle at 50% 0%,#fffef4 0%,#edf9ef 67%,#d3f0dd 100%);border-bottom:5px solid #b2e3c5;padding:36px 15px 40px;text-align:center}
+.logo{display:flex;align-items:center;justify-content:center;gap:clamp(4px,2vw,22px);margin:auto;max-width:850px}
+.logo-character{width:clamp(70px,16vw,155px);height:clamp(85px,20vw,170px);object-fit:contain;filter:drop-shadow(0 7px 3px #a0cdb055)}
+.logo-title{font-size:clamp(2.1rem,7.5vw,5.7rem);margin:0;line-height:.94;color:#75b999;text-shadow:3px 5px 0 #fff,-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff;letter-spacing:-.04em}
+.logo-title span{display:block;font-size:.47em;letter-spacing:.16em;color:#f3aa91;margin-top:12px}
+.hero p{font-size:clamp(15px,2vw,21px);margin:18px 0 0;color:#769887}
+main{max-width:1180px;margin:auto;padding:30px 20px 85px}.filters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:36px}
+.filter{font:600 15px Fredoka,system-ui;cursor:pointer;border:2px solid #bce4cd;background:#fffefa;color:#678f79;border-radius:50px;padding:12px 18px;transition:.15s}
+.filter:hover,.filter[aria-pressed=true]{background:#75ba99;color:white;border-color:#75ba99}.filter:focus-visible,.card:focus-visible{outline:3px solid #df9c8c;outline-offset:4px}
+.group{margin-bottom:48px}.group h2{font-size:clamp(1.5rem,3vw,2.2rem);margin:0 0 18px}.group h2:after{content:"";display:block;background:#b2e3c5;height:4px;border-radius:4px;margin-top:9px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px}
+.card{background:#fffefa;border:3px solid #c9e9d5;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;text-align:center;box-shadow:0 6px 0 #b9dfc8;transition:transform .18s}
+a.card:hover{transform:translateY(-5px)}.thumb{height:185px;background:linear-gradient(145deg,#f9fff4,#d7f4e2);display:flex;align-items:center;justify-content:center;padding:19px}
+.thumb img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 5px 3px #78978538)}
+.thumb .emoji{font-size:80px}.details{padding:16px 14px 19px;display:flex;flex-direction:column;align-items:center;flex:1}
+h3{margin:0 0 13px;font-size:1.22rem}.cta{margin-top:auto;border-radius:30px;background:#7ac29e;color:white;padding:10px 25px;font-size:.92rem}
+.card.soon{opacity:.83}.card.soon .thumb{background:#edf8ec}.status{margin-top:auto;background:#eef2e9;color:#8b9c86;border-radius:30px;padding:10px 20px;font-size:.88rem}
+.censored{filter:blur(5px);user-select:none}.secret .thumb{background:#eaf4ed}.secret .emoji{font-size:65px}
+.group[hidden]{display:none!important}
+footer{text-align:center;border-top:3px solid #bfe6cb;padding:24px;color:#779b86;background:#eaf8ee}
+@media(max-width:530px){.hero{padding:28px 9px}.logo-character{width:70px;height:93px}.logo-title{font-size:clamp(1.85rem,9vw,3rem)}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.thumb{height:145px;padding:12px}.details{padding:13px 7px}.details h3{font-size:1rem}.filters{gap:7px}.filter{font-size:13px;padding:9px 11px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="hero">
+<div class="logo">
+<img class="logo-character" src="soso-icecream/assets/customers/momo.png" alt="Momo" />
+<h1 class="logo-title">TiniTomo<span>ARCADE</span></h1>
+<img class="logo-character" src="soso-icecream/assets/customers/soso.png" alt="Soso" />
+</div>
+<p>Little friends, big adventures! ♡</p>
+</header>
+<main>
+<nav class="filters" aria-label="Filter games">
+<button class="filter" data-filter="all" aria-pressed="true">All games</button>
+<button class="filter" data-filter="released" aria-pressed="false">Released!</button>
+<button class="filter" data-filter="coming" aria-pressed="false">Coming soon</button>
+<button class="filter" data-filter="revamp" aria-pressed="false">Revamp coming!</button>
+<button class="filter" data-filter="future" aria-pressed="false">Future Projects</button>
+</nav>
+<div id="catalog"></div>
+</main>
+<footer>© TiniTomo Holdings · Made with ♡</footer>
+<script>
+const catalog=[
+{key:"released",title:"Released!",games:[
+{name:"Soso Ice Cream",url:"soso-icecream/",icon:"soso-icecream/assets/icons/icon-512.png"},
+{name:"Momo Pudding",url:"https://inneyoh.github.io/momo-puddingpanic/",emoji:"🍮"},
+{name:"Soso Shelf Stock",url:"https://inneyoh.github.io/soso-shelfstock/",icon:"https://raw.githubusercontent.com/inneyoh/soso-shelfstock/main/asset/icons/soso-icon-512.png"},
+{name:"TiniTomoToys",url:"https://inneyoh.github.io/tinitomotoys/",icon:"https://raw.githubusercontent.com/inneyoh/tinitomotoys/main/assets/icon/icon-512.png"},
+{name:"Momo Burger",emoji:"🍔",note:"Game link to be added"},
+{name:"Soso Donburi Sky",url:"https://inneyoh.github.io/soso-donburiskies/",emoji:"🍚"}
+]},
+{key:"coming",title:"Coming soon",games:[
+{name:"Turtle Playtime",emoji:"🐢",note:"Coming soon"}
+]},
+{key:"revamp",title:"Revamp coming!",games:[
+{name:"Momo Parasol",url:"https://inneyoh.github.io/momo-parasoldrop/",emoji:"☂️",note:"Revamp planned"},
+{name:"Momo Fries Fever",url:"https://inneyoh.github.io/momo-friesfever/",emoji:"🍟",note:"Revamp planned"}
+]},
+{key:"future",title:"Future Projects",games:[
+{name:"MoSo Treehouse Tandem",emoji:"🌳🏠",secret:true,note:"Secret project"},
+{name:"TiniTomo Fishery",emoji:"🎣",secret:true,note:"Secret project"}
+]}
+];
+const el=document.getElementById("catalog");
+for(const section of catalog){
+ const group=document.createElement("section");group.className="group";group.dataset.group=section.key;
+ const title=document.createElement("h2");title.textContent=section.title;
+ const grid=document.createElement("div");grid.className="grid";
+ for(const game of section.games){
+  const linked=!!game.url;
+  const card=document.createElement(linked?"a":"article");card.className="card"+(linked?"":" soon")+(game.secret?" secret":"");
+  if(linked){card.href=game.url;if(game.url.startsWith("https://")){card.target="_blank";card.rel="noopener noreferrer"}card.setAttribute("aria-label","Play "+game.name)}
+  const thumb=document.createElement("div");thumb.className="thumb";
+  if(game.icon){const img=document.createElement("img");img.src=game.icon;img.alt="";img.loading="lazy";img.onerror=()=>{img.remove();const e=document.createElement("span");e.className="emoji";e.textContent="🎮";thumb.append(e)};thumb.append(img)}
+  else{const e=document.createElement("span");e.className="emoji";e.textContent=game.emoji||"🎮";thumb.append(e)}
+  const details=document.createElement("div");details.className="details";
+  const h=document.createElement("h3");h.textContent=game.name;if(game.secret)h.className="censored";
+  const action=document.createElement("span");action.className=linked?"cta":"status";action.textContent=linked?"Play now →":(game.note||"Coming soon");
+  details.append(h,action);card.append(thumb,details);grid.append(card);
+ }
+ group.append(title,grid);el.append(group);
+}
+document.querySelectorAll(".filter").forEach(button=>button.addEventListener("click",()=>{
+ const filter=button.dataset.filter;
+ document.querySelectorAll(".filter").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
+ document.querySelectorAll(".group").forEach(section=>section.hidden=filter!=="all"&&section.dataset.group!==filter);
+}));
+</script>
+</body></html>
