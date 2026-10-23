@@ -85,7 +85,17 @@ const CONFIG = {
   TOUCH_KNOB_PAD: 34,        // extra grab radius around the blender knob
   TOUCH_BTN_PAD: 22,         // extra height around the soda buttons
 
-  /* ---------- 8. DEBUG ---------- */
+
+/* ---------- 8. AUDIO ---------- */
+   BGM: {
+  file: 'assets/audio/ice-cream-please.mp3',   // swap the file here to change the song
+  volume: 0.45,                                // 0 = silent … 1 = full volume
+  onTitle: true,                               // also play on the title screen (after the first tap)
+  onResult: false,                             // keep playing on the "Closing time!" screen
+  duringPause: false,                          // keep playing while paused
+},
+   
+   /* ---------- 9. DEBUG ---------- */
   // Alt+1 = end the day now · Alt+2 = spawn a customer · Alt+3 = +$20
   DEBUG: true,
 };
