@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#fff4e7">
-<title>TiniTomo Arcade | Little friends, big adventures</title>
+<title>TiniTomo Arcade | Jump into TiniTomo World and play games with MoSo Sisters!</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
 :root{font-family:'Fredoka',system-ui,sans-serif;color:#6c4d44;background:#fff4e7}
@@ -23,7 +23,7 @@ footer{text-align:center;color:#a48779;padding:30px 14px;font-size:.9rem}
 </style>
 </head>
 <body>
-<header><h1>♡ TiniTomo Arcade ♡</h1><p>Little friends, big adventures!</p></header>
+<header><h1>♡ TiniTomo Arcade</h1><p>Little friends, big adventures!</p></header>
 <main>
 <nav class="toolbar" aria-label="Filter games">
 <button class="filter" data-filter="all" aria-pressed="true">All games</button>
@@ -34,19 +34,19 @@ footer{text-align:center;color:#a48779;padding:30px 14px;font-size:.9rem}
 </nav>
 <section class="grid" id="games" aria-label="Games"></section>
 </main>
-<footer>Made with ♡ by TiniTomo Holdings</footer>
+<footer>Made by TiniTomo Holdings</footer>
 <script>
 const games=[
-{name:"Momo Steakstack",slug:"momo-steakstack",group:"momo",description:"Stack your way to the top!",emoji:"🥩",bg:"#ffddd2"},
-{name:"Momo Pudding Panic",slug:"momo-puddingpanic",group:"momo",description:"Jump up and collect puddings!",emoji:"🍮",bg:"#f9e9bb"},
-{name:"Momo Parasol Drop",slug:"momo-parasoldrop",group:"momo",description:"Float through the clouds!",emoji:"☂️",bg:"#d9eaf8"},
-{name:"Momo Fries Fever",slug:"momo-friesfever",group:"momo",description:"A crispy little adventure!",emoji:"🍟",bg:"#ffe8bb"},
-{name:"Momo Cash Rush",slug:"momo-cashrush",group:"momo",description:"Have fun in a money rush!",emoji:"💰",bg:"#d8edce"},
-{name:"Soso Stock Shuffle",slug:"soso-shelfstock",group:"soso",description:"Match boxes and clear the shelves!",emoji:"📦",bg:"#d7eada"},
-{name:"Soso Donburi Skies",slug:"soso-donburiskies",group:"soso",description:"Fly high and collect ingredients!",emoji:"🍚",bg:"#e0eaff"},
-{name:"Soso Lemonade Bar",slug:"soso-lemonadebar",group:"soso",description:"Serve up refreshing drinks!",emoji:"🍋",bg:"#fff0b9"},
-{name:"Popo's Pizza Party",slug:"popo-pizzaparty",group:"popo",description:"Bake and serve tasty pizza!",emoji:"🍕",bg:"#ffddd2"},
-{name:"TiniTomo Toys",slug:"tinitomotoys",group:"other",description:"Discover little surprises!",emoji:"🧸",bg:"#e7dcf5"}
+{name:"Momo Steakstack",slug:"momo-steakstack",group:"momo",description:"Build Momo a tall burger tower!",emoji:"🥩",bg:"#ffddd2"},
+{name:"Momo Pudding Panic",slug:"momo-puddingpanic",group:"momo",description:"Momo's big dream! Get all those pudding!",emoji:"🍮",bg:"#f9e9bb"},
+{name:"Momo Parasol Drop",slug:"momo-parasoldrop",group:"momo",description:"Not released",emoji:"☂️",bg:"#d9eaf8"},
+{name:"Momo Fries Fever",slug:"momo-friesfever",group:"momo",description:"Sneaky night with Momo, don't get caught!",emoji:"🍟",bg:"#ffe8bb"},
+{name:"Momo Cash Rush",slug:"momo-cashrush",group:"momo",description:"Not released",emoji:"💰",bg:"#d8edce"},
+{name:"Soso Stock Shuffle",slug:"soso-shelfstock",group:"soso",description:"Help Soso pack the stocks!",emoji:"📦",bg:"#d7eada"},
+{name:"Soso Donburi Skies",slug:"soso-donburiskies",group:"soso",description:"Float through the sky and make donburis with Soso",emoji:"🍚",bg:"#e0eaff"},
+{name:"Soso Lemonade Bar",slug:"soso-lemonadebar",group:"soso",description:"To be revamped!",emoji:"🍋",bg:"#fff0b9"},
+{name:"Popo's Pizza Party",slug:"popo-pizzaparty",group:"popo",description:"To be revamped!",emoji:"🍕",bg:"#ffddd2"},
+{name:"TiniTomo Toys",slug:"tinitomotoys",group:"other",description:"Work as the receptionist at TiniTomoToys and earn money to pull for TiniTomo Stickers!",emoji:"🧸",bg:"#e7dcf5"}
 ];
 const target=document.getElementById("games");
 function render(filter="all"){
