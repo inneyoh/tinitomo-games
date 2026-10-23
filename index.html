@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fff4e7">
+<title>TiniTomo Arcade | Little friends, big adventures</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+:root{font-family:'Fredoka',system-ui,sans-serif;color:#6c4d44;background:#fff4e7}
+*{box-sizing:border-box}body{margin:0}a{text-decoration:none;color:inherit}header{text-align:center;padding:64px 20px 42px;background:linear-gradient(160deg,#fff5e7,#ffe7df)}
+h1{font-size:clamp(2.6rem,8vw,5.1rem);margin:0;color:#ed8d8c;letter-spacing:.02em}header p{font-size:1.18rem;margin:9px 0 0}
+main{max-width:1110px;padding:38px 20px 65px;margin:auto}.toolbar{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px}
+.filter{font:inherit;cursor:pointer;background:#fff;border:2px solid #f4d6c9;color:#806258;padding:9px 20px;border-radius:99px}
+.filter[aria-pressed=true]{background:#efaaa4;color:#fff;border-color:#efaaa4}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:21px}
+.card{background:white;border:2px solid #f4e2d6;border-radius:24px;overflow:hidden;box-shadow:0 7px 0 #efdacf;transition:transform .2s;display:flex;flex-direction:column}
+.card:hover,.card:focus-visible{transform:translateY(-5px)}.art{min-height:150px;display:grid;place-items:center;font-size:70px;background:var(--bg,#f9eac9)}
+.content{padding:20px;display:flex;flex:1;flex-direction:column;gap:8px}.content h2{font-size:1.3rem;line-height:1.15;margin:0}.content p{color:#9a7b70;margin:0 0 12px;flex:1;font-size:.94rem}
+.play{align-self:flex-start;background:#92c7a7;color:#fff;padding:9px 19px;border-radius:16px;font-weight:600}
+footer{text-align:center;color:#a48779;padding:30px 14px;font-size:.9rem}
+@media(prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<header><h1>♡ TiniTomo Arcade ♡</h1><p>Little friends, big adventures!</p></header>
+<main>
+<nav class="toolbar" aria-label="Filter games">
+<button class="filter" data-filter="all" aria-pressed="true">All games</button>
+<button class="filter" data-filter="momo" aria-pressed="false">Momo</button>
+<button class="filter" data-filter="soso" aria-pressed="false">Soso</button>
+<button class="filter" data-filter="popo" aria-pressed="false">Popo</button>
+<button class="filter" data-filter="other" aria-pressed="false">Friends</button>
+</nav>
+<section class="grid" id="games" aria-label="Games"></section>
+</main>
+<footer>Made with ♡ by TiniTomo Holdings</footer>
+<script>
+const games=[
+{name:"Momo Steakstack",slug:"momo-steakstack",group:"momo",description:"Stack your way to the top!",emoji:"🥩",bg:"#ffddd2"},
+{name:"Momo Pudding Panic",slug:"momo-puddingpanic",group:"momo",description:"Jump up and collect puddings!",emoji:"🍮",bg:"#f9e9bb"},
+{name:"Momo Parasol Drop",slug:"momo-parasoldrop",group:"momo",description:"Float through the clouds!",emoji:"☂️",bg:"#d9eaf8"},
+{name:"Momo Fries Fever",slug:"momo-friesfever",group:"momo",description:"A crispy little adventure!",emoji:"🍟",bg:"#ffe8bb"},
+{name:"Momo Cash Rush",slug:"momo-cashrush",group:"momo",description:"Have fun in a money rush!",emoji:"💰",bg:"#d8edce"},
+{name:"Soso Stock Shuffle",slug:"soso-shelfstock",group:"soso",description:"Match boxes and clear the shelves!",emoji:"📦",bg:"#d7eada"},
+{name:"Soso Donburi Skies",slug:"soso-donburiskies",group:"soso",description:"Fly high and collect ingredients!",emoji:"🍚",bg:"#e0eaff"},
+{name:"Soso Lemonade Bar",slug:"soso-lemonadebar",group:"soso",description:"Serve up refreshing drinks!",emoji:"🍋",bg:"#fff0b9"},
+{name:"Popo's Pizza Party",slug:"popo-pizzaparty",group:"popo",description:"Bake and serve tasty pizza!",emoji:"🍕",bg:"#ffddd2"},
+{name:"TiniTomo Toys",slug:"tinitomotoys",group:"other",description:"Discover little surprises!",emoji:"🧸",bg:"#e7dcf5"}
+];
+const target=document.getElementById("games");
+function render(filter="all"){
+const shown=games.filter(g=>filter==="all"||g.group===filter);
+target.replaceChildren();
+for(const g of shown){
+const a=document.createElement("a");a.className="card";a.href="https://inneyoh.github.io/"+g.slug+"/";a.target="_blank";a.rel="noopener noreferrer";a.setAttribute("aria-label","Play "+g.name);
+const art=document.createElement("div");art.className="art";art.style.setProperty("--bg",g.bg);art.textContent=g.emoji;
+const content=document.createElement("div");content.className="content";
+const h=document.createElement("h2");h.textContent=g.name;
+const p=document.createElement("p");p.textContent=g.description;
+const play=document.createElement("span");play.className="play";play.textContent="Play now →";
+content.append(h,p,play);a.append(art,content);target.append(a);
+}
+}
+document.querySelectorAll(".filter").forEach(button=>button.addEventListener("click",()=>{
+document.querySelectorAll(".filter").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));
+render(button.dataset.filter);
+}));
+render();
+</script>
+</body>
+</html>
