@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#b9ddfb">
+<!-- Add to Home Screen: opens full screen without browser bars -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Soso Ice Cream">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+<title>Soso's Ice Cream Stand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ 1. GAME CANVAS ============ -->
+<canvas id="game"></canvas>
+
+<!-- ============ 2. TITLE SCREEN ============ -->
+<section id="title" class="screen">
+  <div class="panel title-panel">
+    <img class="title-soso" src="assets/customers/soso.png" alt="">
+    <h1 class="logo"><span class="l1">Soso's</span><span class="l2">Ice Cream Stand</span></h1>
+    <div class="menu-row">
+      <span class="chip c1">Cup</span><span class="chip c2">Waffle</span><span class="chip c3">Smoothie</span><span class="chip c4">Soda</span>
+    </div>
+    <button id="btn-start" class="btn big">Open the stand!</button>
+    <div class="btn-row">
+      <button id="btn-how" class="btn">How to play</button>
+      <button class="btn btn-sound">Sound: ON</button>
+      <button class="btn btn-fs" hidden>Full screen</button>
+    </div>
+    <div id="t-best" class="best"></div>
+    <div id="t-tip" class="tip-home" hidden>Tip: tap Share → <b>Add to Home Screen</b> to play full screen</div>
+  </div>
+</section>
+
+<!-- ============ 3. HOW TO PLAY ============ -->
+<section id="how" class="screen" hidden>
+  <div class="panel how-panel">
+    <h2>How to play</h2>
+    <p class="lead">Tap to pick things up and tap again to use them (dragging works too). Make what's in the bubble, then drag the finished cup to the customer (or tap it, then tap the customer) to serve it.</p>
+    <div class="recipes">
+      <div class="rc"><b>Ice cream cup</b>Cup on the mat → scoop (1–2) → sprinkles? → spoon</div>
+      <div class="rc"><b>Waffle cup</b>Ladle batter into the cooker → pull the lid down → pull it up when ✓ → put the waffle in a cup → scoops → sprinkles? → spoon</div>
+      <div class="rc"><b>Smoothie</b>Scoops into the blender → turn the knob ON → turn it OFF in <i>short</i> (yellow) or <i>long</i> (green) → pour into a drink cup → sprinkles? → cup cap → straw-spoon. Not sure which flavours a smoothie has? Check the recipe book beside the bin.</div>
+      <div class="rc"><b>Ice cream soda</b>Drink cup under the dispenser → hold the flavour button until full → 1 scoop → sprinkles? → straw-spoon</div>
+    </div>
+    <p class="tip">Rinse the scoop in the bowl before switching flavours · burnt waffles, overflowing cups and watery smoothies go in the bin.</p>
+    <button id="btn-how-back" class="btn">Back</button>
+  </div>
+</section>
+
+<!-- ============ 4. PAUSE ============ -->
+<section id="pause" class="screen dim" hidden>
+  <div class="panel small">
+    <h2>Paused</h2>
+    <button id="btn-resume" class="btn big">Resume</button>
+    <div class="btn-row">
+      <button id="btn-restart" class="btn">Restart day</button>
+      <button class="btn btn-sound">Sound: ON</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-layout">Layout: Classic</button>
+      <button class="btn btn-fs" hidden>Full screen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. RESULT ============ -->
+<section id="result" class="screen dim" hidden>
+  <div class="panel small">
+    <h2>Closing time!</h2>
+    <div id="r-stars" class="stars"></div>
+    <div class="r-grid">
+      <div><span>Earned</span><b id="r-money">$0</b></div>
+      <div><span>Served</span><b id="r-served">0</b></div>
+      <div><span>Missed</span><b id="r-missed">0</b></div>
+      <div><span>Best</span><b id="r-best">$0</b></div>
+    </div>
+    <p id="r-line" class="r-line"></p>
+    <div class="btn-row">
+      <button id="btn-again" class="btn big">Next day</button>
+      <button id="btn-title" class="btn">Title</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. ROTATE HINT (phones held upright) ============ -->
+<div id="rotate"><div>Turn your phone sideways to play 🍦</div></div>
+
+<!-- ============ 7. SCRIPTS ============ -->
+<script src="js/config.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/dialogue.js"></script>
+<script src="js/art.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
