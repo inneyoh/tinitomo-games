@@ -61,6 +61,42 @@ let highscore = 0; try { highscore = +localStorage.getItem('soso-icecream-hi') |
    3. SOUND — tiny WebAudio blips (ON/OFF)
    --------------------------------------------------------------------- */
 let AC = null, soundOn = true; try { soundOn = localStorage.getItem('soso-icecream-sound') !== 'off'; } catch (e) {}
+const bgm = new Audio(CONFIG.BGM.file);
+bgm.loop = true;
+bgm.volume = CONFIG.BGM.volume ?? 0.45;
+bgm.preload = 'auto';
+
+let musicUnlocked = false;
+
+function syncMusic() {
+  const config = CONFIG.BGM;
+  const allowed =
+    S.phase === 'play' ||
+    (S.phase === 'title' && config.onTitle) ||
+    (S.phase === 'result' && config.onResult) ||
+    (S.phase === 'pause' && config.duringPause);
+
+  if (!musicUnlocked || !soundOn || document.hidden || !allowed) {
+    bgm.pause();
+    return;
+  }
+
+  if (bgm.paused) {
+    bgm.play().catch(error => {
+      console.warn('Music could not start:', error);
+    });
+  }
+}
+
+// Browsers require an interaction before audible music can start.
+function unlockMusic() {
+  musicUnlocked = true;
+  syncMusic();
+}
+
+document.addEventListener('pointerdown', unlockMusic);
+document.addEventListener('keydown', unlockMusic);
+document.addEventListener('visibilitychange', syncMusic);
 function beep(f = 600, d = .08, type = 'sine', v = .12, slide = 0) {
   if (!soundOn) return;
   try {
@@ -736,7 +772,12 @@ function frame(now) {
    10. SCREENS + DEBUG
    --------------------------------------------------------------------- */
 const $ = s => document.querySelector(s);
-function show(id) { document.querySelectorAll('.screen').forEach(e => e.hidden = e.id !== id); }
+function show(id) {
+  document.querySelectorAll('.screen').forEach(e => {
+    e.hidden = e.id !== id;
+  });
+  syncMusic();
+}
 function startDay() {
   if (touchCapable() && !standalone) goFullscreen();   // phones: go full screen when the shift starts (where allowed)
   const keep = soundOn; resetState(); soundOn = keep; S.phase = 'play'; show(null); beep(784, .1); setTimeout(() => beep(1046, .14), 100);
@@ -752,7 +793,7 @@ function endDay() {
   show('result'); SFX.ding();
 }
 function setPaused(p) { if (S.phase !== 'play' && S.phase !== 'pause') return; S.phase = p ? 'pause' : 'play'; show(p ? 'pause' : null); S.pressing = [false, false, false]; }
-function setSound(on) { soundOn = on; try { localStorage.setItem('soso-icecream-sound', on ? 'on' : 'off'); } catch (e) {} document.querySelectorAll('.btn-sound').forEach(b => b.textContent = 'Sound: ' + (on ? 'ON' : 'OFF')); }
+function setSound(on) { soundOn = on; try { localStorage.setItem('soso-icecream-sound', on ? 'on' : 'off'); } catch (e) {} document.querySelectorAll('.btn-sound').forEach(b => b.textContent = 'Sound: ' + (on ? 'ON' : 'OFF')); syncMusic();}
 
 // HUD buttons on the canvas
 cv.addEventListener('pointerdown', e => {
