@@ -39,14 +39,15 @@ footer{text-align:center;border-top:3px solid #bfe6cb;padding:24px;color:#779b86
 <header class="hero">
 <div class="logo">
 <img class="logo-character" src="soso-icecream/assets/customers/momo.png" alt="Momo" />
-<h1 class="logo-title">TiniTomo<span>ARCADE</span></h1>
+<h1 class="logo-title">TiniTomo<span>Arcade</span></h1>
 <img class="logo-character" src="soso-icecream/assets/customers/soso.png" alt="Soso" />
 </div>
-<p>Little friends, big adventures! ♡</p>
+<p>MoSo Sisters and their daily lives!</p>
 </header>
 <main>
 <nav class="filters" aria-label="Filter games">
 <button class="filter" data-filter="all" aria-pressed="true">All games</button>
+<button class="filter" data-filter="updated" aria-pressed="false">Updated</button>
 <button class="filter" data-filter="released" aria-pressed="false">Released!</button>
 <button class="filter" data-filter="coming" aria-pressed="false">Coming soon</button>
 <button class="filter" data-filter="revamp" aria-pressed="false">Revamp coming!</button>
@@ -54,9 +55,13 @@ footer{text-align:center;border-top:3px solid #bfe6cb;padding:24px;color:#779b86
 </nav>
 <div id="catalog"></div>
 </main>
-<footer>© TiniTomo Holdings · Made with ♡</footer>
+<footer>© TiniTomo Holdings</footer>
 <script>
 const catalog=[
+{key:"updated",title:"Updated",games:[
+{name:"Soso Shelf Stock",url:"https://inneyoh.github.io/soso-shelfstock/",icon:"https://raw.githubusercontent.com/inneyoh/soso-shelfstock/main/asset/icons/soso-icon-512.png"},
+{name:"TiniTomoToys",url:"https://inneyoh.github.io/tinitomotoys/",icon:"https://raw.githubusercontent.com/inneyoh/tinitomotoys/main/assets/icon/icon-512.png"}
+]},
 {key:"released",title:"Released!",games:[
 {name:"(NEW!) Soso Ice Cream",url:"soso-icecream/",icon:"soso-icecream/assets/icons/icon-512.png"},
 {name:"Momo Pudding",url:"https://inneyoh.github.io/momo-puddingpanic/",icon:"https://raw.githubusercontent.com/inneyoh/momo-puddingpanic/main/assets/icon-512.png"},
@@ -70,7 +75,8 @@ const catalog=[
 ]},
 {key:"revamp",title:"Revamp coming!",games:[
 {name:"Momo Parasol",url:"https://inneyoh.github.io/momo-parasoldrop/",emoji:"☂️",note:"Revamp planned"},
-{name:"Momo Fries Fever",url:"https://inneyoh.github.io/momo-friesfever/",emoji:"🍟",note:"Revamp planned"}
+{name:"Momo Fries Fever",url:"https://inneyoh.github.io/momo-friesfever/",emoji:"🍟",note:"Revamp planned"},
+{name:"Popo Pizza Party", url:"https://inneyoh.github.io/popo-pizzaparty/",icon:"https://raw.githubusercontent.com/inneyoh/popo-pizzaparty/main/assets/assets/icon-512.png"}
 ]},
 {key:"future",title:"Future Projects",games:[
 {name:"MoSo Treehouse Tandem",emoji:"🌳🏠",secret:true,note:"Secret project"},
