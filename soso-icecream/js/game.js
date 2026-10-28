@@ -149,20 +149,32 @@ function findTarget(p, onlyOk) {
   return { tg: best, T };
 }
 
+/* ---- ice cream scoop: auto-return ----
+   Things the scoop is used with: tubs, washing bowl, blender jug, bin and any cup.
+   Letting go of the scoop anywhere else (or tapping something unrelated) sends it back to the
+   washing bowl, where it is cleaned automatically. Switching flavours while still holding it
+   still needs a rinse (or the flavours mix). */
+function scoopRelated(tg) { return !!tg && (tg.scoopRel || (tg.spot && !!tg.spot[0][tg.spot[1]])); }
+function returnScoop(from) {
+  if (!holding('scoop')) return;
+  S.hand = null; S.scoop = { fl: null, dirty: null }; S.scoopHome = false;
+  S.scoopFly = { x: from.x, y: from.y, t: 0 };            // flies back to the bowl, see update()
+}
 /* actions that apply a held tool to a cup sitting somewhere */
 function applyToCup(it) {
   const h = H();
   if (!h) return false;
   if (h.t === 'scoop') {
     if (!S.scoop.fl) { say('Scoop some ice cream first'); return true; }
-    if (it.spr || it.ut || it.cap) { say('Ice cream goes in before toppings'); return true; }
+    if (it.ut && it.waffle) { say('On waffle cups the spoon goes in last'); return true; }
+    if (it.spr || it.cap) { say('Ice cream goes in before toppings'); return true; }
     if (it.smoothie) { say('That cup already has a smoothie'); return true; }
     if (it.k === 'H' && it.scoops.length >= 2) { say('Two scoops max!'); return true; }
     if (it.k === 'I' && it.scoops.length >= 1) { say('Ice cream soda takes one scoop'); return true; }
     it.scoops.push(S.scoop.fl); S.scoop.dirty = S.scoop.fl; S.scoop.fl = null; SFX.drop(); return true;
   }
   if (h.t === 'spr') {
-    if (it.ut) { say('Sprinkles go on before the spoon'); return true; }
+    if (it.ut && it.waffle) { say('On waffle cups the spoon goes in last'); return true; }
     if (it.cap) { say('Sprinkles go on before the cup cap'); return true; }
     if (it.spr) { say('Already sprinkled'); return true; }
     if (!it.scoops.length && !it.smoothie) { say('Add ice cream first'); return true; }
@@ -170,7 +182,7 @@ function applyToCup(it) {
   }
   if (h.t === 'spoon' || h.t === 'straw') {
     if (it.ut) { say('It already has one'); return true; }
-    if (!it.scoops.length && !it.smoothie && sodaTotal(it) <= 0) { say('Make the treat first'); return true; }
+    // spoons / straw-spoons can go in at any time (waffle cups: must be last — the other steps check that)
     it.ut = h.t; S.hand = null; SFX.drop(); return true;
   }
   if (h.t === 'jug') {
@@ -183,25 +195,26 @@ function applyToCup(it) {
   if (h.t === 'cap') {
     if (it.k !== 'I') { say('Cup caps only fit drink cups'); return true; }
     if (it.cap) { say('It already has a cap'); return true; }
-    if (it.ut) { say('Put the cap on before the straw-spoon'); return true; }
     if (!it.smoothie && !it.scoops.length && sodaTotal(it) <= 0) { say('Make the drink first'); return true; }
     it.cap = true; S.hand = null; SFX.drop(); return true;
   }
   if (h.t === 'waffle') {
     if (it.k !== 'H') { say('Waffles go in an ice cream cup'); return true; }
     if (it.waffle || it.scoops.length) { say('Use an empty ice cream cup'); return true; }
+    if (it.ut) { say('On waffle cups the spoon goes in last'); return true; }
     it.waffle = h.w; S.hand = null; SFX.drop(); return true;
   }
   return false;
 }
 function canApply(it) {
   const h = H(); if (!h) return true;
-  if (h.t === 'scoop') return !!S.scoop.fl && !it.spr && !it.ut && !it.cap && !it.smoothie && it.scoops.length < (it.k === 'H' ? 2 : 1);
-  if (h.t === 'spr') return !it.ut && !it.cap && !it.spr && (it.scoops.length || it.smoothie);
-  if (h.t === 'cap') return it.k === 'I' && !it.cap && !it.ut && (it.scoops.length || it.smoothie || sodaTotal(it) > 0);
-  if (h.t === 'spoon' || h.t === 'straw') return !it.ut && (it.scoops.length || it.smoothie || sodaTotal(it) > 0);
+  const spoonLast = it.ut && it.waffle;   // waffle cup with its spoon already in: finished
+  if (h.t === 'scoop') return !!S.scoop.fl && !it.spr && !spoonLast && !it.cap && !it.smoothie && it.scoops.length < (it.k === 'H' ? 2 : 1);
+  if (h.t === 'spr') return !spoonLast && !it.cap && !it.spr && (it.scoops.length || it.smoothie);
+  if (h.t === 'cap') return it.k === 'I' && !it.cap && (it.scoops.length || it.smoothie || sodaTotal(it) > 0);
+  if (h.t === 'spoon' || h.t === 'straw') return !it.ut;
   if (h.t === 'jug') return it.k === 'I' && !it.scoops.length && !it.smoothie && !it.cap && sodaTotal(it) <= 0;
-  if (h.t === 'waffle') return it.k === 'H' && !it.waffle && !it.scoops.length;
+  if (h.t === 'waffle') return it.k === 'H' && !it.waffle && !it.scoops.length && !it.ut;
   return false;
 }
 
@@ -237,6 +250,7 @@ function targets() {
   CONFIG.TRAY_ORDER.forEach((f, i) => {
     const [x, y] = L.tubs[i];
     T.push({
+      scoopRel: true,
       hit: p => inRect(p, { x: x - L.tubW / 2, y: y - L.tubH / 2, w: L.tubW, h: L.tubH }), rect: [x - L.tubW / 2, y - L.tubH / 2, L.tubW, L.tubH, 18],
       tap() {
         if (!holding('scoop')) { say(H() ? 'Your hands are full' : 'Pick up the scoop from the bowl first'); return; }
@@ -250,9 +264,10 @@ function targets() {
   });
   // b. washing bowl
   T.push({
+    scoopRel: true, bowl: true,
     hit: p => inCirc(p, L.bowl.cx, L.bowl.cy, L.bowl.r + 6), circ: [L.bowl.cx, L.bowl.cy, L.bowl.r],
     tap() {
-      if (!H()) { if (S.scoopHome) { S.scoopHome = false; S.hand = { t: 'scoop' }; SFX.pick(); } return; }
+      if (!H()) { if (S.scoopHome && !S.scoopFly) { S.scoopHome = false; S.hand = { t: 'scoop' }; SFX.pick(); } return; }
       if (!holding('scoop')) { say('Your hands are full'); return; }
       if (S.scoop.fl || S.scoop.dirty) { S.scoop.fl = null; S.scoop.dirty = null; S.washT = 1; SFX.wash(); burst(L.bowl.cx, L.bowl.cy, 'bubble', 8); return; }
       S.scoopHome = true; S.hand = null; SFX.drop();
@@ -267,6 +282,7 @@ function targets() {
   });
   // c. blender jug
   T.push({
+    scoopRel: true,
     hit: p => inRect(toBlender(p), { x: 466, y: 240, w: 124, h: 214 }), rect: [468, 246, 120, 206, 16], blender: true,
     tap() {
       const b = S.blender, h = H();
@@ -367,6 +383,7 @@ function targets() {
     tap() { S.book.open = true; SFX.pick(); }, ok: () => false });
   // L. bin
   T.push({
+    scoopRel: true,
     hit: p => inRect(p, L.bin), rect: [L.bin.x, L.bin.y, L.bin.w, L.bin.h, 16],
     tap() {
       const h = H(); if (!h) return;
@@ -399,10 +416,14 @@ cv.addEventListener('pointerdown', e => {
   const p = toStage(e); pointer = { ...p, type: e.pointerType, inside: true };
   touchMode = e.pointerType !== 'mouse';
   if (S.book.open) { bookTap(p); drag = null; return; }
-  // dispenser buttons (hold) — bigger on touch
+  // dispenser buttons — tap to start pouring, tap again to stop (bigger on touch)
   const pt = toTable(p), bp = touchMode ? CONFIG.TOUCH_BTN_PAD : 0;
-  for (let i = 0; i < 3; i++) if (inRect(pt, { x: L.nozzles[i] - 30 - Math.min(bp, 11), y: 258 + DY() - bp, w: 60 + 2 * Math.min(bp, 11), h: 74 + bp * 1.4 })) { S.pressing[i] = true; drag = { kind: 'btn', i }; return; }
+  for (let i = 0; i < 3; i++) if (inRect(pt, { x: L.nozzles[i] - 30 - Math.min(bp, 11), y: 258 + DY() - bp, w: 60 + 2 * Math.min(bp, 11), h: 74 + bp * 1.4 })) {
+    returnScoop(p); S.pressing[i] = !S.pressing[i]; SFX.lid(); drag = null; return;
+  }
   const { tg, T } = findTarget(p);
+  // holding the scoop and tapping something it isn't used with → the scoop goes back to the bowl first
+  if (holding('scoop') && !scoopRelated(tg)) { returnScoop(p); if (!tg) { drag = null; return; } }
   if (tg && tg.book) { tg.tap(); drag = null; return; }
   if (tg && tg.knob) { drag = { kind: 'knob', sx: p.x, sy: p.y, moved: false, tg }; return; }
   if (tg && tg.lid && (S.cooker.lid > .5 || tg.tap === T.find(t => t.lid).tap)) {
@@ -412,7 +433,7 @@ cv.addEventListener('pointerdown', e => {
   const hadHand = !!S.hand;
   if (tg) tg.tap();
   const picked = !hadHand && !!S.hand;
-  drag = { kind: 'item', sx: p.x, sy: p.y, moved: false, picked, from: picked && tg && tg.spot && holding('cup') ? { spot: tg.spot, item: S.hand.item } : null };
+  drag = { kind: 'item', sx: p.x, sy: p.y, moved: false, picked, tg, from: picked && tg && tg.spot && holding('cup') ? { spot: tg.spot, item: S.hand.item } : null };
 });
 cv.addEventListener('pointermove', e => {
   const p = toStage(e); pointer = { ...p, type: e.pointerType, inside: true };
@@ -444,7 +465,13 @@ function endPointer(e) {
   if (drag.kind === 'btn') S.pressing[drag.i] = false;
   if (drag.kind === 'knob' && !drag.moved) drag.tg.tap();
   if (drag.kind === 'lid' && !drag.moved) drag.tg.tap();
-  if (drag.kind === 'item' && drag.moved && drag.picked && S.hand) {
+  if (drag.kind === 'item' && drag.moved && holding('scoop')) {
+    // let go of the scoop: use it on what's under the finger, otherwise it goes back to the bowl
+    const P = t => t.top ? p : toTable(p), exact = targets().find(t => t.hit(P(t)));
+    if (exact && exact.bowl) returnScoop(p);
+    else if (scoopRelated(exact)) { if (exact !== drag.tg && exact.ok()) exact.tap(); }
+    else { const { tg } = findTarget(p, true); if (scoopRelated(tg) && tg !== drag.tg) tg.tap(); else returnScoop(p); }
+  } else if (drag.kind === 'item' && drag.moved && drag.picked && S.hand) {
     // drag & drop: release over a target = tap it
     const { tg } = findTarget(p, true); if (tg) tg.tap();
     // dragged a cup off the mat / dispenser and let go somewhere it can't stay (or the customer refused it): slide it back
@@ -580,6 +607,8 @@ function update(dt) {
     ck.cook += dt;
     if (!ck.dinged && ck.cook >= CONFIG.WAFFLE_COOK_TIME) { ck.dinged = true; SFX.ding(); }
   }
+  // scoop flying back to the washing bowl (auto-clean)
+  if (S.scoopFly) { S.scoopFly.t += dt / CONFIG.SCOOP_RETURN_TIME; if (S.scoopFly.t >= 1) { S.scoopFly = null; S.scoopHome = true; SFX.wash(); burst(L.bowl.cx, L.bowl.cy, 'bubble', 6); } }
   // blender
   const b = S.blender; if (b.knob > 0 && b.scoops.length && !S.jugInHand) b.blend += CONFIG.BLEND_SPEED * dt;
   // dispenser
@@ -625,11 +654,11 @@ function hintText() {
     if (isEmpty(h.item)) return h.item.k === 'H' ? 'Put the cup on the mat — or tap a cooked waffle to scoop it in' : 'Put it on the mat — or under the soda dispenser';
     return 'Drag (or tap) it to the customer to serve — or put it down / bin it';
   }
-  if (h.t === 'scoop') return S.scoop.fl ? 'Drop the scoop into a cup — or into the blender' : S.scoop.dirty ? 'New flavour? Rinse the scoop in the bowl first!' : 'Tap a flavour to scoop';
+  if (h.t === 'scoop') return S.scoop.fl ? 'Drop the scoop into a cup or the blender — let go elsewhere to put it back' : S.scoop.dirty ? 'New flavour? Rinse the scoop in the bowl first!' : 'Tap a flavour to scoop';
   if (h.t === 'ladle') return h.full ? 'Pour the batter into the open waffle cooker' : 'Put the ladle back in its batter tub';
   if (h.t === 'spr') return 'Tap a cup to add sprinkles';
-  if (h.t === 'spoon') return 'Spoons go into ice cream cups';
-  if (h.t === 'straw') return 'Straw-spoons go into drink cups';
+  if (h.t === 'spoon') return 'Spoons go into ice cream cups (last on waffle cups)';
+  if (h.t === 'straw') return 'Straw-spoons go into drink cups — any time';
   if (h.t === 'jug') return 'Pour into an empty drink cup';
   if (h.t === 'waffle') return 'Put the waffle into an empty ice cream cup';
   if (h.t === 'cap') return 'Cap a finished smoothie (after sprinkles, before the straw-spoon)';
@@ -753,6 +782,10 @@ function render() {
   drawShelf(ctx, S, t); drawSprinklePots(ctx, S, t);
   ctx.restore();
   if (S.phase === 'play' && !S.book.open) { drawGlows(ctx, t); drawHUD(ctx, t); }
+  if (S.scoopFly) {   // scoop flying back to the bowl
+    const f = S.scoopFly, q = 1 - Math.pow(1 - Math.min(1, f.t), 3), bx = L.bowl.cx + 4, by = L.bowl.cy + 2 - L.band;
+    drawScoopTool(ctx, f.x + (bx - f.x) * q, f.y + (by - f.y) * q - Math.sin(q * Math.PI) * 40, 1.05 - .15 * q, { fl: null, dirty: null }, -.45 - .15 * q);
+  }
   drawFx(ctx);
   if (S.phase === 'play' && S.book.open) { drawRecipeBook(ctx, S, t); return; }
   if (S.phase === 'play' && S.hand) {
@@ -792,7 +825,7 @@ function endDay() {
   $('#r-line').textContent = stars >= 3 ? 'Soso is the ice cream queen!' : stars === 2 ? 'Sweet shift, nicely done!' : stars === 1 ? 'Not bad — the freezer is still cold!' : 'Hmph… tomorrow will be better!';
   show('result'); SFX.ding();
 }
-function setPaused(p) { if (S.phase !== 'play' && S.phase !== 'pause') return; S.phase = p ? 'pause' : 'play'; show(p ? 'pause' : null); S.pressing = [false, false, false]; }
+function setPaused(p) { if (S.phase !== 'play' && S.phase !== 'pause') return; S.phase = p ? 'pause' : 'play'; show(p ? 'pause' : null); }
 function setSound(on) { soundOn = on; try { localStorage.setItem('soso-icecream-sound', on ? 'on' : 'off'); } catch (e) {} document.querySelectorAll('.btn-sound').forEach(b => b.textContent = 'Sound: ' + (on ? 'ON' : 'OFF')); syncMusic();}
 
 // HUD buttons on the canvas
