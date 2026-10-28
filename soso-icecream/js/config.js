@@ -30,7 +30,7 @@ const CONFIG = {
   BLEND_SHORT: 1.0,          // blend points where "Short" (chunky) starts
   BLEND_LONG: 2.2,           // …where "Long" (smooth) starts
   BLEND_OVER: 3.6,           // …where it turns watery (wrong)
-  SODA_RATE: 0.38,           // cup fill per second while a dispenser button is held
+  SODA_RATE: 0.38,           // cup fill per second while a dispenser is pouring (tap a button to start, tap again to stop)
   SODA_MIN: 0.8,             // a soda counts as full from this level (1.0 = brim, above = spill)
 
   /* ---------- 5. MENU INGREDIENTS ---------- */
@@ -53,11 +53,14 @@ const CONFIG = {
 
   SPRINKLE_SIZE: 1.82,       // size of sprinkles drawn on ice cream (1 = original v0 size; 1.3 × 1.4)
   SPRINKLE_COUNT: 7,         // how many sprinkles are drawn on one scoop
+  SPRINKLE_ART_SCALE: 1.4,   // each sprinkle in the sprinkle pictures is drawn this much bigger (1 = as drawn)
+  SCOOP_RETURN_TIME: 0.3,    // seconds the scoop takes to fly back to the washing bowl
   SMOOTHIE_SPRINKLE_W: 60,   // width of the sprinkle picture laid on top of a smoothie
   SHELF_STACK_H: 118,        // height of the cup / cap stack pictures on the shelf
   SPRINKLES: {
     // spread: how far apart they sit on a scoop (1 = full spread) · lift: how far they move up toward the top (fraction of scoop radius)
-    rainbow: { name: 'Rainbow',       spread: 0.60, lift: 0.22 },
+    // artScale: size of each sprinkle in the sprinkle picture (overrides SPRINKLE_ART_SCALE) · vibrance: colour boost (1 = as drawn)
+    rainbow: { name: 'Rainbow',       spread: 0.60, lift: 0.22, artScale: 1.68, vibrance: 1.8 },
     metal:   { name: 'Silver pearls', spread: 0.80, lift: 0.16 },
     chip:    { name: 'Choco chips',   spread: 0.85, lift: 0.12 },
   },
