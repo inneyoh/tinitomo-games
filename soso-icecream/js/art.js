@@ -33,7 +33,9 @@ const BOX = {
   'ice-cream-tray/tray-full': [193, 440, 420, 294],
   'stations/sprinkle-tray':   [459, 765, 316, 94],
 };
-const ART = {}, ART_SPLIT = {}, ART_TRIM = {};
+const ART = {}, ART_SPLIT = {}, ART_TRIM = {}, ART_BLOBS = {}, ART_TUNED = {};
+/* per-sprinkle tuning from CONFIG.SPRINKLES (artScale, vibrance) */
+function sprinkleTune(n) { const k = Object.keys(SPRINKLE_ART).find(t => SPRINKLE_ART[t] === n); return (k && CONFIG.SPRINKLES[k]) || {}; }
 function loadArt() {
   const names = ['cups/ice-cream-cup', 'cups/drink-cup', 'cups/cup-cap', 'tools/ice-cream-scoop', 'tools/ice-cream-scoop-dirty',
     'ice-cream-tray/tray-full', 'stations/sprinkle-tray', 'shelf/ice-cream-cup-stack', 'shelf/drink-cup-stack', 'shelf/cup-cap-stack',
@@ -41,6 +43,18 @@ function loadArt() {
     ...CONFIG.TRAY_ORDER.map(SCOOP_ART), ...CONFIG.TRAY_ORDER.map(f => 'ice-cream-tray/tub-' + f),
     ...Object.keys(CONFIG.SPRINKLES).map(k => 'stations/sprinkle-pot-' + k)];
   names.forEach(n => { const im = new Image(); im.onload = () => prepArt(n, im); im.src = ART_DIR + n + '.png'; ART[n] = im; });
+}
+/* draw a sprinkle picture whose full canvas maps onto box b — every sprinkle scaled up around its own centre */
+function drawSprinkleArt(c, n, b) {
+  const src = art(n); if (!src) return false;
+  const im = ART_TUNED[n] || src, iw = src.naturalWidth, ih = src.naturalHeight;
+  const blobs = ART_BLOBS[n], k = sprinkleTune(n).artScale || CONFIG.SPRINKLE_ART_SCALE || 1, sx = b[2] / iw, sy = b[3] / ih;
+  if (!blobs || k === 1) { c.drawImage(im, b[0], b[1], b[2], b[3]); return true; }
+  blobs.forEach(([x, y, w, h]) => {
+    const cx = b[0] + (x + w / 2) * sx, cy = b[1] + (y + h / 2) * sy, dw = w * sx * k, dh = h * sy * k;
+    c.drawImage(im, x, y, w, h, cx - dw / 2, cy - dh / 2, dw, dh);
+  });
+  return true;
 }
 function art(n) { const i = ART[n]; return i && i.complete && i.naturalWidth ? i : null; }
 function drawArt(c, n, b) { const i = art(n); if (!i) return false; c.drawImage(i, b[0], b[1], b[2], b[3]); return true; }
@@ -58,10 +72,34 @@ function prepArt(n, im) {
   }
   if (n.startsWith('sprinkles/')) {
     const w = im.naturalWidth, h = im.naturalHeight, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
-    const cc = cv.getContext('2d'); cc.drawImage(im, 0, 0); let d; try { d = cc.getImageData(0, 0, w, h).data; } catch (e) { return; }
+    const cc = cv.getContext('2d'); cc.drawImage(im, 0, 0); let img; try { img = cc.getImageData(0, 0, w, h); } catch (e) { return; }
+    const d = img.data, T = sprinkleTune(n);
+    if (T.vibrance && T.vibrance !== 1) {   // boost colour: push each colourful pixel away from grey, a touch deeper
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i + 3] < 10) continue;
+        const r = d[i], g = d[i + 1], b = d[i + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+        if (mx - mn < 25) continue;                      // leave outlines / white highlights alone
+        const avg = (r + g + b) / 3, k = T.vibrance, dk = 1 - (k - 1) * .12;
+        d[i] = Math.max(0, Math.min(255, (avg + (r - avg) * k) * dk));
+        d[i + 1] = Math.max(0, Math.min(255, (avg + (g - avg) * k) * dk));
+        d[i + 2] = Math.max(0, Math.min(255, (avg + (b - avg) * k) * dk));
+      }
+      cc.putImageData(img, 0, 0); ART_TUNED[n] = cv;
+    }
     let x0 = w, y0 = h, x1 = -1, y1 = -1;
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 10) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
     if (x1 > 0) ART_TRIM[n] = [x0, y0, x1 - x0 + 1, y1 - y0 + 1];
+    // find each separate sprinkle so it can be drawn bigger in place (CONFIG.SPRINKLE_ART_SCALE)
+    const seen = new Uint8Array(w * h), blobs = [], on = i => d[i * 4 + 3] > 10;
+    for (let i = 0; i < w * h; i++) {
+      if (seen[i] || !on(i)) continue;
+      let bx0 = w, by0 = h, bx1 = -1, by1 = -1; const st = [i]; seen[i] = 1;
+      while (st.length) { const j = st.pop(), x = j % w, y = (j / w) | 0;
+        if (x < bx0) bx0 = x; if (x > bx1) bx1 = x; if (y < by0) by0 = y; if (y > by1) by1 = y;
+        for (const k of [j - 1, j + 1, j - w, j + w]) if (k >= 0 && k < w * h && !seen[k] && on(k) && Math.abs((k % w) - x) <= 1) { seen[k] = 1; st.push(k); } }
+      if ((bx1 - bx0) * (by1 - by0) > 4) blobs.push([bx0 - 1, by0 - 1, bx1 - bx0 + 3, by1 - by0 + 3]);
+    }
+    ART_BLOBS[n] = blobs;
   }
 }
 loadArt();
@@ -211,7 +249,7 @@ function drawScoopBall(c, x, y, r, f, seed = 1, spr = null, sk = 1) {
   if (img) {
     const k = r / 40, [bx, by, bw, bh] = BOX.scoop40, b = [x + bx * k, y + by * k, bw * k, bh * k];
     c.drawImage(img, b[0], b[1], b[2], b[3]);
-    if (spr && art(SPRINKLE_ART[spr])) c.drawImage(art(SPRINKLE_ART[spr]), b[0], b[1], b[2], b[3]);   // sprinkles: same canvas as the scoop
+    if (spr && art(SPRINKLE_ART[spr])) drawSprinkleArt(c, SPRINKLE_ART[spr], b);   // sprinkles: same canvas as the scoop
     else if (spr) drawSprinklesOn(c, x, y, r, spr, seed, sk);
     return;
   }
@@ -404,8 +442,9 @@ function drawCupI(c, it, t) {
     drawScoopBall(c, 0, -26, 27, it.scoops[0], 4, it.spr, it.sprK || 1);
   } else if (it.spr && it.smoothie && art(SPRINKLE_ART[it.spr]) && ART_TRIM[SPRINKLE_ART[it.spr]]) {
     // sprinkles on top of the smoothie — the sprinkle PNG, trimmed to its cluster, laid on the drink's surface
-    const n = SPRINKLE_ART[it.spr], [sx, sy, sw, sh] = ART_TRIM[n], w = CONFIG.SMOOTHIE_SPRINKLE_W, h = w * sh / sw;
-    c.drawImage(art(n), sx, sy, sw, sh, -w / 2, -level - h * .62, w, h);
+    const n = SPRINKLE_ART[it.spr], im = art(n), [sx, sy, sw, sh] = ART_TRIM[n], w = CONFIG.SMOOTHIE_SPRINKLE_W, k = w / sw, h = sh * k;
+    // map the whole sprinkle canvas so its cluster lands on the drink surface, then draw each sprinkle bigger
+    drawSprinkleArt(c, n, [-w / 2 - sx * k, -level - h * .62 - sy * k, im.naturalWidth * k, im.naturalHeight * k]);
   } else if (it.spr && it.smoothie) {
     // sprinkles on top of the smoothie
     const R = rng(9), cols = ['#ff7aa8', '#7fc8ff', '#ffd55c', '#8fe39a', '#c9a0ff'], q = (it.sprK || 1) * CONFIG.SPRINKLE_SIZE;
