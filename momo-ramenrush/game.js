@@ -50,11 +50,15 @@ const MOMO_FACE=[ {max:40, img:'assets/momo_confused.webp', line:'…Wait. Where
                   {max:100,img:'assets/momo_smug.webp',     line:'Hmph. As calculated.'} ];
 const faceFor = total => MOMO_FACE.find(f=>total<=f.max);
 const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp'};
+/* angry Soso · upset Kew · confused Rang — a bowl under 40 points, or patience under 20% */
+const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp'};
+const UPSET_SCORE=40, UPSET_PATIENCE=20;
+Object.values(CUST_UPSET).forEach(src=>{ new Image().src=src; });   // preload so the swap is instant
 const CUST_H={soso:394, kew:408, rang:416};
-function custHTML(id, mood){
+function custHTML(id, mood, upset){
   const fx = mood==='happy' ? '<img class="cfx" src="assets/ui_heart.webp" alt="" style="left:262px;top:-14px"><img class="cfx" src="assets/ui_heart.webp" alt="" style="left:14px;top:30px;width:60px;animation-delay:.25s">'
            : mood==='sad' ? '<img class="cfx" src="assets/ui_anger_mark.webp" alt="" style="left:258px;top:10px">' : '';
-  return `<img class="csprite" src="${CUST_IMG[id]}" alt="${CUSTOMERS[id].name}">${fx}`;
+  return `<img class="csprite" src="${upset?CUST_UPSET[id]:CUST_IMG[id]}" data-upset="${upset?1:0}" alt="${CUSTOMERS[id].name}">${fx}`;
 }
 function placeCustomer(id){ const el=$('#cust'), h=CUST_H[id]; el.style.top=(752 - h*0.62)+'px'; el.style.height=h+'px'; }
 
@@ -1046,13 +1050,15 @@ function patienceTick(dt){
   const bar=$('#patBar'); bar.classList.toggle('mid',cls==='mid'); bar.classList.toggle('low',cls==='low'); bar.firstElementChild.style.width=G.pat+'%';
   document.querySelectorAll('.tk-pat').forEach(el=>{ el.className='tk-pat '+cls; el.firstElementChild.style.width=G.pat+'%'; });
   $('#cust').classList.toggle('impatient',G.pat<20);
+  const up=G.pat<UPSET_PATIENCE, im=$('#cust .csprite');
+  if(im && im.dataset.upset!==(up?'1':'0')){ im.src=up?CUST_UPSET[G.order.cust]:CUST_IMG[G.order.cust]; im.dataset.upset=up?'1':'0'; }
   if(G.pat<=0) walkout();
 }
 function walkout(){
   G.waiting=false; D.walk++; const id=G.order.cust;
   if(G.scene!=='shop') showScene('shop');
   $('#orderSheet').classList.remove('on'); $('#patBar').classList.add('hide'); layoutStage(false);
-  const c=$('#cust'); c.classList.remove('impatient'); c.innerHTML=custHTML(id,'sad'); say(WALK_LINE[id]); blip(200,.35,'sawtooth',.05);
+  const c=$('#cust'); c.classList.remove('impatient'); c.innerHTML=custHTML(id,'sad',true); say(WALK_LINE[id]); blip(200,.35,'sawtooth',.05);
   later(()=>{ hush(); c.classList.add('away'); },1800);
   later(()=>{ D.done++; saveGame(); nextCustomer(); },2600);
 }
@@ -1106,7 +1112,7 @@ function eat(){
     ['Slurp!','Slurrrp…','Fuu fuu'].forEach((w,i)=>later(()=>{ slurpText(260+i*130,420); blip(300+i*60,.1,'sine',.05); },i*500));
   },800);
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
-  later(()=>{ c.classList.remove('eat'); c.innerHTML=custHTML(id, r.grade==='C'?'sad':'happy'); say(CUSTOMERS[id].react[r.grade]);
+  later(()=>{ c.classList.remove('eat'); c.innerHTML=custHTML(id, r.grade==='C'?'sad':'happy', r.total<UPSET_SCORE); say(CUSTOMERS[id].react[r.grade]);
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus()));
     const C=CUSTOMERS[id], tip = r.total>=55 ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip) : 0, bonus = r.total>=95?C.perfect:0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
