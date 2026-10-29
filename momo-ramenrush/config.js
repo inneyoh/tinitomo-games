@@ -15,11 +15,11 @@ const CFG = {
 /* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+ ---- */
 const CUSTOMERS = {
   soso:{name:'Soso', pat:.7, tip:2.5, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
-    react:{S:"This might be Soso's happiest day ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"Eh… this isn't what Soso ordered…"}},
+    react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"}},
   rang:{name:'Rang', pat:1, tip:1, perfect:900, hi:"Rangahahaha! I'm STARVING!",
-    react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Haha… eh, close enough!",C:"Ha… ha…?"}},
+    react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"}},
   kew:{name:'Kew', pat:1.4, tip:1, perfect:200, hi:"…One bowl, please.",
-    react:{S:"…The taste of stillness. Perfect.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Emptiness."}},
+    react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."}},
 };
 
 /* ---- audio volumes (0–1) ---- */
