@@ -649,8 +649,13 @@ function renderTicket(el, order, mini){
     + `<div class="tk-hl" hidden></div>`
     + SHEET.map(s=>`<div class="tk-row" data-k="${s.key}"><div class="lb">${s.en}</div><div class="tk-opts ${s.trail?'trail':''}">${s.opts.map(o=>`<span>${o}</span>`).join('')}</div></div>`).join('')
     + `<div class="tk-now"></div><div class="tk-foot">circle between two = half / both · circle after the last = 3</div><svg class="tk-ink"></svg>`;
+  el._order=order;
   requestAnimationFrame(()=>{ drawCircles(el, order); if(el.id==='kTicket') updateHighlight(); });
+  // fonts arriving late (common on phones) or any re-layout move the words: redraw the circles when that happens
+  if(!el._ro && window.ResizeObserver){ el._ro=new ResizeObserver(()=>{ if(el._order) drawCircles(el,el._order); }); el._ro.observe(el); el.querySelectorAll && 0; }
 }
+function redrawAllCircles(){ document.querySelectorAll('.ticket').forEach(t=>{ if(t._order){ drawCircles(t,t._order); if(t.id==='kTicket') updateHighlight(); } }); }
+if(document.fonts){ document.fonts.ready.then(redrawAllCircles); document.fonts.addEventListener && document.fonts.addEventListener('loadingdone',()=>setTimeout(redrawAllCircles,30)); }
 function handEllipse(cx,cy,rx,ry,seed){
   const rnd=mulberry(seed); const pts=[]; const n=14, start=rnd()*6.28;
   for(let i=0;i<=n+2;i++){ const a=start+i/n*6.28; const j=1+(rnd()-.5)*.12; pts.push([cx+Math.cos(a)*rx*j, cy+Math.sin(a)*ry*j]); }
@@ -1555,7 +1560,7 @@ function nextCustomer(){
   setTimeout(()=>{ placeCustomer(id); c.innerHTML=custHTML(id,'idle'); c.classList.remove('away','eat');
     setTimeout(()=>{ say(CUSTOMERS[id].hi); renderTicket($('#shopTicket'),G.order); $('#orderSheet').classList.add('on'); layoutStage('cust');
       const timed = G.play==='story' && !G.tut; G.waiting=timed; $('#patBar').classList.toggle('hide',!timed); $('#app').classList.toggle('notimed',!timed);
-      $('#orderCoach').hidden=!G.tut; $('#scoreCoach').hidden=!G.tut; },650); },350);
+      $('#orderCoach').hidden=!G.tut; $('#scoreCoach').hidden=!G.tut; setTimeout(redrawAllCircles,60); setTimeout(redrawAllCircles,520); },650); },350);
 }
 function patienceTick(dt){
   if(!G.waiting || G.play!=='story' || G.tut) return;
