@@ -27,7 +27,7 @@ const CUSTOMERS = {
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"},
     profile:"Loud, cheerful and free. Laughs at everything — rangahahaha!", likes:"Rich broth",
     fav:{order:{rich:3}, row:'Richness', line:"RANGAHAHA! That rich broth hits the spot!"}},
-  kew:{name:'Kew', size:.82, pat:1.5, tip:1, perfect:400, hi:"…One bowl, please.",
+  kew:{name:'Kew', size:.82, pat:1.5, tip:1, perfect:370, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."},
     profile:"Quiet and polite. Treats every bowl like training. Patience is a virtue.", likes:"Seaweed",
     fav:{order:{nori:0}, row:'Seaweed', line:"…Seaweed. The ocean, in a bowl. Thank you."}},
@@ -45,7 +45,7 @@ const CUSTOMERS = {
 const BOOK_RATINGS={
   pat:   [[1.5,'Very good'],[1.15,'Good'],[1,'Normal'],[.75,'Bad'],[0,'Very bad']],
   tip:   [[2.3,'Very good'],[1.5,'Good'],[1,'Normal'],[.7,'Bad'],[0,'Very bad']],
-  perfect:[[700,'Very good'],[371,'Good'],[0,'Normal']],
+  perfect:[[700,'Very good'],[365,'Good'],[0,'Normal']],
 };
 
 /* ---- audio volumes (0–1) ---- */
