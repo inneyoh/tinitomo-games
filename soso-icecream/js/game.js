@@ -569,7 +569,7 @@ function check(it, o) {
 /* pick a line for a customer: their own line if they have one, else the default (a list = random pick) */
 function line(cu, kind, key) {
   const id = cu.who.id, own = DIALOGUE[id] || {}, def = DIALOGUE.default;
-  let v = key ? ((own[kind] || {})[key] ?? (def[kind] || {})[key]) : (own[kind] ?? def[kind]);
+  let v = key ? (typeof own[kind] === 'string' ? own[kind] : ((own[kind] || {})[key] ?? (def[kind] || {})[key])) : (own[kind] ?? def[kind]);
   if (Array.isArray(v)) v = v[Math.floor(Math.random() * v.length)];
   return v || '';
 }

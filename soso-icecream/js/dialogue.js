@@ -107,4 +107,12 @@ const DIALOGUE = {
     happy:  ['Ranghahaha', 'Thanks~'],
     slow:   ['Rang...', 'No time for this, kthxbye'],
   },
+
+  bae: {
+    arrive: 'Hello...! Ice cream please.',
+    happy: 'Thank you!',
+    thanks: 'Thank you!',
+    slow: 'Oh no...',
+    wrong: "I didn't order this...",
+  },
 };
