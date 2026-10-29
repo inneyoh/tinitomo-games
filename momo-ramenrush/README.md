@@ -2,8 +2,12 @@
 
 Portrait HTML ramen game starring Momo. Open `index.html` (GitHub Pages: `/momo-ramenrush/`).
 
-- `index.html` — the whole game (sprites, music and SFX are embedded).
+- `config.js` — **all the tuning**: kitchenware upgrades and prices (`UPGRADES`), night market (`MARKET`), rent / starting money / patience / tips (`ECON`), kitchen timing (`CFG`), customers (`CUSTOMERS`), volumes (`VOL`).
+- `game.js` — the game code.
+- `style.css` — the look.
+- `index.html` — the page layout (scenes, buttons, panels).
+- `assets/` — sprites (`assets/icons/` = app icons) · `audio/` — music and sound effects.
 - `atlases/` — 900 Ramen Book sheets (1024×1024, 64 bowls each). Thumbnails fall back to drawn bowls if a sheet is missing.
-- `assets/icons/` — app icons; `manifest.webmanifest` for "Add to Home Screen".
+- `manifest.webmanifest` for "Add to Home Screen".
 
-Tuning lives near the top of the script: `CFG` (kitchen), `ECON` / `MARKET` / `UPGRADES` (story mode), `CUSTOMERS`, `VOL` (audio).
+Opening `index.html` straight from your computer (file://) may block the sounds; use GitHub Pages or a local server (`python3 -m http.server`).
