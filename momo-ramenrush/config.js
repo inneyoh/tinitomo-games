@@ -12,16 +12,18 @@ const CFG = {
   PRICE:980,
 };
 
-/* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+ ---- */
+/* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+, size = how big they look (Soso = 1) ---- */
 const CUSTOMERS = {
-  soso:{name:'Soso', pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
+  soso:{name:'Soso', size:1, pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
     react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"}},
-  rang:{name:'Rang', pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
+  rang:{name:'Rang', size:.81, pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"}},
-  kew:{name:'Kew', pat:1.5, tip:1, perfect:400, hi:"…One bowl, please.",
+  kew:{name:'Kew', size:.74, pat:1.5, tip:1, perfect:400, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."}},
-  bae:{name:'Bae', pat:1.2, tip:1.2, perfect:300, hi:"Hello, one bowl of Ramen please!",
+  bae:{name:'Bae', size:.76, pat:1.2, tip:1.2, perfect:300, hi:"Hello, one bowl of Ramen please!",
     react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"}},
+  popo:{name:'Popo', size:1.2, pat:0.7, tip:2, perfect:500, hi:"How is the shop doing?",
+    react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"}},
 };
 
 /* ---- audio volumes (0–1) ---- */

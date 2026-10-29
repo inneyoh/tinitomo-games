@@ -49,18 +49,21 @@ const MOMO_FACE=[ {max:40, img:'assets/momo_confused.webp', line:'…Wait. Where
                   {max:85, img:'assets/momo_front.webp',    line:'Not bad. Next one.'},
                   {max:100,img:'assets/momo_smug.webp',     line:'Hmph. As calculated.'} ];
 const faceFor = total => MOMO_FACE.find(f=>total<=f.max);
-const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp', bae:'assets/cu_bae.webp'};
+const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp', bae:'assets/cu_bae.webp', popo:'assets/cu_popo.webp'};
 /* angry Soso · upset Kew · confused Rang · worried Bae — a bowl under 40 points, or patience under 20% */
-const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp', bae:'assets/cu_bae_upset.webp'};
+const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp', bae:'assets/cu_bae_upset.webp', popo:'assets/cu_popo_upset.webp'};
 const UPSET_SCORE=40, UPSET_PATIENCE=20;
 Object.values(CUST_UPSET).forEach(src=>{ new Image().src=src; });   // preload so the swap is instant
-const CUST_H={soso:394, kew:408, rang:416, bae:457};
+const CUST_H={soso:394, kew:408, rang:416, bae:457, popo:467};   // picture height at 360 px wide
+const csize=id=>CUSTOMERS[id].size||1;
 function custHTML(id, mood, upset){
   const fx = mood==='happy' ? '<img class="cfx" src="assets/ui_heart.webp" alt="" style="left:262px;top:-14px"><img class="cfx" src="assets/ui_heart.webp" alt="" style="left:14px;top:30px;width:60px;animation-delay:.25s">'
            : mood==='sad' ? '<img class="cfx" src="assets/ui_anger_mark.webp" alt="" style="left:258px;top:10px">' : '';
-  return `<img class="csprite" src="${upset?CUST_UPSET[id]:CUST_IMG[id]}" data-upset="${upset?1:0}" alt="${CUSTOMERS[id].name}">${fx}`;
+  return `<div class="cbox" style="height:${CUST_H[id]}px;transform:scale(${csize(id)})"><img class="csprite" src="${upset?CUST_UPSET[id]:CUST_IMG[id]}" data-upset="${upset?1:0}" alt="${CUSTOMERS[id].name}">${fx}</div>`;
 }
-function placeCustomer(id){ const el=$('#cust'), h=CUST_H[id]; el.style.top=(752 - h*0.62)+'px'; el.style.height=h+'px'; }
+function placeCustomer(id){ const el=$('#cust'), h=CUST_H[id], sc=csize(id), bottom=752+h*sc*.38;   // 62% of them shows above the counter
+  el.style.top=(bottom-h)+'px'; el.style.height=h+'px';
+  const b=$('#custBubble'); b.style.left=(450+180*sc-70)+'px'; b.style.top=(bottom-h*sc-208)+'px'; }   // bubble sits beside the head, whatever the size
 
 /* =====================================================================
    5. GAME STATE
@@ -952,7 +955,7 @@ function setArms(root,deg){ root.querySelector('.hL').style.transform=`rotate(${
 /* =====================================================================
    15. HOME SCREEN — customers at the counter, Momo serving on a loop
    ===================================================================== */
-const SEAT_X=[205,450,695];   // 3 of the customers, in a random order, every time the home screen opens
+const SEAT_X=[205,450,695];   // 3 of the customers, in a random order, every time the home screen opens (a big one nudges its neighbours out)
 const HOME={built:false, seats:[], m:{x:1080,state:'kitchen',t:.6,target:0,turnCD:2.5,carry:false,ph:0}};
 function bowlFromPack(o){ return {tare:o.dashi+1, soup:CFG.SOUP_TARGET, fat:o.richness, garlic:o.garlic, spice:o.spice,
   green:o.onion===0||o.onion===3, white:o.onion===1||o.onion===3, chashu:!!o.chashu, nori:!!o.seaweed, rice:false,
@@ -961,8 +964,13 @@ function randomBowl(){ const r=a=>a[Math.floor(Math.random()*a.length)];
   return bowlFromPack({dashi:r([0,1,2]),richness:r([0,1,2,3,4]),garlic:r([0,2,3,4]),onion:r([0,0,1,3]),chashu:r([1,1,0]),spice:r([0,1,2,3]),texture:r([1,2]),seaweed:r([1,1,0])}); }
 function seatCustomers(){
   const ids=shuffled(Object.keys(CUSTOMERS)).slice(0,SEAT_X.length);
-  HOME.seats.forEach((st,i)=>{ const id=ids[i], h=CUST_H[id]*250/360, top=752-h*.6, im=st.el.querySelector('.csprite');
-    im.src=CUST_IMG[id]; im.alt=CUSTOMERS[id].name; st.el.style.top=top+'px'; st.cv.style.top=(800-152-top)+'px'; });
+  const big=ids.reduce((m,id,i)=>csize(id)>csize(ids[m])?i:m,0); if(csize(ids[big])>1) [ids[1],ids[big]]=[ids[big],ids[1]];   // the biggest toy takes the middle seat
+  const ws=ids.map(id=>250*csize(id)); HOME.x=SEAT_X.slice();
+  // a big toy pushes its neighbours out a little so they don't hide behind it
+  for(let i=0;i<2;i++){ const need=(ws[i]+ws[i+1])/2-30, have=HOME.x[i+1]-HOME.x[i]; if(need>have){ const d=need-have; if(i===0) HOME.x[0]-=d; else HOME.x[2]+=d; } }
+  HOME.seats.forEach((st,i)=>{ const id=ids[i], w=ws[i], h=CUST_H[id]*w/360, top=752-h*.6, im=st.el.querySelector('.csprite');
+    im.src=CUST_IMG[id]; im.alt=CUSTOMERS[id].name; st.el.style.width=w+'px'; st.el.style.left=(HOME.x[i]-w/2)+'px'; st.el.style.top=top+'px';
+    st.cv.style.left=(w/2-80)+'px'; st.cv.style.top=(800-152-top)+'px'; });
 }
 function buildHome(){
   if(HOME.built){ seatCustomers(); return; } HOME.built=true; const box=$('#seats');
@@ -978,14 +986,14 @@ function buildHome(){
 }
 function homeFrame(dt){
   HOME.seats.forEach((s,i)=>{ if(s.state!=='eating') return; s.t-=dt; s.el.classList.add('eat');
-    if(Math.random()<dt*.35) slurpText(SEAT_X[i]-60+Math.random()*60,560);
+    if(Math.random()<dt*.35) slurpText(HOME.x[i]-60+Math.random()*60,560);
     if(s.t<=0){ s.state='done'; s.el.classList.remove('eat'); s.bowl.eaten=true; drawRamen(s.cv,s.bowl); } });
   const m=HOME.m, el=$('#homeMomo'), W=340, speed=230; m.t-=dt; m.turnCD-=dt; m.ph+=dt;
   if(m.state==='kitchen' && m.t<=0){
     const free=HOME.seats.map((s,i)=>s.state==='done'?i:-1).filter(i=>i>=0);
     if(free.length){ m.target=free[Math.floor(Math.random()*free.length)]; m.carry=true; m.bowl=randomBowl(); drawRamen(el.querySelector('.carry'),m.bowl); m.state='walkIn'; m.x=1080; }
     else m.t=1; }
-  else if(m.state==='walkIn'){ m.x-=speed*dt; if(m.x<=SEAT_X[m.target]){ m.x=SEAT_X[m.target]; m.state='place'; m.t=.8; } }
+  else if(m.state==='walkIn'){ m.x-=speed*dt; if(m.x<=HOME.x[m.target]){ m.x=HOME.x[m.target]; m.state='place'; m.t=.8; } }
   else if(m.state==='place'){ if(m.t<=.4 && m.carry){ m.carry=false; const s=HOME.seats[m.target]; s.bowl=m.bowl; s.state='eating'; s.t=7+Math.random()*4; drawRamen(s.cv,s.bowl); blip(700,.06); }
     if(m.t<=0){ if(m.turnCD<=0 && Math.random()<.5) homeTurn('walkOut'); else m.state='walkOut'; } }
   else if(m.state==='walkOut'){ m.x+=speed*dt; if(m.turnCD<=0 && m.x>200 && m.x<760 && Math.random()<dt*.5) homeTurn('walkOut');
@@ -1014,7 +1022,7 @@ function goHome(){ G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true
 /* =====================================================================
    16. A BUSINESS DAY — customers, patience, serving, paying
    ===================================================================== */
-const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere else!", kew:'…My patience has limits.', bae:'Bae… I have to go…'};
+const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere else!", kew:'…My patience has limits.', bae:'Bae… I have to go…', popo:'This is taking way too long!'};
 /* three ways to play: story (rent/stock/patience), endless (just ramen), tutorial replay (one guided bowl) */
 /* delayed steps of a day only run if the player is still in that same session (not after Home / Restart) */
 function later(f,ms){ const ss=G.sess; return setTimeout(()=>{ if(ss===G.sess) f(); },ms); }
