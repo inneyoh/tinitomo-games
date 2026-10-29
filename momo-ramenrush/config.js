@@ -16,7 +16,7 @@ const CFG = {
 const CUSTOMERS = {
   soso:{name:'Soso', pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
     react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"}},
-  rang:{name:'Rang', pat:1, tip:1, perfect:800, hi:"Rangahahaha! I'm STARVING!",
+  rang:{name:'Rang', pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"}},
   kew:{name:'Kew', pat:1.5, tip:1, perfect:400, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."}},
