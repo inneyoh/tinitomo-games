@@ -33,7 +33,17 @@ window.addEventListener('resize', resize);
 
 /* customer sticker images */
 const IMG = {};
-CONFIG.CUSTOMERS.forEach(cu => { const i = new Image(); i.src = cu.img; IMG[cu.id] = i; });
+CONFIG.CUSTOMERS.forEach(cu => {
+  const i = new Image(); i.src = cu.img; IMG[cu.id] = i;
+  if (cu.upsetImg) {
+    const upset = new Image(); upset.src = cu.upsetImg; IMG[cu.id + '-upset'] = upset;
+  }
+});
+function customerImage(cu) {
+  const upset = IMG[cu.who.id + '-upset'];
+  const isUpset = cu.state === 'angry' || cu.p <= 0 || cu.shake > 0 || cu.talk?.mood === 'angry';
+  return isUpset && upset?.complete && upset.naturalWidth ? upset : IMG[cu.who.id];
+}
 
 /* ---------------------------------------------------------------------
    2. GAME STATE
@@ -667,7 +677,7 @@ function hintText() {
 function drawCustomers(c, t) {
   S.customers.forEach((cu, i) => {
     if (!cu) return;
-    const x = L.custX[i], im = IMG[cu.who.id];
+    const x = L.custX[i], im = customerImage(cu);
     let dy = 0, k = 1;
     if (cu.state === 'enter') { const q = Math.min(1, cu.t / .6); dy = (1 - easeBack(q)) * L.custH; }
     if (cu.state === 'leave') dy = Math.min(1, cu.t / .5) * (L.custH + 20);

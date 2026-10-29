@@ -79,6 +79,7 @@ const CONFIG = {
     { id: 'kew',  name: 'Kew',  img: 'assets/customers/kew.png' },
     { id: 'rang', name: 'Rang', img: 'assets/customers/rang.png' },
     { id: 'bae',  name: 'Bae',  img: 'assets/customers/bae.png' },
+    { id: 'popo', name: 'Popo', img: 'assets/customers/popo.png', upsetImg: 'assets/customers/popo-upset.png' },
   ],
 
   // the same character never appears twice at once; only these may come back right after their last visit

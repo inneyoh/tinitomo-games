@@ -115,4 +115,16 @@ const DIALOGUE = {
     slow: 'Oh no...',
     wrong: "I didn't order this...",
   },
+
+  popo: {
+    arrive: 'Ice cream?',
+    happy: 'Ooh! Lemme try to make this too.',
+    thanks: 'Ooh! Lemme try to make this too.',
+    slow: 'No time for this, faster next time!',
+    wrong: {
+      needWaffle: 'Did you blend the waffle in?',
+      burntWaffle: 'Do you need me to make it instead?',
+      needSpoon: 'Oh, do I go in with my hands...?',
+    },
+  },
 };
