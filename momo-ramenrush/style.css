@@ -347,6 +347,10 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 .ipTabs button{flex:1;border:2px solid var(--ink);border-radius:12px;background:#fff;font-weight:700;font-size:13px;padding:6px 0;cursor:pointer}
 .ipTabs button.on{background:var(--ink);color:#fff}
 .ipList{flex:1;overflow:auto;padding:0 12px 8px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.ipCats{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:4px;padding:2px 0 6px;background:#f4eee2;scrollbar-width:none;flex-shrink:0}
+.ipCats::-webkit-scrollbar{display:none}
+.ipCats button{flex:1 1 auto;border:2px solid #d9c7a8;border-radius:999px;background:#fff;font-weight:700;font-size:11px;padding:4px 6px;white-space:nowrap;cursor:pointer;color:var(--ink)}
+.ipCats button.on{background:#e0a800;border-color:#b98400;color:#fff}
 .ipItem{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;background:#fff;border:2px solid #e4d6bd;border-radius:14px;padding:8px}
 .ipItem.off{opacity:.5}
 .ipItem.tonight{border-color:#e0a800;background:#fffbea}

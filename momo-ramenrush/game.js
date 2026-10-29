@@ -896,7 +896,7 @@ let P=loadSave()||freshSave();
 const has=id=>!!P.upgrades[id];
 const owned=k=>UPGRADES.filter(u=>has(u.id) && u[k]!==undefined).map(u=>u[k]);
 const UP={ soup:()=>Math.max(1,...owned('soup')), flick:()=>Math.min(1,...owned('flick')), oneFlick:()=>owned('oneFlick').length>0,
-  pat:()=>Math.max(1,...owned('pat')), bonus:()=>owned('bonus').reduce((a,b)=>a+b,0), boil:()=>Math.min(1,...owned('boil')) };
+  pat:()=>Math.max(1,...owned('pat')), maxBuy:()=>Math.max(3,...owned('maxBuy')), types:()=>Math.min(STOCK_KEYS.length,Math.max(3,...owned('types'))), bonus:()=>owned('bonus').reduce((a,b)=>a+b,0), boil:()=>Math.min(1,...owned('boil')) };
 /* noodle cooking speed: default is 15% faster than v8, burners make it 10% / 30% faster again */
 const boilSpeed=()=>(1/0.85)/UP.boil();
 const boilT=nd=>(performance.now()-nd.start)/1000*boilSpeed();
@@ -1137,7 +1137,7 @@ function closeShop(){ G.waiting=false; P.resume=null; saveGame(); toast('Closing
 /* =====================================================================
    17. NIGHT — report, iPad (market + kitchenware), prep, sleep
    ===================================================================== */
-const N={market:[],qty:{},tab:'market',queue:[],results:[]};
+const N={market:[],qty:{},tab:'market',cat:'all',queue:[],results:[]};
 function shuffled(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function showNight(){
   const rent=ECON.rent(P.day), after=P.money-rent;
@@ -1147,7 +1147,7 @@ function showNight(){
   $('#rpLedger').innerHTML=`<span>Sales</span><span class="pos">+${yen(D.sales)}</span><span>Tips</span><span class="pos">+${yen(D.tips)}</span><span>Rent</span><span class="neg">−${yen(rent)}</span><span class="tot">Money left</span><span class="tot ${after<0?'neg':''}">${yen(after)}</span>`;
   const bt=$('#btnIpad');
   if(after<0){ bt.textContent="Can't pay rent…"; bt.onclick=gameOver; }
-  else { bt.textContent='Pay rent & open iPad ▶'; bt.onclick=()=>{ P.money=after; N.market=shuffled(STOCK_KEYS).slice(0,3); saveGame(); openIpad(); }; }
+  else { bt.textContent='Pay rent & open iPad ▶'; bt.onclick=()=>{ P.money=after; N.market=shuffled(STOCK_KEYS).slice(0,UP.types()); saveGame(); openIpad(); }; }
 }
 function openIpad(){ $('#report').hidden=true; $('#ipad').hidden=false; N.qty={}; N.market.forEach(k=>N.qty[k]=1); N.tab='market'; renderIpad(); }
 const marketCost=()=>N.market.reduce((s,k)=>s+(N.qty[k]||0)*MARKET[k].price,0);
@@ -1167,13 +1167,20 @@ function renderIpad(){
         return `<div class="ipItem ${on?'tonight':'off'}"><div class="ic"><img src="${m.img}" alt=""></div>
           <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}<br>${on?`${m.pack} · ${yen(m.price)} → up to +${Math.round(m.base*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
           ${on?`<div class="step"><button data-k="${k}" data-d="-1" aria-label="Fewer">−</button><span>${q}</span><button data-k="${k}" data-d="1" aria-label="More">+</button></div>`:'<span></span>'}</div>`; }).join('');
-    L.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; N.qty[k]=Math.max(0,Math.min(3,(N.qty[k]||0)+ +b.dataset.d)); blip(600,.04); renderIpad(); });
+    L.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; N.qty[k]=Math.max(0,Math.min(UP.maxBuy(),(N.qty[k]||0)+ +b.dataset.d)); blip(600,.04); renderIpad(); });
   } else {
-    L.innerHTML=UPGRADES.map(u=>{ const own=has(u.id), locked=u.req&&!has(u.req), reqName=locked?UPGRADES.find(x=>x.id===u.req).name:'';
-      return `<div class="ipItem${locked?' off':''}"><div class="ic"><canvas width="104" height="104" data-icon="${u.id}" style="width:52px;height:52px"></canvas></div><div><h4>${u.name}</h4><p>${u.desc}${locked?`<br><b>Needs ${reqName} first</b>`:''}</p></div>
-        <button class="buy" data-u="${u.id}" ${own||locked||P.money<u.price?'disabled':''}>${own?'Owned':yen(u.price)}</button></div>`; }).join('');
+    const why=u=> u.req&&!has(u.req) ? `Needs ${UPGRADES.find(x=>x.id===u.req).name} first` : u.minDay&&P.day<u.minDay ? `Unlocks after Day ${u.minDay}` : '';
+    const list=UPGRADES.filter(u=>N.cat==='all'||u.cat===N.cat);
+    L.innerHTML=`<div class="ipCats">${UPGRADE_CATS.map(([k,t])=>`<button data-c="${k}" class="${N.cat===k?'on':''}">${t}</button>`).join('')}</div>`+
+      list.map(u=>{ const own=has(u.id), lock=own?'':why(u);
+      return `<div class="ipItem${lock?' off':''}"><div class="ic"><canvas width="104" height="104" data-icon="${u.id}" style="width:52px;height:52px"></canvas></div><div><h4>${u.name}</h4><p>${u.desc}${lock?`<br><b>${lock}</b>`:''}</p></div>
+        <button class="buy" data-u="${u.id}" ${own||lock||P.money<u.price?'disabled':''}>${own?'Owned':yen(u.price)}</button></div>`; }).join('');
+    L.querySelectorAll('.ipCats button').forEach(b=>b.onclick=()=>{ N.cat=b.dataset.c; blip(600,.04); renderIpad(); $('#ipList').scrollTop=0; });
     L.querySelectorAll('canvas[data-icon]').forEach(cv=>drawIcon(cv));
-    L.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{ const u=UPGRADES.find(x=>x.id===b.dataset.u); if(has(u.id)||P.money<u.price||(u.req&&!has(u.req))) return; P.money-=u.price; P.upgrades[u.id]=true; saveGame(); sfx('pay'); toast(`${u.name} installed!`); renderIpad(); });
+    L.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{ const u=UPGRADES.find(x=>x.id===b.dataset.u); if(has(u.id)||P.money<u.price||why(u)) return;
+      P.money-=u.price; P.upgrades[u.id]=true;
+      if(u.types){ const extra=shuffled(STOCK_KEYS.filter(k=>!N.market.includes(k))).slice(0,Math.max(0,UP.types()-N.market.length)); extra.forEach(k=>{ N.market.push(k); N.qty[k]=N.qty[k]||0; }); }   // tonight's delivery grows right away
+      saveGame(); sfx('pay'); toast(`${u.name} installed!`); renderIpad(); });
   }
   const cost=marketCost(); $('#ipSum').innerHTML=`Ingredients <b>${yen(cost)}</b>${cost>P.money?' <span style="color:var(--marker)">· not enough money</span>':''}`;
   $('#btnPrep').disabled=cost>P.money; $('#btnPrep').innerHTML=cost>0?'Buy &amp; prep ▶':'Skip to sleep ▶';
@@ -1193,6 +1200,10 @@ function drawIcon(cv){ const c=cv.getContext('2d'); c.scale(2,2); const id=cv.da
   else if(id==='restore'){ ell(c,26,26,19,19,vg(c,7,45,'#d9c6ff','#8e63c4'),2); ell(c,26,26,13,13,'#fffaf0',2);
     c.strokeStyle=OUT; c.lineWidth=2; c.beginPath(); c.moveTo(26,26); c.lineTo(26,17); c.moveTo(26,26); c.lineTo(20,29); c.stroke();
     c.strokeStyle='#7fe3ff'; c.lineWidth=2.5; c.beginPath(); c.arc(26,26,23,3.6,5.6); c.stroke(); c.beginPath(); c.moveTo(43,8); c.lineTo(46,15); c.lineTo(39,15); c.closePath(); c.fillStyle='#7fe3ff'; c.fill(); }
+  else if(id==='stock1'||id==='stock2'||id==='stock3'){ const n=id==='stock1'?1:id==='stock2'?2:3;
+    for(let k=0;k<n;k++){ const y=38-k*11, x=10+k*3; rr(c,x,y,32,12,2); fs(c,vg(c,y,y+12,'#e2b27a','#b98249'),1.8); c.strokeStyle='rgba(91,58,46,.45)'; c.lineWidth=1.2; c.beginPath(); c.moveTo(x+16,y); c.lineTo(x+16,y+12); c.stroke(); }
+    txt(c,['4','8','16'][n-1],40,12,11,'#d2322d',700,'center',3,'#fff'); }
+  else if(id==='inv'){ [['#e9645f',8],['#6aa84f',20],['#4f86c6',32],['#e0a800',44]].forEach(([col,x],k)=>{ rr(c,x-5,14+(k%2)*4,10,26,4); fs(c,col,1.8); }); rr(c,3,40,46,6,2); fs(c,'#8b5a33',1.5); txt(c,'+1',44,10,10,'#3e8e3a',700,'center',3,'#fff'); }
   else if(id==='mold'){ c.beginPath(); c.moveTo(8,20); c.lineTo(44,20); c.lineTo(38,42); c.lineTo(14,42); c.closePath(); fs(c,steel(c,8,44),2); ell(c,26,20,18,4,'#2d3a2b',2); txt(c,'140g',26,32,9,OUT,700); }
   else if(id==='boil1'||id==='boil2'||id==='boil3'){ rr(c,6,34,40,10,3); fs(c,'#5d646b',2); const n=id==='boil3'?4:id==='boil2'?3:2;
     for(let k=0;k<n;k++){ const x=26+(k-(n-1)/2)*12; c.beginPath(); c.moveTo(x-6,34); c.quadraticCurveTo(x-6,20,x,10); c.quadraticCurveTo(x+6,20,x+6,34); c.closePath(); fs(c,vg(c,10,34,'#ffd257','#e8582a'),1.5); } }

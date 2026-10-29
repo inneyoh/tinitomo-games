@@ -37,25 +37,32 @@ const MARKET={   // a pack bought at night → Momo preps it → up to `base` po
 /* Kitchenware sold on Momo's iPad. Effect fields (the best one you own counts, bowl bonuses add up):
    soup  = soup pours × faster        flick = water kept per flick × (lower = better)   oneFlick = a single flick drains it all
    pat   = customers wait × longer    bonus = + share of every bowl's price            boil  = boil time × (lower = faster)
-   req   = id of the upgrade you must own first */
+   maxBuy = packs of one ingredient you can buy a night (default 3)   types = kinds of ingredients delivered a night (default 3)
+   req   = id of the upgrade you must own first      minDay = shows up from that night on (e.g. 4 = after Day 4)
+   cat   = iPad filter: 'kitchen' (Kitchen Equipment) · 'prep' (Prep) · 'store' (Storefront) */
+const UPGRADE_CATS=[['all','All'],['kitchen','Kitchen Equipment'],['prep','Prep'],['store','Storefront']];
 const UPGRADES=[
-  {id:'tap',    name:'Soup tap',          price:3000,  soup:1.4,  desc:'Soup pours 1.4× faster.'},
-  {id:'tap2',   name:'Super tap',         price:5000,  soup:2,    desc:'Soup pours 2× faster.'},
-  {id:'tebo',   name:'Tebo strainer',     price:1000,  flick:.8,  desc:'Each flick drains 20% better.'},
-  {id:'tebo2',  name:'Tebo Plus',         price:3500,  flick:.5,  desc:'Each flick drains 50% better.', req:'tebo'},
-  {id:'tebo3',  name:'Ultra Tebo',        price:8000,  oneFlick:true, desc:'One flick drains it all.', req:'tebo2'},
-  {id:'bell',   name:'Timer bell',        price:1500,             desc:'Dings when the noodles reach the ordered texture.'},
-  {id:'restore',name:'Restoranator',      price:33300,            desc:"Dr Mo's time machine! “Toss noodles” becomes “Restore noodles”: boiled noodles go back in the box raw."},
-  {id:'knife',  name:'Chashu knife',      price:2000,             desc:'Wider timing when slicing chashu at night.'},
-  {id:'mold',   name:'Ramen mold',        price:2000,             desc:'When bundling noodles at night, the scale slows down 80% near 140 g.'},
-  {id:'plush',  name:'Plush cushion',     price:3000,  pat:1.2,   desc:'Customers wait 1.2× longer.'},
-  {id:'fluffy', name:'Fluffy cushion',    price:7000,  pat:1.7,   desc:'Customers wait 1.7× longer.', req:'plush'},
-  {id:'lemon',  name:"Soso's lemon water",price:2000,  bonus:.03, desc:'+3% on every bowl.'},
-  {id:'noren',  name:'Noren curtain',     price:5000,  bonus:.07, desc:'+7% on every bowl.'},
-  {id:'doll',   name:'Momo doll',         price:8000,  bonus:.12, desc:'+12% on every bowl.'},
-  {id:'boil1',  name:'Strong burner',     price:2500,  boil:.9,   desc:'Noodles boil 10% faster.'},
-  {id:'boil2',  name:'Ultra burner',      price:8000,  boil:.7,   desc:'Noodles boil 30% faster.', req:'boil1'},
-  {id:'boil3',  name:'Turbo burner',      price:15000, boil:.5,   desc:'Noodles boil 50% faster.', req:'boil2'},
+  {id:'tap',    name:'Soup tap',          price:3000,  soup:1.4,  desc:'Soup pours 1.4× faster.', cat:'kitchen'},
+  {id:'tap2',   name:'Super tap',         price:5000,  soup:2,    desc:'Soup pours 2× faster.', cat:'kitchen'},
+  {id:'tebo',   name:'Tebo strainer',     price:1000,  flick:.8,  desc:'Each flick drains 20% better.', cat:'kitchen'},
+  {id:'tebo2',  name:'Tebo Plus',         price:3500,  flick:.5,  desc:'Each flick drains 50% better.', req:'tebo', cat:'kitchen'},
+  {id:'tebo3',  name:'Ultra Tebo',        price:8000,  oneFlick:true, desc:'One flick drains it all.', req:'tebo2', cat:'kitchen'},
+  {id:'bell',   name:'Timer bell',        price:1500,             desc:'Dings when the noodles reach the ordered texture.', cat:'kitchen'},
+  {id:'restore',name:'Restoranator',      price:33300,            desc:"Dr Mo's time machine! “Toss noodles” becomes “Restore noodles”: boiled noodles go back in the box raw.", cat:'kitchen'},
+  {id:'knife',  name:'Chashu knife',      price:2000,             desc:'Wider timing when slicing chashu at night.', cat:'prep'},
+  {id:'mold',   name:'Ramen mold',        price:2000,             desc:'When bundling noodles at night, the scale slows down 80% near 140 g.', cat:'prep'},
+  {id:'stock1', name:'More Stocks!',        price:4000,  maxBuy:4,  desc:'Buy up to 4 packs of each ingredient a night.', cat:'prep'},
+  {id:'stock2', name:'More More Stocks!',   price:8000,  maxBuy:8,  desc:'Buy up to 8 packs of each ingredient a night.', req:'stock1', minDay:4, cat:'prep'},
+  {id:'stock3', name:'Momomomore Stocks!',  price:15000, maxBuy:16, desc:'Buy up to 16 packs of each ingredient a night.', req:'stock2', minDay:8, cat:'prep'},
+  {id:'inv',    name:'Inventory Up!',       price:6000,  types:4,   desc:'4 kinds of ingredients delivered each night instead of 3.', cat:'prep'},
+  {id:'plush',  name:'Plush cushion',     price:3000,  pat:1.2,   desc:'Customers wait 1.2× longer.', cat:'store'},
+  {id:'fluffy', name:'Fluffy cushion',    price:7000,  pat:1.7,   desc:'Customers wait 1.7× longer.', req:'plush', cat:'store'},
+  {id:'lemon',  name:"Soso's lemon water",price:2000,  bonus:.03, desc:'+3% on every bowl.', cat:'store'},
+  {id:'noren',  name:'Noren curtain',     price:5000,  bonus:.07, desc:'+7% on every bowl.', cat:'store'},
+  {id:'doll',   name:'Momo doll',         price:8000,  bonus:.12, desc:'+12% on every bowl.', cat:'store'},
+  {id:'boil1',  name:'Strong burner',     price:2500,  boil:.9,   desc:'Noodles boil 10% faster.', cat:'kitchen'},
+  {id:'boil2',  name:'Ultra burner',      price:8000,  boil:.7,   desc:'Noodles boil 30% faster.', req:'boil1', cat:'kitchen'},
+  {id:'boil3',  name:'Turbo burner',      price:15000, boil:.5,   desc:'Noodles boil 50% faster.', req:'boil2', cat:'kitchen'},
 ];
 
 /* ---- story economy ---- */
