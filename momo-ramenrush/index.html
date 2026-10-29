@@ -96,7 +96,9 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 /* the stage = an upper section (ceiling, lamps, signboard, shelves — 670 tall) + the original 900x1280 scene */
 #shopTop{position:absolute;left:0;top:0;width:900px;height:500px;transition:filter .6s}
 #scene{position:absolute;left:0;top:500px;width:900px;height:1450px}
-#counterLow{position:absolute;left:0;top:1280px;width:900px;height:170px;background:linear-gradient(#5c0000,#430000)}
+#stage canvas#shopFront{height:1450px}
+/* soft shadow under Momo's feet on the floor (home screen) */
+#homeMomo::before{content:"";position:absolute;left:24%;right:18%;bottom:-8px;height:26px;border-radius:50%;background:radial-gradient(closest-side,rgba(40,15,5,.35),rgba(40,15,5,0))}
 /* money plaque: pinned to the top of the phone screen, not to the signboard */
 #boardHud{position:absolute;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));display:flex;justify-content:center;z-index:6;pointer-events:none;max-width:calc(100% - 120px)}
 #boardHud>div{display:flex;gap:10px;align-items:baseline;background:rgba(43,24,12,.9);color:#f7e7c9;border:2.5px solid #241309;border-radius:16px;padding:5px 14px 6px;font-weight:600;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 5px 0 rgba(0,0,0,.25)}
@@ -423,8 +425,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
       <div id="seats"></div>
       <div id="cust" class="away"></div>
       <div id="patBar" class="hide"><i></i></div>
-      <canvas id="shopFront" class="layer" width="900" height="1280"></canvas>
-      <div id="counterLow"></div>
+      <canvas id="shopFront" class="layer" width="900" height="1450"></canvas>
       <div id="custBubble" class="bubble off"></div>
       <div id="gloom"><div class="wisp" style="left:60px;top:620px"></div><div class="wisp" style="left:560px;top:700px;animation-delay:-3s"></div><div class="cloud"></div>
         <div class="drop" style="left:380px;top:650px"></div><div class="drop" style="left:430px;top:660px;animation-delay:.3s"></div><div class="drop" style="left:480px;top:648px;animation-delay:.6s"></div></div>
@@ -884,10 +885,57 @@ function drawShopBack(){
     ['も','も','屋'].forEach((ch,k)=>txt(c,ch,x,y-36+k*36,32,'#2b1a10',400,'center',0,'#fff',BRUSH));
     shine(c,x-40,y-40,10,60,5,.25); });
 }
+/* Momo's side of the counter: near lip, open storage underneath, then the floor she walks on */
+function drawUnderCounter(c){
+  const LIP=1004, FACE=1030, KICK=1296, FLOOR=1312;
+  // floor — warm wooden boards with a little perspective
+  c.fillStyle=vg(c,FLOOR,1450,'#8a5a34','#a87446'); c.fillRect(0,FLOOR,900,138);
+  c.strokeStyle='rgba(60,32,14,.35)'; c.lineWidth=2;
+  [1336,1366,1402,1446].forEach(y=>{ c.beginPath(); c.moveTo(0,y); c.lineTo(900,y); c.stroke(); });
+  const R=mulberry(31); for(let row=0;row<4;row++){ const y0=[FLOOR,1336,1366,1402][row], y1=[1336,1366,1402,1450][row];
+    for(let x=(row%2)*90; x<900; x+=180+R()*40){ c.beginPath(); c.moveTo(x,y0); c.lineTo(x+(x-450)*.04,y1); c.stroke(); } }
+  c.save(); c.globalAlpha=.12; c.fillStyle='#fff'; c.beginPath(); c.moveTo(80,1450); c.lineTo(240,FLOOR); c.lineTo(330,FLOOR); c.lineTo(200,1450); c.fill(); c.restore();
+  c.fillStyle=vg(c,FLOOR,FLOOR+40,'rgba(30,12,4,.45)','rgba(30,12,4,0)'); c.fillRect(0,FLOOR,900,40);
+  // counter front: dark wood frame with three open bays
+  c.fillStyle=vg(c,FACE,KICK,'#5e3c22','#43291a'); c.fillRect(0,FACE,900,KICK-FACE);
+  const bays=[[24,280],[316,268],[608,268]], shelfY=1166;
+  bays.forEach(([x,w])=>{ rr(c,x,FACE+18,w,KICK-FACE-30,8); fs(c,vg(c,FACE,KICK,'#2c1a0f','#3a2416'),3,'#1e1209');
+    c.fillStyle=vg(c,FACE+18,FACE+60,'rgba(0,0,0,.35)','rgba(0,0,0,0)'); c.fillRect(x+3,FACE+21,w-6,40);
+    rr(c,x+2,shelfY,w-4,12,3); fs(c,vg(c,shelfY,shelfY+12,'#7a4f2a','#563519'),2.5,'#1e1209'); });
+  [0,300,592,884].forEach(x=>{ c.fillStyle=hg(c,x,x+16,'#6b4628','#4a2e1c'); c.fillRect(x,FACE,16,KICK-FACE); });
+  // ---- bay 1: stacked bowls on top, a crate of soda bottles below
+  for(let k=0;k<3;k++){ miniBowl(c,74+k*80,shelfY,70); miniBowl(c,74+k*80,shelfY-18,70); miniBowl(c,74+k*80,shelfY-36,70); }
+  const crate=(x,y,w,col,dark,cap)=>{ for(let k=0;k<4;k++){ const bx=x+18+k*(w-36)/3; rr(c,bx-9,y-74,18,44,6); fs(c,'rgba(170,220,230,.85)',2,'#1e3a40'); rr(c,bx-5,y-86,10,14,3); fs(c,'rgba(170,220,230,.85)',2,'#1e3a40'); ell(c,bx,y-88,6,3,cap,1.5,'#1e1209'); }
+    rr(c,x,y-50,w,50,6); fs(c,vg(c,y-50,y,col,dark),3,'#1e1209');
+    for(let k=1;k<4;k++){ rr(c,x+k*w/4-12,y-40,24,12,5); fs(c,'rgba(0,0,0,.35)',0); } };
+  crate(44,KICK-14,240,'#f2c14e','#c9962a','#e0463a');
+  // ---- bay 2: juice / oolong cartons on top, noodle box + rice sack below
+  const carton=(x,y,col,lab)=>{ c.beginPath(); c.moveTo(x-22,y); c.lineTo(x-22,y-66); c.lineTo(x-12,y-84); c.lineTo(x+12,y-84); c.lineTo(x+22,y-66); c.lineTo(x+22,y); c.closePath(); fs(c,vg(c,y-84,y,'#fffaf0','#ece2cf'),2.5,'#1e1209');
+    rr(c,x-18,y-58,36,34,4); fs(c,col,0); txt(c,lab,x,y-41,10,'#fff',700); c.fillStyle='rgba(0,0,0,.12)'; c.fillRect(x+8,y-66,14,66); };
+  carton(352,shelfY,'#e8873a','ORANGE'); carton(404,shelfY,'#6aa84f','OOLONG'); carton(456,shelfY,'#4f86c6','MILK'); carton(508,shelfY,'#e8873a','ORANGE'); carton(556,shelfY,'#c8553d','PEACH');
+  rr(c,332,KICK-92,130,80,6); fs(c,vg(c,KICK-92,KICK-12,'#d9a86c','#b07a43'),3,'#1e1209'); c.strokeStyle='rgba(60,32,14,.5)'; c.lineWidth=2; c.beginPath(); c.moveTo(332,KICK-72); c.lineTo(462,KICK-72); c.stroke();
+  txt(c,'NOODLES',397,KICK-46,15,'#4a2412',700); txt(c,'fresh daily',397,KICK-28,10,'#6b4423',600);
+  c.beginPath(); c.moveTo(482,KICK-12); c.quadraticCurveTo(470,KICK-70,492,KICK-104); c.lineTo(552,KICK-108); c.quadraticCurveTo(578,KICK-70,566,KICK-12); c.closePath(); fs(c,vg(c,KICK-108,KICK-12,'#f6efd9','#ddd0b2'),3,'#1e1209');
+  rr(c,488,KICK-112,60,12,5); fs(c,'#c9a56e',2,'#1e1209'); txt(c,'米',524,KICK-58,26,'#b0302a',400,'center',0,'#fff',BRUSH); txt(c,'RICE',524,KICK-30,10,'#6b4423',700);
+  // ---- bay 3: big soy bottles + tare jug on top, a crate of glass ramune-style bottles below
+  const big=(x,y,col)=>{ c.beginPath(); c.moveTo(x-18,y); c.lineTo(x-18,y-70); c.quadraticCurveTo(x-18,y-88,x-7,y-94); c.lineTo(x-7,y-112); c.lineTo(x+7,y-112); c.lineTo(x+7,y-94); c.quadraticCurveTo(x+18,y-88,x+18,y-70); c.lineTo(x+18,y); c.closePath(); fs(c,vg(c,y-112,y,shade(col,.2),col),2.5,'#1e1209');
+    rr(c,x-14,y-62,28,32,3); fs(c,'#f6efd9',2,'#1e1209'); txt(c,'醤油',x,y-46,11,'#3a2013',400,'center',0,'#fff',BRUSH); rr(c,x-8,y-120,16,10,3); fs(c,'#e3483c',2,'#1e1209'); };
+  big(646,shelfY,'#3c1a0b'); big(690,shelfY,'#3c1a0b'); big(734,shelfY,'#5a2a12');
+  rr(c,768,shelfY-74,92,74,14); fs(c,vg(c,shelfY-74,shelfY,'#f4e3c4','#d9bd93'),3,'#1e1209'); rr(c,840,shelfY-60,26,30,10); fs(c,null,4,'#1e1209'); rr(c,780,shelfY-86,40,14,4); fs(c,'#7b4b2a',2.5,'#1e1209'); txt(c,'TARE',812,shelfY-38,13,OUT,700);
+  crate(626,KICK-14,240,'#5aa9d6','#3a7fae','#7bd36a');
+  // kick plate + shadow cast by the lip
+  c.fillStyle='#2a180d'; c.fillRect(0,KICK,900,FLOOR-KICK);
+  c.fillStyle=vg(c,FACE,FACE+34,'rgba(0,0,0,.45)','rgba(0,0,0,0)'); c.fillRect(0,FACE,900,34);
+  // near lip of the counter (wood), between the red top and the storage
+  c.fillStyle=vg(c,LIP,FACE,'#e7c28f','#a8743f'); c.fillRect(0,LIP,900,FACE-LIP);
+  c.strokeStyle='#24140a'; c.lineWidth=3; c.beginPath(); c.moveTo(0,LIP); c.lineTo(900,LIP); c.moveTo(0,FACE); c.lineTo(900,FACE); c.stroke();
+  shine(c,0,LIP+3,900,4,2,.45);
+}
 function drawShopFront(){
-  const c=$('#shopFront').getContext('2d'); c.clearRect(0,0,900,1280);
-  // far edge (wood rim) + red lacquer counter surface
-  c.fillStyle=vg(c,756,1280,'#951410','#5c0000','#7b0000'); c.fillRect(0,756,900,524);
+  const c=$('#shopFront').getContext('2d'); c.clearRect(0,0,900,1450);
+  drawUnderCounter(c);
+  // far edge (wood rim) + red lacquer counter surface (ends at the near lip, y≈1004)
+  c.fillStyle=vg(c,756,1004,'#951410','#640303','#7b0000'); c.fillRect(0,756,900,248);
   c.save(); c.globalAlpha=.10; c.fillStyle='#fff'; c.beginPath(); c.moveTo(0,820); c.lineTo(900,780); c.lineTo(900,830); c.lineTo(0,880); c.fill(); c.restore();
   [95,805].forEach(x=>{ const g=c.createRadialGradient(x,800,6,x,800,120); g.addColorStop(0,'rgba(255,150,90,.30)'); g.addColorStop(1,'rgba(255,150,90,0)'); c.fillStyle=g; c.fillRect(x-130,760,260,160); });
   c.fillStyle='rgba(245,200,110,.55)'; c.fillRect(0,770,900,2.5);
