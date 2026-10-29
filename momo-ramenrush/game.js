@@ -999,7 +999,10 @@ function homeTurn(after){ const m=HOME.m, hm=$('#homeMomo'), fl=hm.querySelector
    .then(()=>ppFlip(fl,()=>{ hm.classList.remove('front'); hm.querySelector('.body').src=ASSET_SRC.momo_body; }))
    .then(()=>{ if(G.mode==='home') m.state=after; }); }
 function slurpText(x,y){ const s=document.createElement('div'); s.className='slurp'; s.style.fontSize='34px'; s.textContent=['Slurp!','Zuzu…','Mmm!'][Math.floor(Math.random()*3)]; s.style.left=x+'px'; s.style.top=y+'px'; $('#scene').appendChild(s); setTimeout(()=>s.remove(),1200); }
-function refreshHome(){ $('#hmDay').textContent=P.day; $('#hmMoney').textContent=P.money.toLocaleString(); $('#hmRent').textContent=ECON.rent(P.day).toLocaleString(); $('#btnDay').innerHTML= P.resume&&P.resume.day===P.day ? `Continue Day ${P.day} · ${Math.min(P.resume.D.done+1,P.resume.D.n)}/${P.resume.D.n} ▶<small>Pick up where you saved</small>` : `Story · Day ${P.day} ▶<small>Rent, stock, patience and night prep</small>`; $('#hotDrink').classList.toggle('locked',!P.tutorialDone); }
+function refreshHome(){ const endless=P.lastMode==='endless';   // the tray shows whichever mode was played last
+  $('#hotTray .hm:not(.hmEnd)').hidden=endless; $('#hotTray .hmEnd').hidden=!endless; $('#hmBest').textContent=(P.endlessBest||0).toLocaleString();
+  $('#btnEndless').innerHTML=`Endless${P.endlessBest?` · Best ${P.endlessBest} bowl${P.endlessBest===1?'':'s'}`:''} ▶<small>Just make ramen. No rent, no stock, no rush.</small>`;
+  $('#hmDay').textContent=P.day; $('#hmMoney').textContent=P.money.toLocaleString(); $('#hmRent').textContent=ECON.rent(P.day).toLocaleString(); $('#btnDay').innerHTML= P.resume&&P.resume.day===P.day ? `Continue Day ${P.day} · ${Math.min(P.resume.D.done+1,P.resume.D.n)}/${P.resume.D.n} ▶<small>Pick up where you saved</small>` : `Story · Day ${P.day} ▶<small>Rent, stock, patience and night prep</small>`; $('#hotDrink').classList.toggle('locked',!P.tutorialDone); }
 function goHome(){ G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
   $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); showScene('shop'); layoutStage(false); buildHome(); refreshHome(); music('title'); }
 
@@ -1012,12 +1015,12 @@ const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere
 function later(f,ms){ const ss=G.sess; return setTimeout(()=>{ if(ss===G.sess) f(); },ms); }
 function enterService(){ $('#modeSheet').classList.remove('on'); G.mode='service'; $('#shop').classList.remove('home'); G.custQueue=[];
   resetMomoBack(); updateHud(); layoutStage(false); music('day',true); later(nextCustomer,400); }
-function startDay(){ G.play='story'; G.tut=!P.tutorialDone; G.firstOrder=!P.firstDone||G.tut;
+function startDay(){ P.lastMode='story'; G.play='story'; G.tut=!P.tutorialDone; G.firstOrder=!P.firstDone||G.tut;
   Object.assign(D,{n:ECON.customers(P.day),done:0,sales:0,tips:0,walk:0});
   if(P.resume && P.resume.day===P.day) Object.assign(D,P.resume.D);                          // continue a saved day
   else P.dayStart={day:P.day,money:P.money,stock:{...P.stock},served:P.served};              // for "Restart the day"
   P.resume=null; saveGame(); enterService(); }
-function startEndless(){ G.play='endless'; G.tut=false; G.firstOrder=false; Object.assign(E,{served:0,money:0}); Object.assign(D,{n:Infinity,done:0,sales:0,tips:0,walk:0}); enterService(); }
+function startEndless(){ P.lastMode='endless'; E.newBest=false; saveGame(); G.play='endless'; G.tut=false; G.firstOrder=false; Object.assign(E,{served:0,money:0}); Object.assign(D,{n:Infinity,done:0,sales:0,tips:0,walk:0}); enterService(); }
 function startTutorial(){ if(!P.tutorialDone){ toast('The tutorial starts with your first story day'); return; }
   G.play='tutorial'; G.tut=true; G.firstOrder=true; Object.assign(D,{n:1,done:0,sales:0,tips:0,walk:0}); enterService(); }
 function updateHud(){
@@ -1116,7 +1119,8 @@ function eat(){
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus()));
     const C=CUSTOMERS[id], tip = r.total>=55 ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip) : 0, bonus = r.total>=95?C.perfect:0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
-    else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++; }
+    else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++;
+      if(E.served>(P.endlessBest||0)){ if(P.endlessBest && !E.newBest){ E.newBest=true; later(()=>toast(`New best: ${E.served} bowls!`),1400); } P.endlessBest=E.served; saveGame(); } }
     D.done++;
     if(G.tut){ G.tut=false; P.tutorialDone=true; later(()=>toast(G.play==='story'?'Tutorial complete! The rest of Day 1 is up to you.':'Tutorial complete!'),2200); }
     saveGame(); updateHud();
@@ -1230,7 +1234,7 @@ function gameOver(){
   $('#ovSub').textContent=`もも屋 ran for ${P.day} day${P.day>1?'s':''}. Popo says rent comes first!`;
   $('#ovLedger').innerHTML=`<span>Bowls served</span><span>${P.served}</span><span>Ramen Book</span><span>${Object.keys(P.book).length} bowls</span>`;
 }
-$('#btnRestart').onclick=()=>{ P=freshSave(P.book,P.tutorialDone,P.seen); saveGame(); goHome(); };
+$('#btnRestart').onclick=()=>{ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0}; saveGame(); goHome(); };
 
 /* =====================================================================
    18. PREP MINIGAMES (placeholder art — swap in sprites later)
@@ -1489,7 +1493,7 @@ $('#btnToss').onclick=tossNoodles;
   const m=document.createElement('meta'); m.name='apple-mobile-web-app-title'; m.content='Momo-ya'; document.head.appendChild(m); })();
 $('#btnBookBack').onclick=goHome;
 $('#btnReset').onclick=()=>{ const b=$('#btnReset');
-  if(b.dataset.arm==='1'){ P=freshSave(P.book,P.tutorialDone,P.seen); saveGame(); refreshHome(); b.dataset.arm=''; b.textContent='Start a new story'; toast('New game started (your Ramen Book is kept)'); return; }
+  if(b.dataset.arm==='1'){ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0}; saveGame(); refreshHome(); b.dataset.arm=''; b.textContent='Start a new story'; toast('New game started (your Ramen Book is kept)'); return; }
   b.dataset.arm='1'; b.textContent='Tap again to reset money, stock and upgrades'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='Start a new story'; },2500); };
 $('#btnToKitchen').onclick=toKitchen;
 $('#btnEat').onclick=eat;

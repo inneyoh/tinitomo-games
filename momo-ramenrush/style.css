@@ -89,6 +89,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #boardHud #hudDay{color:#ffcf8a}
 #shop.home #boardHud .svc{display:none}
 #shop.home #boardHud{transform:translate(-50%,-50%);width:max-content;visibility:hidden}
+#hotTray .hm[hidden]{display:none}
 #hotTray .hm{position:absolute;left:50%;top:69%;transform:translate(-50%,-50%);display:grid;grid-template-columns:auto auto;justify-content:center;column-gap:18px;white-space:nowrap;
   font-weight:600;font-size:25px;line-height:1.25;color:#e9dcc2;padding:4px 22px 7px;border-radius:22px;border:3px solid rgba(232,196,119,.4);background:rgba(255,236,190,.07);font-variant-numeric:tabular-nums;pointer-events:none}
 #hotTray .hm span{position:static}
