@@ -28,8 +28,8 @@ const VOL={ titleMusic:.13, titleShop:.36, dayMusic:.25, nightMusic:.27, sfx:.95
 /* ---- night market: price per pack, base = portions from a perfect prep ---- */
 const MARKET={   // a pack bought at night → Momo preps it → up to `base` portions (fewer if the prep is messy)
   chashu:{name:'Chashu',      pack:'Pork belly roll',    price:800, base:6, img:'assets/pk_chashu.webp',      unit:'portions'},
-  green: {name:'Green onion', pack:'Green onion bunch',  price:250, base:6, img:'assets/pk_green_onion.webp', unit:'portions'},
-  white: {name:'White onion', pack:'Naganegi stalks',    price:300, base:6, img:'assets/pk_white_onion.webp', unit:'portions'},
+  green: {name:'Green onion', pack:'Naganegi stalks',  price:250, base:6, img:'assets/pk_green_onion.webp', unit:'portions'},
+  white: {name:'White onion', pack:'Bag of tamanegi',    price:300, base:6, img:'assets/pk_white_onion.webp', unit:'portions'},
   nori:  {name:'Seaweed',     pack:'Raw nori sheets',    price:350, base:6, img:'assets/pk_seaweed.webp',     unit:'portions'},
   noodle:{name:'Noodles',     pack:'Fresh noodle dough', price:500, base:8, img:'assets/pk_noodles.webp',     unit:'bundles'},
 };
