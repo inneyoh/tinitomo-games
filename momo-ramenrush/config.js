@@ -14,13 +14,13 @@ const CFG = {
 
 /* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+ ---- */
 const CUSTOMERS = {
-  soso:{name:'Soso', pat:.7, tip:2.5, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
+  soso:{name:'Soso', pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
     react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"}},
-  rang:{name:'Rang', pat:1, tip:1, perfect:900, hi:"Rangahahaha! I'm STARVING!",
+  rang:{name:'Rang', pat:1, tip:1, perfect:800, hi:"Rangahahaha! I'm STARVING!",
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"}},
-  kew:{name:'Kew', pat:1.4, tip:1, perfect:200, hi:"…One bowl, please.",
+  kew:{name:'Kew', pat:1.5, tip:1, perfect:400, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."}},
-  bae:{name:'Bae', pat:1.2, tip:1.2, perfect:250, hi:"Hello, one bowl of Ramen please!",
+  bae:{name:'Bae', pat:1.2, tip:1.2, perfect:300, hi:"Hello, one bowl of Ramen please!",
     react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"}},
 };
 
