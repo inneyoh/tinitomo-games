@@ -10,7 +10,7 @@ const CFG = {
   BOIL_MAX:22.4, FIRM_CENTERS:[5.6,8.8,12,15.2,18.4], FIRM_TOL:1.6, // seconds in the water for each texture (20% faster than v1)
   FLICK_KEEP:0.55, WATER_OK:0.15,                       // each flick keeps 55% of the water; ≤15% is a clean drain
   PRICE:980,
-  SCOOP_TIME:.72,                                      // ladle trip length (1 ≈ 0.66 s); .72 lets taps ~0.5 s apart count, faster taps are ignored
+  SCOOP_TIME:.85,                                      // ladle trip length (1 ≈ 0.66 s); .72 lets taps ~0.5 s apart count, faster taps are ignored
 };
 
 /* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+, size = how big they look (Soso = 1)
