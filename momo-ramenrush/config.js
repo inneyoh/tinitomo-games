@@ -10,20 +10,34 @@ const CFG = {
   BOIL_MAX:22.4, FIRM_CENTERS:[5.6,8.8,12,15.2,18.4], FIRM_TOL:1.6, // seconds in the water for each texture (20% faster than v1)
   FLICK_KEEP:0.55, WATER_OK:0.15,                       // each flick keeps 55% of the water; ≤15% is a clean drain
   PRICE:980,
+  SCOOP_TIME:1.5,                                      // how slow Momo's ladle trip is (1 = old speed); taps while she's busy are ignored
 };
 
-/* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+, size = how big they look (Soso = 1) ---- */
+/* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+, size = how big they look (Soso = 1)
+        profile / likes = what the Customer Book says about them ---- */
 const CUSTOMERS = {
   soso:{name:'Soso', size:1, pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
-    react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"}},
+    react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"},
+    profile:"Momo's twin sister. Cutesy, chaotic and very fluffy — loves strawberry milk, attention, and Momo.", likes:"Spice level 5"},
   rang:{name:'Rang', size:.87, pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
-    react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"}},
+    react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"},
+    profile:"Loud, cheerful and always STARVING. Laughs at everything — rangahahaha!", likes:"Rich broth"},
   kew:{name:'Kew', size:.82, pat:1.5, tip:1, perfect:400, hi:"…One bowl, please.",
-    react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."}},
+    react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."},
+    profile:"Quiet and serious. Treats every bowl like training, and waits longer than anyone.", likes:"Seaweed"},
   bae:{name:'Bae', size:.87, pat:1.2, tip:1.2, perfect:300, hi:"Hello, one bowl of Ramen please!",
-    react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"}},
+    react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"},
+    profile:"A gentle, polite pup who always says thank you. Worries a little too easily.", likes:"Soft noodles"},
   popo:{name:'Popo', size:1.2, pat:0.7, tip:2, perfect:500, hi:"How is the shop doing?",
-    react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"}},
+    react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"},
+    profile:"The MoSo sisters' big sister and the best cook in town. Chill, strict and straight to the point.", likes:"A perfect bowl"},
+};
+
+/* ---- Customer Book ratings: a customer gets the first label whose minimum they reach ---- */
+const BOOK_RATINGS={
+  pat:   [[1.5,'Very good'],[1.15,'Good'],[1,'Normal'],[.75,'Bad'],[0,'Very bad']],
+  tip:   [[2.3,'Very good'],[1.6,'Good'],[1,'Normal'],[.7,'Bad'],[0,'Very bad']],
+  perfect:[[700,'Very good'],[371,'Good'],[0,'Normal']],
 };
 
 /* ---- audio volumes (0–1) ---- */
@@ -81,4 +95,4 @@ const ECON={
   PATIENCE_SLOWER:.85,                    // patience drains 15% slower for everyone
 };
 
-const ATLAS_DIR='atlases/';               // folder of the 1024px ramen sheets (Ramen Book thumbnails)
+const ATLAS_DIR='atlases/';               // folder of the 1024px ramen sheets (old Ramen Book thumbnails, no longer shown)

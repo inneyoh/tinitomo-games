@@ -700,7 +700,7 @@ function hitObject(p){
 function homeOf(o){ return {x:K.px0+(o.home?o.home[0]:0), y:o.home?o.home[1]:0}; }
 kc.addEventListener('pointerdown',e=>{
   const p=toStage(e); K.idle=0; kc.setPointerCapture(e.pointerId);
-  if(K.M){ const o=hitObject(p); if(o && K.M.src && o.id===K.M.src && K.queue<5) K.queue++; return; }
+  if(K.M) return;   // Momo is still busy with the last scoop — extra taps are ignored (no more spam-tapping)
   const o=hitObject(p);
   if(!o){ K.pan={x0:p.x,cam0:K.cam,lastX:p.x,lastT:performance.now(),v:0,moved:false,momo:p.y>596&&p.x>64&&p.x<336}; return; }
   const b=G.bowl, nd=b.nood;
@@ -816,10 +816,10 @@ function kitchenFrame(dt){
   if(K.pour){ b.soup=Math.min(1.15,b.soup+dt*CFG.SOUP_RATE*UP.soup()); K.dirty=true; if(Math.random()<dt*8) blip(180+Math.random()*40,.05,'sine',.03); }
   // tool motion (tap = automatic; drag-release = pour where you let go)
   const M=K.M; if(M){ M.T+=dt;
-    if(M.stage==='go'){ const k=Math.min(1,M.T/.24), e=k*k*(3-2*k); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*40; if(k>=1){ M.stage='act'; M.T=0; } }
-    else if(M.stage==='act'){ M.ang = M.t==='fat' ? 0 : -Math.min(1,M.T/.14)*1.1; if(M.t==='fat') M.x=M.to.x+Math.sin(M.T*40)*10;
-      if(M.T>=.2){ if(M.apply){ M.apply(); M.apply=null; K.dirty=true; } if(M.keep){ M.stage='back'; M.T=0; M.from={x:M.x,y:M.y}; M.to=M.home||M.from; M.full=false; } else K.M=null; } }
-    else if(M.stage==='back'){ const k=Math.min(1,M.T/.22), e=k*k*(3-2*k); M.ang=(1-e)*(M.ang||0); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*24; if(k>=1) K.M=null; }
+    if(M.stage==='go'){ const k=Math.min(1,M.T/(.24*CFG.SCOOP_TIME)), e=k*k*(3-2*k); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*40; if(k>=1){ M.stage='act'; M.T=0; } }
+    else if(M.stage==='act'){ M.ang = M.t==='fat' ? 0 : -Math.min(1,M.T/(.14*CFG.SCOOP_TIME))*1.1; if(M.t==='fat') M.x=M.to.x+Math.sin(M.T*40)*10;
+      if(M.T>=.2*CFG.SCOOP_TIME){ if(M.apply){ M.apply(); M.apply=null; K.dirty=true; } if(M.keep){ M.stage='back'; M.T=0; M.from={x:M.x,y:M.y}; M.to=M.home||M.from; M.full=false; } else K.M=null; } }
+    else if(M.stage==='back'){ const k=Math.min(1,M.T/(.22*CFG.SCOOP_TIME)), e=k*k*(3-2*k); M.ang=(1-e)*(M.ang||0); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*24; if(k>=1) K.M=null; }
     if(!K.M && K.queue>0 && K.lastTap){ K.queue--; autoAct({...K.lastTap}); }
   }
   if(!K.M && !K.lastTap) K.queue=0;
@@ -1063,8 +1063,9 @@ function patienceTick(dt){
   if(!G.waiting || G.play!=='story' || G.tut) return;
   G.pat=Math.max(0,G.pat-dt*100*ECON.PATIENCE_SLOWER/(ECON.patience(P.day)*UP.pat()*(CUSTOMERS[G.order.cust].pat||1)));
   const cls=G.pat<30?'low':G.pat<60?'mid':'';
-  const bar=$('#patBar'); bar.classList.toggle('mid',cls==='mid'); bar.classList.toggle('low',cls==='low'); bar.firstElementChild.style.width=G.pat+'%';
-  document.querySelectorAll('.tk-pat').forEach(el=>{ el.className='tk-pat '+cls; el.firstElementChild.style.width=G.pat+'%'; });
+  const pw=(Math.round(G.pat*2)/2)+'%', key=cls+pw; if(key!==G.patKey){ G.patKey=key;   // only repaint when the bar actually changes
+    const bar=$('#patBar'); bar.classList.toggle('mid',cls==='mid'); bar.classList.toggle('low',cls==='low'); bar.firstElementChild.style.width=pw;
+    document.querySelectorAll('.tk-pat').forEach(el=>{ el.className='tk-pat '+cls; el.firstElementChild.style.width=pw; }); }
   $('#cust').classList.toggle('impatient',G.pat<20);
   const up=G.pat<UPSET_PATIENCE, im=$('#cust .csprite');
   if(im && im.dataset.upset!==(up?'1':'0')){ im.src=up?CUST_UPSET[G.order.cust]:CUST_IMG[G.order.cust]; im.dataset.upset=up?'1':'0'; }
@@ -1078,7 +1079,7 @@ function walkout(){
   later(()=>{ hush(); c.classList.add('away'); },1800);
   later(()=>{ D.done++; saveGame(); nextCustomer(); },2600);
 }
-function say(t){ const b=$('#custBubble'); b.textContent=t; b.classList.remove('off'); }
+function say(t){ const b=$('#custBubble'); if(b.textContent!==t) b.textContent=t; b.classList.remove('off'); }
 function hush(){ $('#custBubble').classList.add('off'); }
 function toKitchen(){
   $('#orderSheet').classList.remove('on'); hush();
@@ -1089,6 +1090,7 @@ function toKitchen(){
 function bookRecord(b,total,cust){
   const o=packOrder(b), idx=(((((o.garlic*4+o.onion)*2+o.chashu)*6+o.spice)*5+o.texture)*2+o.seaweed), id=o.dashi*19200+o.richness*3840+idx;
   const e=P.book[id]||{o,n:0,best:0}; e.n++; e.best=Math.max(e.best,total); e.at=Date.now(); e.cust=cust; e.o=o; P.book[id]=e;
+  P.cbook=P.cbook||{}; const c=P.cbook[cust]||{n:0,best:0}; c.n++; c.best=Math.max(c.best,total); P.cbook[cust]=c;   // Customer Book
 }
 function serve(){
   const b=G.bowl;
@@ -1245,9 +1247,9 @@ $('#btnSleepHome').onclick=()=>{ P.day++; saveGame(); goHome(); };
 function gameOver(){
   showScene('over');
   $('#ovSub').textContent=`もも屋 ran for ${P.day} day${P.day>1?'s':''}. Popo says rent comes first!`;
-  $('#ovLedger').innerHTML=`<span>Bowls served</span><span>${P.served}</span><span>Ramen Book</span><span>${Object.keys(P.book).length} bowls</span>`;
+  $('#ovLedger').innerHTML=`<span>Bowls served</span><span>${P.served}</span><span>Customers met</span><span>${Object.keys(P.cbook||{}).length} / ${Object.keys(CUSTOMERS).length}</span>`;
 }
-$('#btnRestart').onclick=()=>{ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0}; saveGame(); goHome(); };
+$('#btnRestart').onclick=()=>{ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0,cbook:P.cbook||{}}; saveGame(); goHome(); };
 
 /* =====================================================================
    18. PREP MINIGAMES (placeholder art — swap in sprites later)
@@ -1425,15 +1427,18 @@ function drawThumb(cv,id,o){
     else { drawRamen(thumbCv,bowlFromPack(o)); c.drawImage(thumbCv,0,0,cv.width,cv.height); } };
   if(A.ok===null) A.wait.push(go); else go(A.ok);
 }
+/* Customer Book: who comes to もも屋, how patient they are, how they tip, and what they like */
+function rate(kind,v){ const r=BOOK_RATINGS[kind]; const k=r.findIndex(([min])=>v>=min); return {label:r[Math.max(0,k)][1], pips:r.length-Math.max(0,k), of:r.length}; }
 function openBook(){
-  showScene('book'); const ent=Object.entries(P.book).sort((a,b)=>(b[1].at||0)-(a[1].at||0));
-  $('#bookCount').textContent=`${ent.length} / 57,600 bowls`;
-  const grid=$('#bookGrid');
-  if(!ent.length){ grid.innerHTML='<div id="bookEmpty">No bowls yet. Every different bowl you serve gets a page here.</div>'; return; }
-  grid.innerHTML=ent.map(([id,e])=>{ const o=e.o; const gl=GARLIC_LIST[o.garlic], on=['Green','White','No onion','Both onions'][o.onion];
-    return `<div class="bk"><canvas width="184" height="184" data-id="${id}"></canvas><div class="l1">${DASHI_NAME[o.dashi]} · ${RICH_NAME[o.richness]}</div>
-      <div class="l2">${FIRM_NAME[o.texture]} · spice ${o.spice}<br>${gl} garlic · ${on}${o.chashu?' · chashu':''}${o.seaweed?' · nori':''}</div><div class="best">Best ${e.best} · ×${e.n}</div></div>`; }).join('');
-  grid.querySelectorAll('canvas[data-id]').forEach(cv=>{ const id=+cv.dataset.id; drawThumb(cv,id,P.book[id].o); });
+  showScene('book'); const ids=Object.keys(CUSTOMERS), cb=P.cbook||{};
+  $('#bookCount').textContent=`${ids.filter(id=>cb[id]).length} / ${ids.length} met`;
+  const row=(name,r)=>`<div class="cbRow"><span class="k">${name}</span><span class="pips">${'<i class="on"></i>'.repeat(r.pips)}${'<i></i>'.repeat(r.of-r.pips)}</span><span class="v">${r.label}</span></div>`;
+  $('#bookGrid').innerHTML=ids.map(id=>{ const C=CUSTOMERS[id], st=cb[id];
+    return `<div class="cb"><div class="cbPic"><img src="${CUST_IMG[id]}" alt="${C.name}"></div>
+      <div class="cbBody"><h3>${C.name}</h3><p class="cbProf">${C.profile||''}</p>
+        <div class="cbLikes">♡ Likes: <b>${C.likes||'—'}</b></div>
+        ${row('Patience',rate('pat',C.pat||1))}${row('Tips',rate('tip',C.tip||1))}${row('Bonus tip',rate('perfect',C.perfect||0))}
+        <div class="cbStat">${st?`Served ${st.n} bowl${st.n===1?'':'s'} · best ${st.best} pts`:'Not served yet'}</div></div></div>`; }).join('');
 }
 
 
@@ -1506,7 +1511,7 @@ $('#btnToss').onclick=tossNoodles;
   const m=document.createElement('meta'); m.name='apple-mobile-web-app-title'; m.content='Momo-ya'; document.head.appendChild(m); })();
 $('#btnBookBack').onclick=goHome;
 $('#btnReset').onclick=()=>{ const b=$('#btnReset');
-  if(b.dataset.arm==='1'){ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0}; saveGame(); refreshHome(); b.dataset.arm=''; b.textContent='Start a new story'; toast('New game started (your Ramen Book is kept)'); return; }
+  if(b.dataset.arm==='1'){ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0,cbook:P.cbook||{}}; saveGame(); refreshHome(); b.dataset.arm=''; b.textContent='Start a new story'; toast('New game started (your Customer Book is kept)'); return; }
   b.dataset.arm='1'; b.textContent='Tap again to reset money, stock and upgrades'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='Start a new story'; },2500); };
 $('#btnToKitchen').onclick=toKitchen;
 $('#btnEat').onclick=eat;
