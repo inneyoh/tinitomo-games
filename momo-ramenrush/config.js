@@ -20,6 +20,8 @@ const CUSTOMERS = {
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"}},
   kew:{name:'Kew', pat:1.4, tip:1, perfect:200, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."}},
+  bae:{name:'Bae', pat:1.2, tip:1.2, perfect:250, hi:"Hello, one bowl of Ramen please!",
+    react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"}},
 };
 
 /* ---- audio volumes (0–1) ---- */

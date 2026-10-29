@@ -49,12 +49,12 @@ const MOMO_FACE=[ {max:40, img:'assets/momo_confused.webp', line:'…Wait. Where
                   {max:85, img:'assets/momo_front.webp',    line:'Not bad. Next one.'},
                   {max:100,img:'assets/momo_smug.webp',     line:'Hmph. As calculated.'} ];
 const faceFor = total => MOMO_FACE.find(f=>total<=f.max);
-const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp'};
-/* angry Soso · upset Kew · confused Rang — a bowl under 40 points, or patience under 20% */
-const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp'};
+const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp', bae:'assets/cu_bae.webp'};
+/* angry Soso · upset Kew · confused Rang · worried Bae — a bowl under 40 points, or patience under 20% */
+const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp', bae:'assets/cu_bae_upset.webp'};
 const UPSET_SCORE=40, UPSET_PATIENCE=20;
 Object.values(CUST_UPSET).forEach(src=>{ new Image().src=src; });   // preload so the swap is instant
-const CUST_H={soso:394, kew:408, rang:416};
+const CUST_H={soso:394, kew:408, rang:416, bae:457};
 function custHTML(id, mood, upset){
   const fx = mood==='happy' ? '<img class="cfx" src="assets/ui_heart.webp" alt="" style="left:262px;top:-14px"><img class="cfx" src="assets/ui_heart.webp" alt="" style="left:14px;top:30px;width:60px;animation-delay:.25s">'
            : mood==='sad' ? '<img class="cfx" src="assets/ui_anger_mark.webp" alt="" style="left:258px;top:10px">' : '';
@@ -1009,7 +1009,7 @@ function goHome(){ G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true
 /* =====================================================================
    16. A BUSINESS DAY — customers, patience, serving, paying
    ===================================================================== */
-const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere else!", kew:'…My patience has limits.'};
+const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere else!", kew:'…My patience has limits.', bae:'Bae… I have to go…'};
 /* three ways to play: story (rent/stock/patience), endless (just ramen), tutorial replay (one guided bowl) */
 /* delayed steps of a day only run if the player is still in that same session (not after Home / Restart) */
 function later(f,ms){ const ss=G.sess; return setTimeout(()=>{ if(ss===G.sess) f(); },ms); }
@@ -1035,7 +1035,7 @@ function nextCustomer(){
   if(G.play==='tutorial' && D.done>=1){ toast('Tutorial complete!'); goHome(); return; }
   if(G.play==='story' && D.done>=D.n){ closeShop(); return; }
   updateHud();
-  if(!G.custQueue.length) G.custQueue=['soso','rang','kew'].sort(()=>Math.random()-.5);
+  if(!G.custQueue.length) G.custQueue=Object.keys(CUSTOMERS).sort(()=>Math.random()-.5);
   if(G.firstOrder) G.custQueue=['soso',...G.custQueue.filter(c=>c!=='soso')];
   const id=G.custQueue.shift(); G.ticketNo++;
   G.order={cust:id,no:G.ticketNo,pos:genOrder()}; G.bowl=newBowl(); G.result=null; K.dirty=true; G.pat=100;
