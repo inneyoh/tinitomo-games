@@ -85,7 +85,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 /* =====================================================================
    4. SHOP (customer) SCENE
    ===================================================================== */
-#shop{background:#3a2416;overflow:hidden;}
+#shop{background:#3a2416;overflow:hidden;overflow:clip}
 #signTop{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;gap:12px;
   background:linear-gradient(#4a2e1c,#2e1b10);}
 #signTop .board{background:linear-gradient(#f5e6c8,#e5cfa6);border:3px solid #241309;border-radius:8px;padding:0 16px 2px;font-family:var(--f-brush);font-size:24px;box-shadow:0 3px 0 #241309}
@@ -97,8 +97,9 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #shopTop{position:absolute;left:0;top:0;width:900px;height:500px;transition:filter .6s}
 #scene{position:absolute;left:0;top:500px;width:900px;height:1450px}
 #counterLow{position:absolute;left:0;top:1280px;width:900px;height:170px;background:linear-gradient(#5c0000,#430000)}
-#boardHud{position:absolute;left:230px;top:404px;width:440px;display:flex;justify-content:center;z-index:2}
-#boardHud>div{display:flex;gap:22px;align-items:baseline;background:rgba(43,24,12,.9);color:#f7e7c9;border:4px solid #241309;border-radius:20px;padding:6px 24px 8px;font-weight:600;font-size:28px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+/* money plaque: pinned to the top of the phone screen, not to the signboard */
+#boardHud{position:absolute;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));display:flex;justify-content:center;z-index:6;pointer-events:none;max-width:calc(100% - 120px)}
+#boardHud>div{display:flex;gap:10px;align-items:baseline;background:rgba(43,24,12,.9);color:#f7e7c9;border:2.5px solid #241309;border-radius:16px;padding:5px 14px 6px;font-weight:600;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 5px 0 rgba(0,0,0,.25)}
 #boardHud b{color:#ffd257}
 #boardHud #hudDay{color:#ffcf8a}
 #shop.home #boardHud .svc{display:none}
@@ -417,8 +418,6 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
   <section id="shop" class="scene home">
     <div id="stage">
       <canvas id="shopTop" width="900" height="500"></canvas>
-      <div id="boardHud"><div class="svc"><span id="hudDay">Day 1</span><b id="hudCoins">¥0</b></div>
-        <div class="hm"><span>Day <b id="hmDay">1</b></span><span>¥<b id="hmMoney">0</b></span><span>Rent tonight ¥<b id="hmRent">0</b></span></div></div>
       <div id="scene">
       <canvas id="shopBack" class="layer" width="900" height="1280"></canvas>
       <div id="seats"></div>
@@ -450,6 +449,9 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
       </div>
     </div>
     <div id="vignette"></div>
+    <div id="boardHud"><div class="svc"><span id="hudDay">Day 1</span><b id="hudCoins">¥0</b></div>
+        <div class="hm"><span>Day <b id="hmDay">1</b></span><span>¥<b id="hmMoney">0</b></span><span>Rent tonight ¥<b id="hmRent">0</b></span></div></div>
+
     <button class="btn tiny" id="btnExit" hidden>‹ Home</button>
     <button class="btn round" id="btnMute" aria-label="Turn sound off">♪</button>
     <div id="modeSheet" class="sheet">
@@ -1455,6 +1457,7 @@ function giveStock(k){ if(useStock() && k in P.stock) P.stock[k]++; }
    14. UI HELPERS + SCENES
    ===================================================================== */
 function toast(msg){ const t=$('#toast'); t.innerHTML=msg; t.classList.add('show'); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove('show'),1600); }
+document.addEventListener('scroll',e=>{ const t=e.target; if(t&&t.classList&&t.classList.contains('scene')&&t.id!=='book'){ t.scrollTop=0; t.scrollLeft=0; } },true);
 function showScene(id){ ['shop','kitchen','night','prep','book','over'].forEach(s=>$('#'+s).classList.toggle('off',s!==id)); G.scene=id; layoutAll(); }
 function fitStage(sec,stage,w,h){ const W=sec.clientWidth,H=sec.clientHeight; if(!W||!H) return 0; const s=Math.min(W/w,H/h); stage.style.transform=`translate(${(W-w*s)/2}px,${H-h*s}px) scale(${s})`; return s; }
 function layoutAll(){
@@ -1466,7 +1469,7 @@ const TOP_H=500, BOT_H=170;   // upper section above the scene · counter that c
 // view: false = whole shop · 'cust' = closer on the customer while ordering · 'tray' = zoom on the served bowl
 function layoutStage(view){
   if(view!==undefined) G.view=view; view=G.view;
-  const sh=$('#shop'), W=sh.clientWidth, H=sh.clientHeight; if(!W) return; let s=W/900; if((1280+BOT_H)*s>H) s=H/(1280+BOT_H);
+  const sh=$('#shop'), W=sh.clientWidth, H=sh.clientHeight; if(!W) return; sh.scrollTop=0; sh.scrollLeft=0; let s=W/900; if((1280+BOT_H)*s>H) s=H/(1280+BOT_H);
   const left=(W-900*s)/2, top=H-(TOP_H+1280+BOT_H)*s;                 // pinned to the bottom; taller phones see more of the top section
   const focus=(z,fx,fy,sx,sy)=>$('#stage').style.transform=`translate(${W*sx-fx*z}px,${H*sy-(fy+TOP_H)*z}px) scale(${z})`;
   if(view==='tray') focus(s*1.75,437,850,.5,.25);
