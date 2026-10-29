@@ -10,27 +10,35 @@ const CFG = {
   BOIL_MAX:22.4, FIRM_CENTERS:[5.6,8.8,12,15.2,18.4], FIRM_TOL:1.6, // seconds in the water for each texture (20% faster than v1)
   FLICK_KEEP:0.55, WATER_OK:0.15,                       // each flick keeps 55% of the water; ≤15% is a clean drain
   PRICE:980,
-  SCOOP_TIME:1.5,                                      // how slow Momo's ladle trip is (1 = old speed); taps while she's busy are ignored
+  SCOOP_TIME:.72,                                      // ladle trip length (1 ≈ 0.66 s); .72 lets taps ~0.5 s apart count, faster taps are ignored
 };
 
 /* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+, size = how big they look (Soso = 1)
-        profile / likes = what the Customer Book says about them ---- */
+        profile / likes = what the Customer Book says about them
+        fav = their favourite: `order` is what they ask for more often, `row` is the score line that must be perfect
+              (or `score` = minimum total), `line` is what they say when you nail it ---- */
+const FAV_CHANCE=.5;   // extra chance that a customer orders their favourite
 const CUSTOMERS = {
   soso:{name:'Soso', size:1, pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
     react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"},
-    profile:"Momo's twin sister. Cutesy, chaotic and very fluffy — loves strawberry milk, attention, and Momo.", likes:"Spice level 5"},
+    profile:"Momo's twin sister. Cutesy, chaotic and very fluffy — loves strawberry milk, attention, and Momo.", likes:"Spice level 5",
+    fav:{order:{spice:5}, row:'Spice', line:"Level 5 spice~!! Soso's favourite ♡"}},
   rang:{name:'Rang', size:.87, pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"},
-    profile:"Loud, cheerful and always STARVING. Laughs at everything — rangahahaha!", likes:"Rich broth"},
+    profile:"Loud, cheerful and always STARVING. Laughs at everything — rangahahaha!", likes:"Rich broth",
+    fav:{order:{rich:3}, row:'Richness', line:"RANGAHAHA! That rich broth hits the spot!"}},
   kew:{name:'Kew', size:.82, pat:1.5, tip:1, perfect:400, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."},
-    profile:"Quiet and serious. Treats every bowl like training, and waits longer than anyone.", likes:"Seaweed"},
+    profile:"Quiet and serious. Treats every bowl like training, and waits longer than anyone.", likes:"Seaweed",
+    fav:{order:{nori:0}, row:'Seaweed', line:"…Seaweed. The ocean, in a bowl. Thank you."}},
   bae:{name:'Bae', size:.87, pat:1.2, tip:1.2, perfect:300, hi:"Hello, one bowl of Ramen please!",
     react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"},
-    profile:"A gentle, polite pup who always says thank you. Worries a little too easily.", likes:"Soft noodles"},
+    profile:"A gentle, polite pup who always says thank you. Worries a little too easily.", likes:"Soft noodles",
+    fav:{order:{noodle:3}, row:'Noodles', line:"Soft noodles, just how I like them! Thank you!"}},
   popo:{name:'Popo', size:1.2, pat:0.7, tip:2, perfect:500, hi:"How is the shop doing?",
     react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"},
-    profile:"The MoSo sisters' big sister and the best cook in town. Chill, strict and straight to the point.", likes:"A perfect bowl"},
+    profile:"The MoSo sisters' big sister and the best cook in town. Chill, strict and straight to the point.", likes:"A perfect bowl",
+    fav:{score:95, line:"A perfect bowl. I'm proud of you, Momo."}},
 };
 
 /* ---- Customer Book ratings: a customer gets the first label whose minimum they reach ---- */

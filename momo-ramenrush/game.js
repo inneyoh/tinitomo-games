@@ -77,14 +77,16 @@ function newBowl(){ return {
 G.bowl = newBowl();
 
 const pick=a=>a[Math.floor(Math.random()*a.length)];
-function genOrder(){
+function genOrder(cust){
   if(G.firstOrder){ G.firstOrder=false; // = the reference sprite: medium · rich · 1 clove · green · chashu · spice 2 · firm · no rice · seaweed
     return {dashi:1,rich:3,garlic:4,onion:0,chashu:0,spice:2,noodle:1,rice:1,nori:0}; }
-  const r=Math.random;
-  return { dashi:pick([0,1,2]), rich:pick([0,1,2,2,3,4]),
+  const r=Math.random, fav=cust&&CUSTOMERS[cust]&&CUSTOMERS[cust].fav;
+  const o={ dashi:pick([0,1,2]), rich:pick([0,1,2,2,3,4]),
     garlic: r()<.18 ? pick([4.5,6]) : pick([0,1,2,3,3,4,5]),
     onion: r()<.2 ? 0.5 : pick([0,0,1,2]), chashu:r()<.75?0:1, spice:pick([0,0,1,2,3,4,5]),
     noodle:pick([0,1,1,2,2,3,4]), rice:r()<.35?0:1, nori:r()<.7?0:1 };
+  if(fav && fav.order && r()<FAV_CHANCE) Object.assign(o,fav.order);   // their favourite, more often
+  return o;
 }
 function want(p){ return { dashi:p.dashi, rich:p.rich, garlic:GARLIC_STEPS.indexOf(p.garlic),
   onion:{0:'green',1:'white',2:'none',0.5:'both'}[p.onion], chashu:p.chashu===0, spice:p.spice,
@@ -1051,7 +1053,7 @@ function nextCustomer(){
   if(!G.custQueue.length) G.custQueue=Object.keys(CUSTOMERS).sort(()=>Math.random()-.5);
   if(G.firstOrder) G.custQueue=['soso',...G.custQueue.filter(c=>c!=='soso')];
   const id=G.custQueue.shift(); G.ticketNo++;
-  G.order={cust:id,no:G.ticketNo,pos:genOrder()}; G.bowl=newBowl(); G.result=null; K.dirty=true; G.pat=100;
+  G.order={cust:id,no:G.ticketNo,pos:genOrder(id)}; G.bowl=newBowl(); G.result=null; K.dirty=true; G.pat=100;
   $('#shopBowl').classList.add('hidden-o'); $('#shopRice').classList.add('hidden-o');
   const c=$('#cust'); c.classList.add('away'); c.classList.remove('impatient');
   later(()=>{ placeCustomer(id); c.innerHTML=custHTML(id,'idle'); c.classList.remove('away','eat');
@@ -1071,6 +1073,11 @@ function patienceTick(dt){
   if(im && im.dataset.upset!==(up?'1':'0')){ im.src=up?CUST_UPSET[G.order.cust]:CUST_IMG[G.order.cust]; im.dataset.upset=up?'1':'0'; }
   if(G.pat<=0) walkout();
 }
+/* did the bowl nail this customer's favourite? (they must have ordered it, and the bowl isn't a C) */
+function favHit(id,r){ const f=CUSTOMERS[id].fav; if(!f || r.grade==='C') return false;
+  if(f.score) return r.total>=f.score;
+  const p=G.order.pos, asked=Object.keys(f.order||{}).every(k=>p[k]===f.order[k]), row=r.rows.find(x=>x.label===f.row);
+  return asked && !!row && row.pts>=row.max; }
 function walkout(){
   G.waiting=false; D.walk++; const id=G.order.cust;
   if(G.scene!=='shop') showScene('shop');
@@ -1130,7 +1137,7 @@ function eat(){
     ['Slurp!','Slurrrp…','Fuu fuu'].forEach((w,i)=>later(()=>{ slurpText(260+i*130,420); blip(300+i*60,.1,'sine',.05); },i*500));
   },800);
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
-  later(()=>{ c.classList.remove('eat'); c.innerHTML=custHTML(id, r.grade==='C'?'sad':'happy', r.total<UPSET_SCORE); say(CUSTOMERS[id].react[r.grade]);
+  later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, r.grade==='C'?'sad':'happy', r.total<UPSET_SCORE); say(fv?CUSTOMERS[id].fav.line:CUSTOMERS[id].react[r.grade]); if(fv) blip(1180,.12,'sine');
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus()));
     const C=CUSTOMERS[id], tip = r.total>=55 ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip) : 0, bonus = r.total>=95?C.perfect:0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }

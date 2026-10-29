@@ -11,3 +11,5 @@ Portrait HTML ramen game starring Momo. Open `index.html` (GitHub Pages: `/momo-
 - `manifest.webmanifest` for "Add to Home Screen".
 
 Opening `index.html` straight from your computer (file://) may block the sounds; use GitHub Pages or a local server (`python3 -m http.server`).
+
+After editing `style.css`, `config.js` or `game.js`, bump the `?v=` number on their tags in `index.html` (any new number) so phones load the new version straight away. Saves are kept in the browser (localStorage) and are not affected.
