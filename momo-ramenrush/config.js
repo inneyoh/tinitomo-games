@@ -31,11 +31,11 @@ const CUSTOMERS = {
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."},
     profile:"Quiet and polite. Treats every bowl like training. Patience is a virtue.", likes:"Seaweed",
     fav:{order:{nori:0}, row:'Seaweed', line:"…Seaweed. The ocean, in a bowl. Thank you."}},
-  bae:{name:'Bae', size:.87, pat:1.2, tip:1.2, perfect:300, hi:"Hello, one bowl of Ramen please!",
+  bae:{name:'Bae', size:.87, pat:1.2, tip:1.5, perfect:300, hi:"Hello, one bowl of Ramen please!",
     react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"},
     profile:"Gentle, graceful and polite, but worries a little too easily.", likes:"Soft noodles",
     fav:{order:{noodle:3}, row:'Noodles', line:"Soft noodles, just how I like them! Thank you!"}},
-  popo:{name:'Popo', size:1.2, pat:0.7, tip:2, perfect:500, hi:"How is the shop doing?",
+  popo:{name:'Popo', size:1.1, pat:0.75, tip:2, perfect:500, hi:"How is the shop doing?",
     react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"},
     profile:"The actual owner of the store and the (2nd) best cook in town. Loves her ribbons.", likes:"A perfect bowl",
     fav:{score:95, line:"A perfect bowl. I'm proud of you, Momo."}},
@@ -44,7 +44,7 @@ const CUSTOMERS = {
 /* ---- Customer Book ratings: a customer gets the first label whose minimum they reach ---- */
 const BOOK_RATINGS={
   pat:   [[1.5,'Very good'],[1.15,'Good'],[1,'Normal'],[.75,'Bad'],[0,'Very bad']],
-  tip:   [[2.3,'Very good'],[1.6,'Good'],[1,'Normal'],[.7,'Bad'],[0,'Very bad']],
+  tip:   [[2.3,'Very good'],[1.5,'Good'],[1,'Normal'],[.7,'Bad'],[0,'Very bad']],
   perfect:[[700,'Very good'],[371,'Good'],[0,'Normal']],
 };
 
