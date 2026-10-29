@@ -100,11 +100,14 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 /* soft shadow under Momo's feet on the floor (home screen) */
 #homeMomo::before{content:"";position:absolute;left:24%;right:18%;bottom:-8px;height:26px;border-radius:50%;background:radial-gradient(closest-side,rgba(40,15,5,.35),rgba(40,15,5,0))}
 /* money plaque: pinned to the top of the phone screen, not to the signboard */
-#boardHud{position:absolute;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));display:flex;justify-content:center;z-index:6;pointer-events:none;max-width:calc(100% - 120px)}
+#boardHud{position:absolute;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top,0px));transition:top .55s cubic-bezier(.3,1.3,.5,1),transform .55s;display:flex;justify-content:center;z-index:6;pointer-events:none;max-width:calc(100% - 120px)}
 #boardHud>div{display:flex;gap:10px;align-items:baseline;background:rgba(43,24,12,.9);color:#f7e7c9;border:2.5px solid #241309;border-radius:16px;padding:5px 14px 6px;font-weight:600;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 5px 0 rgba(0,0,0,.25)}
 #boardHud b{color:#ffd257}
 #boardHud #hudDay{color:#ffcf8a}
 #shop.home #boardHud .svc{display:none}
+#shop.home #boardHud{transform:translate(-50%,-50%);width:max-content}
+#shop.home #boardHud .hm{display:grid;grid-template-columns:auto auto;justify-content:center;column-gap:8px;row-gap:0;font-size:11px;padding:2px 10px 3px;line-height:1.25;border-radius:10px;border-width:1.5px;background:rgba(255,236,190,.07);border-color:rgba(232,196,119,.4);box-shadow:none;color:#e9dcc2}
+#shop.home #boardHud .hm span:last-child{grid-column:1/-1;text-align:center;font-size:9.5px;opacity:.85}
 #shop:not(.home) #boardHud .hm{display:none}
 #cust{position:absolute;left:270px;top:500px;width:360px;height:394px;transition:transform .7s cubic-bezier(.3,1.4,.5,1), opacity .4s;}
 #cust.away{transform:translateX(-640px);opacity:0}
@@ -251,7 +254,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 .hot:active::before{opacity:1;animation:none}
 .hot span{position:absolute;white-space:nowrap;pointer-events:none}
 /* gold lettering on the black tray */
-#hotTray span{left:50%;top:50%;transform:translate(-50%,-50%);font-weight:700;font-size:42px;letter-spacing:.16em;color:#e8c477;text-shadow:0 2px 0 #000,0 0 16px rgba(232,196,119,.35)}
+#hotTray span{left:50%;top:35%;transform:translate(-50%,-50%);font-weight:700;font-size:42px;letter-spacing:.16em;color:#e8c477;text-shadow:0 2px 0 #000,0 0 16px rgba(232,196,119,.35)}
 /* wooden tag tied round the chopstick holder */
 #hotChop span{left:-6px;top:132px;transform:rotate(-5deg);background:linear-gradient(#f3d6a6,#d9ad72);border:3px solid var(--ink);border-radius:8px;padding:3px 12px 5px;font-weight:700;font-size:23px;color:#3a2013;box-shadow:0 4px 0 rgba(58,32,19,.25)}
 #hotChop span::before{content:"";position:absolute;left:18px;top:-12px;width:2.5px;height:13px;background:var(--ink);transform:rotate(8deg)}
@@ -899,45 +902,41 @@ function drawShopBack(){
 }
 /* Momo's side of the counter: near lip, open storage underneath, then the floor she walks on */
 function drawUnderCounter(c){
-  const LIP=1004, FACE=1030, KICK=1296, FLOOR=1312;
+  const LIP=1004, FACE=1030, KICK=1176, FLOOR=1188, BASE=KICK-12;
   // floor — warm wooden boards with a little perspective
-  c.fillStyle=vg(c,FLOOR,1450,'#8a5a34','#a87446'); c.fillRect(0,FLOOR,900,138);
+  c.fillStyle=vg(c,FLOOR,1450,'#8a5a34','#a87446'); c.fillRect(0,FLOOR,900,1450-FLOOR);
+  const ys=[FLOOR,1212,1244,1286,1340,1410,1450];
   c.strokeStyle='rgba(60,32,14,.35)'; c.lineWidth=2;
-  [1336,1366,1402,1446].forEach(y=>{ c.beginPath(); c.moveTo(0,y); c.lineTo(900,y); c.stroke(); });
-  const R=mulberry(31); for(let row=0;row<4;row++){ const y0=[FLOOR,1336,1366,1402][row], y1=[1336,1366,1402,1450][row];
-    for(let x=(row%2)*90; x<900; x+=180+R()*40){ c.beginPath(); c.moveTo(x,y0); c.lineTo(x+(x-450)*.04,y1); c.stroke(); } }
-  c.save(); c.globalAlpha=.12; c.fillStyle='#fff'; c.beginPath(); c.moveTo(80,1450); c.lineTo(240,FLOOR); c.lineTo(330,FLOOR); c.lineTo(200,1450); c.fill(); c.restore();
+  ys.slice(1,-1).forEach(y=>{ c.beginPath(); c.moveTo(0,y); c.lineTo(900,y); c.stroke(); });
+  const R=mulberry(31); for(let row=0;row<ys.length-1;row++){ const y0=ys[row], y1=ys[row+1];
+    for(let x=(row%2)*90; x<900; x+=180+R()*40){ c.beginPath(); c.moveTo(x,y0); c.lineTo(x+(x-450)*.04*(row+1),y1); c.stroke(); } }
+  c.save(); c.globalAlpha=.12; c.fillStyle='#fff'; c.beginPath(); c.moveTo(60,1450); c.lineTo(240,FLOOR); c.lineTo(330,FLOOR); c.lineTo(190,1450); c.fill(); c.restore();
   c.fillStyle=vg(c,FLOOR,FLOOR+40,'rgba(30,12,4,.45)','rgba(30,12,4,0)'); c.fillRect(0,FLOOR,900,40);
-  // counter front: dark wood frame with three open bays
+  // counter front: dark wood frame with three shallow open bays
   c.fillStyle=vg(c,FACE,KICK,'#5e3c22','#43291a'); c.fillRect(0,FACE,900,KICK-FACE);
-  const bays=[[24,280],[316,268],[608,268]], shelfY=1166;
-  bays.forEach(([x,w])=>{ rr(c,x,FACE+18,w,KICK-FACE-30,8); fs(c,vg(c,FACE,KICK,'#2c1a0f','#3a2416'),3,'#1e1209');
-    c.fillStyle=vg(c,FACE+18,FACE+60,'rgba(0,0,0,.35)','rgba(0,0,0,0)'); c.fillRect(x+3,FACE+21,w-6,40);
-    rr(c,x+2,shelfY,w-4,12,3); fs(c,vg(c,shelfY,shelfY+12,'#7a4f2a','#563519'),2.5,'#1e1209'); });
+  const bays=[[24,280],[316,268],[608,268]];
+  bays.forEach(([x,w])=>{ rr(c,x,FACE+14,w,KICK-FACE-22,8); fs(c,vg(c,FACE,KICK,'#2c1a0f','#3a2416'),3,'#1e1209');
+    c.fillStyle=vg(c,FACE+14,FACE+50,'rgba(0,0,0,.35)','rgba(0,0,0,0)'); c.fillRect(x+3,FACE+17,w-6,34); });
   [0,300,592,884].forEach(x=>{ c.fillStyle=hg(c,x,x+16,'#6b4628','#4a2e1c'); c.fillRect(x,FACE,16,KICK-FACE); });
-  // ---- bay 1: stacked bowls on top, a crate of soda bottles below
-  for(let k=0;k<3;k++){ miniBowl(c,74+k*80,shelfY,70); miniBowl(c,74+k*80,shelfY-18,70); miniBowl(c,74+k*80,shelfY-36,70); }
-  const crate=(x,y,w,col,dark,cap)=>{ for(let k=0;k<4;k++){ const bx=x+18+k*(w-36)/3; rr(c,bx-9,y-74,18,44,6); fs(c,'rgba(170,220,230,.85)',2,'#1e3a40'); rr(c,bx-5,y-86,10,14,3); fs(c,'rgba(170,220,230,.85)',2,'#1e3a40'); ell(c,bx,y-88,6,3,cap,1.5,'#1e1209'); }
+  // ---- bay 1: stacks of bowls + a short crate of soda bottles
+  for(let k=0;k<2;k++) for(let h=0;h<4;h++) miniBowl(c,70+k*78,BASE-h*18,70);
+  const crate=(x,y,w,col,dark,cap,n)=>{ for(let k=0;k<n;k++){ const bx=x+18+k*(w-36)/(n-1); rr(c,bx-9,y-74,18,44,6); fs(c,'rgba(170,220,230,.85)',2,'#1e3a40'); rr(c,bx-5,y-86,10,14,3); fs(c,'rgba(170,220,230,.85)',2,'#1e3a40'); ell(c,bx,y-88,6,3,cap,1.5,'#1e1209'); }
     rr(c,x,y-50,w,50,6); fs(c,vg(c,y-50,y,col,dark),3,'#1e1209');
-    for(let k=1;k<4;k++){ rr(c,x+k*w/4-12,y-40,24,12,5); fs(c,'rgba(0,0,0,.35)',0); } };
-  crate(44,KICK-14,240,'#f2c14e','#c9962a','#e0463a');
-  // ---- bay 2: juice / oolong cartons on top, noodle box + rice sack below
+    for(let k=1;k<n;k++){ rr(c,x+k*w/n-10,y-40,20,12,5); fs(c,'rgba(0,0,0,.35)',0); } };
+  crate(196,BASE,96,'#f2c14e','#c9962a','#e0463a',2);
+  // ---- bay 2: noodle box + rice sack
+  rr(c,330,BASE-80,130,80,6); fs(c,vg(c,BASE-80,BASE,'#d9a86c','#b07a43'),3,'#1e1209'); c.strokeStyle='rgba(60,32,14,.5)'; c.lineWidth=2; c.beginPath(); c.moveTo(330,BASE-60); c.lineTo(460,BASE-60); c.stroke();
+  txt(c,'NOODLES',395,BASE-34,15,'#4a2412',700); txt(c,'fresh daily',395,BASE-16,10,'#6b4423',600);
+  const sx=476; c.beginPath(); c.moveTo(sx,BASE); c.quadraticCurveTo(sx-10,BASE-58,sx+10,BASE-92); c.lineTo(sx+70,BASE-96); c.quadraticCurveTo(sx+94,BASE-58,sx+84,BASE); c.closePath(); fs(c,vg(c,BASE-96,BASE,'#f6efd9','#ddd0b2'),3,'#1e1209');
+  rr(c,sx+8,BASE-100,60,12,5); fs(c,'#c9a56e',2,'#1e1209'); txt(c,'米',sx+42,BASE-50,26,'#b0302a',400,'center',0,'#fff',BRUSH); txt(c,'RICE',sx+42,BASE-22,10,'#6b4423',700);
+  // ---- bay 3: juice cartons, soy bottle and the tare jug
   const carton=(x,y,col,lab)=>{ c.beginPath(); c.moveTo(x-22,y); c.lineTo(x-22,y-66); c.lineTo(x-12,y-84); c.lineTo(x+12,y-84); c.lineTo(x+22,y-66); c.lineTo(x+22,y); c.closePath(); fs(c,vg(c,y-84,y,'#fffaf0','#ece2cf'),2.5,'#1e1209');
     rr(c,x-18,y-58,36,34,4); fs(c,col,0); txt(c,lab,x,y-41,10,'#fff',700); c.fillStyle='rgba(0,0,0,.12)'; c.fillRect(x+8,y-66,14,66); };
-  carton(352,shelfY,'#e8873a','ORANGE'); carton(404,shelfY,'#6aa84f','OOLONG'); carton(456,shelfY,'#4f86c6','MILK'); carton(508,shelfY,'#e8873a','ORANGE'); carton(556,shelfY,'#c8553d','PEACH');
-  rr(c,332,KICK-92,130,80,6); fs(c,vg(c,KICK-92,KICK-12,'#d9a86c','#b07a43'),3,'#1e1209'); c.strokeStyle='rgba(60,32,14,.5)'; c.lineWidth=2; c.beginPath(); c.moveTo(332,KICK-72); c.lineTo(462,KICK-72); c.stroke();
-  txt(c,'NOODLES',397,KICK-46,15,'#4a2412',700); txt(c,'fresh daily',397,KICK-28,10,'#6b4423',600);
-  c.beginPath(); c.moveTo(482,KICK-12); c.quadraticCurveTo(470,KICK-70,492,KICK-104); c.lineTo(552,KICK-108); c.quadraticCurveTo(578,KICK-70,566,KICK-12); c.closePath(); fs(c,vg(c,KICK-108,KICK-12,'#f6efd9','#ddd0b2'),3,'#1e1209');
-  rr(c,488,KICK-112,60,12,5); fs(c,'#c9a56e',2,'#1e1209'); txt(c,'米',524,KICK-58,26,'#b0302a',400,'center',0,'#fff',BRUSH); txt(c,'RICE',524,KICK-30,10,'#6b4423',700);
-  // ---- bay 3: big soy bottles + tare jug on top, a crate of glass ramune-style bottles below
-  const big=(x,y,col)=>{ c.beginPath(); c.moveTo(x-18,y); c.lineTo(x-18,y-70); c.quadraticCurveTo(x-18,y-88,x-7,y-94); c.lineTo(x-7,y-112); c.lineTo(x+7,y-112); c.lineTo(x+7,y-94); c.quadraticCurveTo(x+18,y-88,x+18,y-70); c.lineTo(x+18,y); c.closePath(); fs(c,vg(c,y-112,y,shade(col,.2),col),2.5,'#1e1209');
-    rr(c,x-14,y-62,28,32,3); fs(c,'#f6efd9',2,'#1e1209'); txt(c,'醤油',x,y-46,11,'#3a2013',400,'center',0,'#fff',BRUSH); rr(c,x-8,y-120,16,10,3); fs(c,'#e3483c',2,'#1e1209'); };
-  big(646,shelfY,'#3c1a0b'); big(690,shelfY,'#3c1a0b'); big(734,shelfY,'#5a2a12');
-  rr(c,768,shelfY-74,92,74,14); fs(c,vg(c,shelfY-74,shelfY,'#f4e3c4','#d9bd93'),3,'#1e1209'); rr(c,840,shelfY-60,26,30,10); fs(c,null,4,'#1e1209'); rr(c,780,shelfY-86,40,14,4); fs(c,'#7b4b2a',2.5,'#1e1209'); txt(c,'TARE',812,shelfY-38,13,OUT,700);
-  crate(626,KICK-14,240,'#5aa9d6','#3a7fae','#7bd36a');
+  carton(644,BASE,'#e8873a','ORANGE'); carton(694,BASE,'#6aa84f','OOLONG'); carton(744,BASE,'#c8553d','PEACH');
+  rr(c,776,BASE-74,92,74,14); fs(c,vg(c,BASE-74,BASE,'#f4e3c4','#d9bd93'),3,'#1e1209'); rr(c,848,BASE-60,26,30,10); fs(c,null,4,'#1e1209'); rr(c,788,BASE-86,40,14,4); fs(c,'#7b4b2a',2.5,'#1e1209'); txt(c,'TARE',820,BASE-38,13,OUT,700);
   // kick plate + shadow cast by the lip
   c.fillStyle='#2a180d'; c.fillRect(0,KICK,900,FLOOR-KICK);
-  c.fillStyle=vg(c,FACE,FACE+34,'rgba(0,0,0,.45)','rgba(0,0,0,0)'); c.fillRect(0,FACE,900,34);
+  c.fillStyle=vg(c,FACE,FACE+30,'rgba(0,0,0,.45)','rgba(0,0,0,0)'); c.fillRect(0,FACE,900,30);
   // near lip of the counter (wood), between the red top and the storage
   c.fillStyle=vg(c,LIP,FACE,'#e7c28f','#a8743f'); c.fillRect(0,LIP,900,FACE-LIP);
   c.strokeStyle='#24140a'; c.lineWidth=3; c.beginPath(); c.moveTo(0,LIP); c.lineTo(900,LIP); c.moveTo(0,FACE); c.lineTo(900,FACE); c.stroke();
@@ -1535,6 +1534,7 @@ function layoutStage(view){
   if(view==='tray') focus(s*1.75,437,850,.5,.25);
   else if(view==='cust') focus(s*1.12,520,520,.5,.3);
   else $('#stage').style.transform=`translate(${left}px,${top}px) scale(${s})`;
+  $('#boardHud').style.top = sh.classList.contains('home') ? (top+(TOP_H+922)*s)+'px' : '';   // on the tray at home, top of the screen in service
 }
 /* Pudding Panic flip: hop + stretch, squash through scaleX 0 (swap the picture there), land with a squish */
 function ppFlip(el, mid, dur=650){
