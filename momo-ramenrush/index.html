@@ -105,10 +105,14 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #boardHud b{color:#ffd257}
 #boardHud #hudDay{color:#ffcf8a}
 #shop.home #boardHud .svc{display:none}
-#shop.home #boardHud{transform:translate(-50%,-50%);width:max-content}
-#shop.home #boardHud .hm{display:grid;grid-template-columns:auto auto;justify-content:center;column-gap:8px;row-gap:0;font-size:11px;padding:2px 10px 3px;line-height:1.25;border-radius:10px;border-width:1.5px;background:rgba(255,236,190,.07);border-color:rgba(232,196,119,.4);box-shadow:none;color:#e9dcc2}
-#shop.home #boardHud .hm span:last-child{grid-column:1/-1;text-align:center;font-size:9.5px;opacity:.85}
-#shop:not(.home) #boardHud .hm{display:none}
+#shop.home #boardHud{transform:translate(-50%,-50%);width:max-content;visibility:hidden}
+#hotTray .hm{position:absolute;left:50%;top:69%;transform:translate(-50%,-50%);display:grid;grid-template-columns:auto auto;justify-content:center;column-gap:18px;white-space:nowrap;
+  font-weight:600;font-size:25px;line-height:1.25;color:#e9dcc2;padding:4px 22px 7px;border-radius:22px;border:3px solid rgba(232,196,119,.4);background:rgba(255,236,190,.07);font-variant-numeric:tabular-nums;pointer-events:none}
+#hotTray .hm span{position:static}
+#hotTray .hm b{color:#ffd257}
+#hotTray .hm span:last-child{grid-column:1/-1;text-align:center;font-size:22px;opacity:.85}
+#homeMomo,#homeMomo *{pointer-events:none}
+#homeMomo{z-index:4}
 #cust{position:absolute;left:270px;top:500px;width:360px;height:394px;transition:transform .7s cubic-bezier(.3,1.4,.5,1), opacity .4s;}
 #cust.away{transform:translateX(-640px);opacity:0}
 #cust .csprite{position:absolute;left:0;top:0;width:360px;max-width:none;transform-origin:50% 100%;will-change:transform;backface-visibility:hidden;animation:breath 4.6s ease-in-out infinite}
@@ -254,7 +258,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 .hot:active::before{opacity:1;animation:none}
 .hot span{position:absolute;white-space:nowrap;pointer-events:none}
 /* gold lettering on the black tray */
-#hotTray span{left:50%;top:35%;transform:translate(-50%,-50%);font-weight:700;font-size:42px;letter-spacing:.16em;color:#e8c477;text-shadow:0 2px 0 #000,0 0 16px rgba(232,196,119,.35)}
+#hotTray>span{left:50%;top:35%;transform:translate(-50%,-50%);font-weight:700;font-size:42px;letter-spacing:.16em;color:#e8c477;text-shadow:0 2px 0 #000,0 0 16px rgba(232,196,119,.35)}
 /* wooden tag tied round the chopstick holder */
 #hotChop span{left:-6px;top:132px;transform:rotate(-5deg);background:linear-gradient(#f3d6a6,#d9ad72);border:3px solid var(--ink);border-radius:8px;padding:3px 12px 5px;font-weight:700;font-size:23px;color:#3a2013;box-shadow:0 4px 0 rgba(58,32,19,.25)}
 #hotChop span::before{content:"";position:absolute;left:18px;top:-12px;width:2.5px;height:13px;background:var(--ink);transform:rotate(8deg)}
@@ -448,15 +452,14 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
         <canvas class="carry" width="512" height="512"></canvas>
       </div></div>
       <div class="hot" id="hotChop" style="left:44px;top:500px;width:132px;height:312px"><span>Ramen Book</span></div>
-      <div class="hot" id="hotTray" style="left:232px;top:772px;width:410px;height:206px"><span>OPEN SHOP</span></div>
+      <div class="hot" id="hotTray" style="left:232px;top:772px;width:410px;height:206px"><span>OPEN SHOP</span><div class="hm"><span>Day <b id="hmDay">1</b></span><span>¥<b id="hmMoney">0</b></span><span>Rent tonight ¥<b id="hmRent">0</b></span></div></div>
       <div class="hot" id="hotDrink" style="left:680px;top:684px;width:130px;height:132px"><span>Tutorial</span></div>
       <div id="coinPop"><span class="coin">¥</span><div><b id="cpAmt">+0</b><small id="cpTip"></small></div></div>
       <div id="momoBubble" class="bubble off"></div>
       </div>
     </div>
     <div id="vignette"></div>
-    <div id="boardHud"><div class="svc"><span id="hudDay">Day 1</span><b id="hudCoins">¥0</b></div>
-        <div class="hm"><span>Day <b id="hmDay">1</b></span><span>¥<b id="hmMoney">0</b></span><span>Rent tonight ¥<b id="hmRent">0</b></span></div></div>
+    <div id="boardHud"><div class="svc"><span id="hudDay">Day 1</span><b id="hudCoins">¥0</b></div></div>
 
     <button class="btn round" id="btnMute" aria-label="Turn sound off">♪</button>
     <div id="modeSheet" class="sheet">
