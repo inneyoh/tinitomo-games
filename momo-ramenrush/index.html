@@ -95,12 +95,13 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #stage canvas.layer{position:absolute;left:0;top:0;width:900px;height:1280px;}
 #cust{position:absolute;left:270px;top:500px;width:360px;height:394px;transition:transform .7s cubic-bezier(.3,1.4,.5,1), opacity .4s;}
 #cust.away{transform:translateX(-640px);opacity:0}
-#cust .csprite{position:absolute;left:0;top:0;width:360px;max-width:none;transform-origin:50% 100%;animation:sway 3.2s ease-in-out infinite}
-#cust.eat .csprite{animation:chew .35s ease-in-out infinite}
+#cust .csprite{position:absolute;left:0;top:0;width:360px;max-width:none;transform-origin:50% 100%;will-change:transform;backface-visibility:hidden;animation:breath 4.6s ease-in-out infinite}
+#cust.eat .csprite{animation:chew 1.1s ease-in-out infinite}
 #cust .cfx{position:absolute;width:84px;max-width:none;animation:pop .5s cubic-bezier(.3,1.8,.5,1) both}
 @keyframes pop{from{transform:scale(0)}}
-@keyframes chew{50%{transform:translateY(8px) scaleY(.97)}}
+@keyframes chew{0%,100%{transform:translate3d(0,0,0) scale(1,1)}50%{transform:translate3d(0,6px,0) scale(1.01,.985)}}
 @keyframes sway{50%{transform:rotate(1.2deg) translateY(-3px)}}
+@keyframes breath{0%,100%{transform:translate3d(0,0,0) scale(1,1)}50%{transform:translate3d(0,0,0) scale(1.008,1.018)}}
 .bubble{position:absolute;background:#fff;border:5px solid var(--ink);border-radius:34px;padding:18px 26px;font-size:34px;font-weight:600;
   max-width:330px;line-height:1.25;transform-origin:0 100%;transition:transform .3s cubic-bezier(.3,1.6,.5,1),opacity .2s;box-shadow:0 8px 0 rgba(91,58,46,.18)}
 .bubble.off{transform:scale(.4);opacity:0}
@@ -111,7 +112,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 .hidden-o{opacity:0}
 .slurp{position:absolute;font-weight:700;color:var(--ink);font-size:46px;animation:rise 1.2s ease-out forwards;pointer-events:none;-webkit-text-stroke:2px #fff;paint-order:stroke}
 @keyframes rise{from{opacity:0;transform:translateY(20px)}20%{opacity:1}to{opacity:0;transform:translateY(-80px)}}
-#shopMomo{position:absolute;left:380px;top:985px;transition:top .35s cubic-bezier(.3,1.5,.5,1);width:440px;height:475px;transform-origin:50% 100%;animation:hopS 1.6s ease-in-out infinite}
+#shopMomo{position:absolute;left:380px;top:985px;transition:top .35s cubic-bezier(.3,1.5,.5,1);width:440px;height:475px;transform-origin:50% 100%;will-change:transform;animation:hopS 1.6s ease-in-out infinite}
 #shopMomo img{position:absolute;max-width:none}
 #shopMomo .body{left:0;top:0;width:100%}
 @keyframes hopS{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
@@ -205,11 +206,12 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #shop:not(.home) #seats,#shop:not(.home) #homeMomo,#shop:not(.home) #homeMenu{display:none}
 #shop.home #signTop .board,#shop.home #signTop .hud{display:none}
 .seat{position:absolute;width:250px}
-.seat .csprite{position:absolute;left:0;width:250px;max-width:none;transform-origin:50% 100%;animation:sway 3.4s ease-in-out infinite}
-.seat.eat .csprite{animation:chew .4s ease-in-out infinite}
+.seat .csprite{position:absolute;left:0;width:250px;max-width:none;transform-origin:50% 100%;will-change:transform;backface-visibility:hidden;animation:breath 4.8s ease-in-out infinite}
+.seat:nth-child(2) .csprite{animation-delay:-1.6s}.seat:nth-child(3) .csprite{animation-delay:-3.1s}
+.seat.eat .csprite{animation:chew 1.2s ease-in-out infinite}
 .seat canvas{position:absolute;width:160px;height:160px}
 #homeMenu{position:absolute;inset:0;pointer-events:none;z-index:4}
-#homeMenu .logoImg{position:absolute;left:50%;top:calc(8px + env(safe-area-inset-top,0px));height:min(118px,15vh);transform:translateX(-50%);filter:drop-shadow(0 4px 0 rgba(0,0,0,.35));animation:bobL 3.4s ease-in-out infinite}
+#homeMenu .logoImg{position:absolute;left:50%;top:calc(8px + env(safe-area-inset-top,0px));height:min(118px,15vh);transform:translateX(-50%);filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
 @keyframes bobL{50%{transform:translateX(-50%) translateY(-4px)}}
 #homeMenu .logo{display:none;position:absolute;left:0;right:0;top:calc(12px + env(safe-area-inset-top,0px));text-align:center;color:#fff3dc;font-weight:700;
   font-size:clamp(30px,9.5vw,42px);line-height:.95;text-shadow:0 3px 0 #2a160b,0 0 18px rgba(255,170,90,.35);animation:bobT 3.4s ease-in-out infinite}
