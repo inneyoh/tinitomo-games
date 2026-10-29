@@ -952,22 +952,27 @@ function setArms(root,deg){ root.querySelector('.hL').style.transform=`rotate(${
 /* =====================================================================
    15. HOME SCREEN — customers at the counter, Momo serving on a loop
    ===================================================================== */
-const SEAT_X=[205,450,695], SEAT_CUST=['soso','kew','rang'];
+const SEAT_X=[205,450,695];   // 3 of the customers, in a random order, every time the home screen opens
 const HOME={built:false, seats:[], m:{x:1080,state:'kitchen',t:.6,target:0,turnCD:2.5,carry:false,ph:0}};
 function bowlFromPack(o){ return {tare:o.dashi+1, soup:CFG.SOUP_TARGET, fat:o.richness, garlic:o.garlic, spice:o.spice,
   green:o.onion===0||o.onion===3, white:o.onion===1||o.onion===3, chashu:!!o.chashu, nori:!!o.seaweed, rice:false,
   nood:{state:'bowl',time:CFG.FIRM_CENTERS[o.texture],water:0}, noodlesBeforeSoup:false, eaten:false}; }
 function randomBowl(){ const r=a=>a[Math.floor(Math.random()*a.length)];
   return bowlFromPack({dashi:r([0,1,2]),richness:r([0,1,2,3,4]),garlic:r([0,2,3,4]),onion:r([0,0,1,3]),chashu:r([1,1,0]),spice:r([0,1,2,3]),texture:r([1,2]),seaweed:r([1,1,0])}); }
+function seatCustomers(){
+  const ids=shuffled(Object.keys(CUSTOMERS)).slice(0,SEAT_X.length);
+  HOME.seats.forEach((st,i)=>{ const id=ids[i], h=CUST_H[id]*250/360, top=752-h*.6, im=st.el.querySelector('.csprite');
+    im.src=CUST_IMG[id]; im.alt=CUSTOMERS[id].name; st.el.style.top=top+'px'; st.cv.style.top=(800-152-top)+'px'; });
+}
 function buildHome(){
-  if(HOME.built) return; HOME.built=true; const box=$('#seats');
-  SEAT_X.forEach((x,i)=>{ const id=SEAT_CUST[i], h=CUST_H[id]*250/360, top=752-h*.6;
-    const el=document.createElement('div'); el.className='seat'; el.style.left=(x-125)+'px'; el.style.top=top+'px';
-    el.innerHTML=`<img class="csprite" src="${CUST_IMG[id]}" alt="${CUSTOMERS[id].name}"><canvas width="512" height="512"></canvas>`;
-    const cv=el.querySelector('canvas'); cv.style.left='45px'; cv.style.top=(800-152-top)+'px';
+  if(HOME.built){ seatCustomers(); return; } HOME.built=true; const box=$('#seats');
+  SEAT_X.forEach((x,i)=>{
+    const el=document.createElement('div'); el.className='seat'; el.style.left=(x-125)+'px';
+    el.innerHTML=`<img class="csprite" alt=""><canvas width="512" height="512"></canvas>`;
+    const cv=el.querySelector('canvas'); cv.style.left='45px';
     box.appendChild(el); const b=randomBowl(); b.eaten=i!==1;
     HOME.seats.push({el,cv,bowl:b,state:i===1?'eating':'done',t:6}); });
-  HOME.seats.forEach(s=>drawRamen(s.cv,s.bowl));
+  seatCustomers(); HOME.seats.forEach(s=>drawRamen(s.cv,s.bowl));
   const hm=$('#homeMomo'); placeArms(hm,340,367,ARM_TORSO); HOME.m.arms='torso'; setArms(hm,28);
   domArms($('#shopMomo'),440,475,'torso',26);
 }
