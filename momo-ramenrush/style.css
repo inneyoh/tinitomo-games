@@ -265,6 +265,8 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #btnMute.off{opacity:.6}
 #shop:not(.home) #btnMute{display:none}
 #btnPause{position:absolute;right:max(10px,env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));z-index:9;width:38px;height:38px;font-size:14px;letter-spacing:-1px}
+#btnPause .pause-bars{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;height:100%}
+#btnPause .pause-bars span{display:block;width:5px;height:16px;border-radius:1px;background:currentColor;flex:none}
 #pause{position:absolute;inset:0;z-index:95;background:rgba(25,12,5,.6);display:flex;align-items:center;justify-content:center;padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
 #pause .panel{align-items:stretch;text-align:center}
 #pause .momoNight{width:120px}
