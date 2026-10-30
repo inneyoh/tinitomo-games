@@ -639,8 +639,12 @@ const STATION_ART=[
     c.save(); c.translate(200,0);
     shadow(c,100,470,74,6);
     rr(c,30,384,140,82,32); fs(c,vg(c,384,466,'#fff6ea','#efd6bf'),3);
+    const ro=K.rice? Math.sin(Math.min(1,K.rice.T/RICE_T)*Math.PI) : 0;   // 0 shut → 1 open → 0 shut
+    if(ro>0){ ell(c,100,392,64,14,'#fbf7ee',2.5); ell(c,100,394,52,9,'#ffffff',0); }   // rice inside
+    c.save(); c.translate(168,390); c.rotate(-ro*.85); c.translate(-168,-390);
     c.beginPath(); c.ellipse(100,390,70,28,0,Math.PI,0); c.closePath(); fs(c,vg(c,362,392,'#ffd3d6','#f3a7ae'),3);
-    rr(c,86,356,28,10,5); fs(c,'#e6838e',2.5);
+    rr(c,86,356,28,10,5); fs(c,'#e6838e',2.5); c.restore();
+    if(ro>.2){ c.save(); for(let k=0;k<4;k++){ c.globalAlpha=ro*.55; ell(c,72+k*18,366-ro*30-(k%2)*12,12+ro*6,9+ro*4,'#fff'); } c.restore(); }
     rr(c,66,418,68,26,8); fs(c,'#5f7c7a',2.5); txt(c,'RICE',100,431,12,'#e9fff5',700);
     shine(c,42,398,8,48,4,.5);
     c.save(); for(let k=0;k<2;k++){ const ph=(t*.6+k*.5)%1; c.globalAlpha=(1-ph)*.5; ell(c,100+Math.sin(t*2+k)*5,350-ph*50,8+ph*8,6+ph*6,'#fff'); } c.restore();
@@ -707,6 +711,7 @@ kc.addEventListener('pointerdown',e=>{
   if(!o){ K.pan={x0:p.x,cam0:K.cam,lastX:p.x,lastT:performance.now(),v:0,moved:false,momo:p.y>596&&p.x>64&&p.x<336}; return; }
   const b=G.bowl, nd=b.nood;
   if(o.kind==='pour'){ K.pour=true; K.dirty=true; return; }
+  if(o.kind==='rice'){ if(K.rice) return; if(b.rice){ b.rice=false; floatTxt('Removed',BROTH.x+70,BROTH.y-60); blip(300); } else { K.rice={T:0}; blip(520,.06); } return; }
   if(o.kind==='bowlTebo'){ K.M={t:'tebo',x:K.px0+TEBO_UP[0],y:TEBO_UP[1],from:{x:K.px0+TEBO_UP[0],y:TEBO_UP[1]},to:POUR_AT,stage:'go',T:0,apply:teboToBowl,keep:false}; return; }
   if(o.kind==='bundle' && nd.state!=='none'){ toast(nd.state==='bowl'?'The noodles are already in the bowl':'One bundle per bowl'); return; }
   if(o.kind==='tebo' && nd.state==='boiling'){ nd.state='lifted'; nd.time=boilT(nd); nd.water=1; blip(880,.12); floatTxt(firmLabel(nd.time)+' · '+nd.time.toFixed(1)+'s',K.px0+250,372); }
@@ -748,6 +753,7 @@ function endPointer(e){
 }
 kc.addEventListener('pointerup',endPointer); kc.addEventListener('pointercancel',endPointer);
 const keepsTool=h=>h.kind==='scoop'||h.kind==='fat';
+const RICE_T=.9;   // rice cooker: lid opens, a bowl of rice appears beside the ramen, lid closes
 function autoAct(h){   // Momo carries the tool to the bowl (or the bundle to the boiler) by herself
   if(h.kind==='bundle'){ K.M={t:'bundle',x:h.home.x,y:h.home.y,from:h.home,to:{x:K.px0+TEBO_IN[0],y:TEBO_IN[1]-20},stage:'go',T:0,apply:dropBundle,keep:false}; return; }
   K.M={t:h.t,x:h.home.x,y:h.home.y,from:h.home,to:POUR_AT,stage:'go',T:0,apply:applyFor(h),keep:keepsTool(h),home:h.home,full:h.full,src:h.o.id};
@@ -817,6 +823,8 @@ function kitchenFrame(dt){
   const b=G.bowl, nd=b.nood;
   if(K.pour){ b.soup=Math.min(1.15,b.soup+dt*CFG.SOUP_RATE*UP.soup()); K.dirty=true; if(Math.random()<dt*8) blip(180+Math.random()*40,.05,'sine',.03); }
   // tool motion (tap = automatic; drag-release = pour where you let go)
+  if(K.rice){ K.rice.T+=dt; if(!K.rice.served && K.rice.T>=RICE_T*.5){ K.rice.served=true; b.rice=true; blip(760,.08); floatTxt('Rice',BROTH.x+70,BROTH.y-70); }
+    if(K.rice.T>=RICE_T) K.rice=null; }
   const M=K.M; if(M){ M.T+=dt;
     if(M.stage==='go'){ const k=Math.min(1,M.T/(.24*CFG.SCOOP_TIME)), e=k*k*(3-2*k); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*40; if(k>=1){ M.stage='act'; M.T=0; } }
     else if(M.stage==='act'){ M.ang = M.t==='fat' ? 0 : -Math.min(1,M.T/(.14*CFG.SCOOP_TIME))*1.1; if(M.t==='fat') M.x=M.to.x+Math.sin(M.T*40)*10;
@@ -849,7 +857,7 @@ function kitchenFrame(dt){
   shadow(c,BROTH.x,BOWL.y+478*BK,86,10,.25);
   if(K.dirty){ drawRamen(bowlCv,b); K.dirty=false; }
   c.drawImage(bowlCv,BOWL.x,BOWL.y,BOWL.s,BOWL.s);
-  if(b.rice && !(K.M&&K.M.t==='rice')) drawSprite(c,IMG.rice,340,512,74,0);
+  if(b.rice){ const pop=K.rice&&K.rice.served? Math.min(1,(K.rice.T-RICE_T*.5)/(RICE_T*.25)) : 1, sc=pop<1? .4+.6*pop+Math.sin(pop*Math.PI)*.15 : 1; drawSprite(c,IMG.rice,340,512,74*sc,0); }
   if(K.stn===1){ c.save(); c.setLineDash([5,5]); c.lineWidth=2; c.strokeStyle='rgba(210,50,45,.8)'; c.beginPath(); c.ellipse(BROTH.x,BROTH.y,RX*BK,RY*BK,0,0,6.29); c.stroke(); c.restore();
     rr(c,302,474,58,24,8); fs(c,'#fffaf0',2.5); txt(c,Math.round(b.soup*100)+'%',331,486,12,Math.abs(b.soup-CFG.SOUP_TARGET)<=CFG.SOUP_TOL?'#3e8e3a':OUT,700);
     txt(c,'fill line',BROTH.x+RX*BK-6,BROTH.y-RY*BK-6,9,'#d2322d',700,'right',3); }
@@ -1090,7 +1098,7 @@ function say(t){ const b=$('#custBubble'); if(b.textContent!==t) b.textContent=t
 function hush(){ $('#custBubble').classList.add('off'); }
 function toKitchen(){
   $('#orderSheet').classList.remove('on'); hush();
-  showScene('kitchen'); K.cam=K.camT=0; K.stn=0; K.hop=.6; K.hand=null; K.M=null; K.queue=0; K.lastTap=null; K.parts=[]; K.fx=[]; K.idle=0; K.dirty=true;
+  showScene('kitchen'); K.cam=K.camT=0; K.stn=0; K.hop=.6; K.hand=null; K.M=null; K.rice=null; K.queue=0; K.lastTap=null; K.parts=[]; K.fx=[]; K.idle=0; K.dirty=true;
   ticketMini=!!G.tut; tutKey=''; $('#coach').hidden=!G.tut; $('#btnNext').classList.remove('pulse'); $('#serveHint').classList.remove('pulse');
   requestAnimationFrame(()=>renderTicket($('#kTicket'),G.order,ticketMini));
 }
