@@ -17,7 +17,7 @@
 <title>Momo-ya</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Yuji+Syuku&display=swap">
-<link rel="stylesheet" href="style.css?v=202610301338">
+<link rel="stylesheet" href="style.css?v=202610301548">
 </head>
 <body>
 <div id="app">
@@ -29,14 +29,19 @@
       <canvas id="shopBack" class="layer" width="900" height="1280"></canvas>
       <div id="seats"></div>
       <div id="cust" class="away"></div>
+      <div id="cust2" class="away" hidden></div>
       <div id="patBar" class="hide"><i></i></div>
+      <div id="patBar2" class="hide" hidden><i></i></div>
       <canvas id="shopFront" class="layer" width="900" height="1450"></canvas>
       <div id="custBubble" class="bubble off"></div>
+      <div id="custBubble2" class="bubble off"></div>
       <div id="gloom"><div class="wisp" style="left:60px;top:620px"></div><div class="wisp" style="left:560px;top:700px;animation-delay:-3s"></div><div class="cloud"></div>
         <div class="drop" style="left:380px;top:650px"></div><div class="drop" style="left:430px;top:660px;animation-delay:.3s"></div><div class="drop" style="left:480px;top:648px;animation-delay:.6s"></div></div>
       <div id="shine"></div>
       <canvas id="shopBowl" width="512" height="512" class="hidden-o"></canvas>
+      <canvas id="shopBowl2" width="512" height="512" class="hidden-o"></canvas>
       <img id="shopRice" src="assets/pk_rice.webp" class="hidden-o" alt="">
+      <img id="shopRice2" src="assets/pk_rice.webp" class="hidden-o" alt="">
       <div id="sparkles"></div>
       <div id="shopMomo"><div class="flip">
         <img class="hand hL" src="assets/momo_handL.webp" alt=""><img class="hand hR" src="assets/momo_handR.webp" alt="">
@@ -51,6 +56,7 @@
       <div class="hot" id="hotTray" style="left:232px;top:772px;width:410px;height:206px"><span>OPEN SHOP</span><div class="hm"><span>Day <b id="hmDay">1</b></span><span>¥<b id="hmMoney">0</b></span><span>Rent tonight ¥<b id="hmRent">0</b></span></div><div class="hm hmEnd" hidden><span>Endless</span><span>Best <b id="hmBest">0</b></span><span>bowls sold in one run</span></div></div>
       <div class="hot" id="hotDrink" style="left:680px;top:684px;width:130px;height:132px"><span>Tutorial</span></div>
       <div id="coinPop"><span class="coin">¥</span><div><b id="cpAmt">+0</b><small id="cpTip"></small></div></div>
+      <div id="coinPop2"><span class="coin">¥</span><div><b id="cpAmt2">+0</b><small id="cpTip2"></small></div></div>
       <div id="momoBubble" class="bubble off"></div>
       </div>
     </div>
@@ -67,6 +73,7 @@
     <div id="orderSheet" class="sheet">
       <h3>New order</h3>
       <div class="coach sheetCoach" id="orderCoach" hidden><img src="assets/momo_happy.webp" alt=""><div><span class="ct">TUTORIAL</span>This is Soso's order slip. The <b style="color:var(--marker)">red circles</b> are what she wants. Each row is one step in the kitchen, top to bottom. Tap the slip in the kitchen to fold it.</div></div>
+      <div id="rushTabs" hidden></div>
       <div class="tk-wrap"><div class="ticket" id="shopTicket"></div></div>
       <div class="row"><button class="btn red" id="btnToKitchen">To the kitchen ▶</button></div>
     </div>
@@ -74,6 +81,7 @@
       <div class="top"><div class="stamp" id="scStamp">S</div><div><div class="total" id="scTotal">0<small> / 100</small></div><div class="momoLine" id="scMomo"></div></div></div>
       <div class="coach sheetCoach" id="scoreCoach" hidden><img src="assets/momo_happy.webp" alt=""><div><span class="ct">TUTORIAL</span>Your bowl vs the slip, row by row. Higher score = more money, and serving before patience runs low earns tips.</div></div>
       <div id="scoreList"></div>
+      <div id="scoreDuo"></div>
       <div class="row"><button class="btn red" id="btnEat">Let them eat!</button></div>
     </div>
     <button class="btn red" id="btnNextCust" hidden>Next customer ▶</button>
@@ -84,6 +92,8 @@
     <div id="kStage">
       <canvas id="kCanvas" width="400" height="820"></canvas>
       <div id="kTicket" class="ticket"></div>
+      <div id="kTicket2" class="ticket" hidden></div>
+      <div class="k-ui" id="serveAsk" hidden>Serve which bowl? <b>Tap a bowl</b> · tap Momo again for both</div>
       <button id="boilChip" class="k-ui" hidden><i></i><span id="boilTxt"></span></button>
       <button class="btn round k-ui" id="btnPrev" aria-label="Previous step">‹</button>
       <button class="btn round k-ui" id="btnNext" aria-label="Next step">›</button>
@@ -161,10 +171,28 @@
       <button class="btn" id="btnSaveHome">Save &amp; go home</button>
     </div>
   </div>
+  <div id="rushIntro" hidden>
+    <div class="panel">
+      <h2 id="riTitle">Lunch rush!</h2>
+      <div class="riPic"><canvas id="riCanvas" width="600" height="320"></canvas></div>
+      <div class="riCap" id="riCap"></div>
+      <div class="riDots" id="riDots"></div>
+      <div class="row"><button class="link" id="btnRushSkip">Skip</button><button class="btn red" id="btnRushGo">Next ▶</button></div>
+    </div>
+  </div>
+  <div id="patch" hidden>
+    <div class="panel">
+      <span class="pv" id="patchVer"></span>
+      <h2 id="patchTitle"></h2>
+      <div id="patchList"></div>
+      <div class="row"><button class="btn red" id="btnPatch">Let's cook! ▶</button></div>
+    </div>
+  </div>
   <div id="toast"></div>
 </div>
 
-<script src="config.js?v=202610301338"></script>
-<script src="game.js?v=202610301338"></script>
+<script src="patch-notes.js?v=202610301548"></script>
+<script src="config.js?v=202610301548"></script>
+<script src="game.js?v=202610301548"></script>
 </body>
 </html>

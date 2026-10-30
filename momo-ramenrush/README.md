@@ -2,6 +2,7 @@
 
 Portrait HTML ramen game starring Momo. Open `index.html` (GitHub Pages: `/momo-ramenrush/`).
 
+- `patch-notes.js` — **the update notice** players see once after an update. Change `VERSION`, edit the text, push.
 - `config.js` — **all the tuning**: kitchenware upgrades and prices (`UPGRADES`), night market (`MARKET`), rent / starting money / patience / tips (`ECON`), kitchen timing (`CFG`), customers (`CUSTOMERS`), volumes (`VOL`).
 - `game.js` — the game code.
 - `style.css` — the look.

@@ -376,7 +376,7 @@ function drawUnderCounter(c){
   c.strokeStyle='#24140a'; c.lineWidth=3; c.beginPath(); c.moveTo(0,LIP); c.lineTo(900,LIP); c.moveTo(0,FACE); c.lineTo(900,FACE); c.stroke();
   shine(c,0,LIP+3,900,4,2,.45);
 }
-function drawShopFront(){
+function drawShopFront(props=true){
   const c=$('#shopFront').getContext('2d'); c.clearRect(0,0,900,1450);
   drawUnderCounter(c);
   // far edge (wood rim) + red lacquer counter surface (ends at the near lip, y≈1004)
@@ -386,6 +386,7 @@ function drawShopFront(){
   c.fillStyle='rgba(245,200,110,.55)'; c.fillRect(0,770,900,2.5);
   rr(c,-10,738,920,22,6); fs(c,vg(c,738,760,'#f0cf9c','#c99a62'),3,'#4a2412');
   shine(c,10,741,880,4,2,.5);
+  if(props){
   // chopstick holder (left)
   shadow(c,108,808,72,14,.35);
   [[-14,'#d9b27c'],[-4,'#c8945a'],[6,'#e3c08b'],[16,'#b98249'],[-22,'#ecd2a6']].forEach(([dx,col],k)=>{ c.save(); c.translate(108+dx,620); c.rotate((dx)*.012); rr(c,-4,-112-k*4,8,124,3); fs(c,col,2.5); c.restore(); });
@@ -397,12 +398,14 @@ function drawShopFront(){
   shadow(c,200,804,26,7,.3);
   c.beginPath(); c.moveTo(186,800); c.lineTo(186,740); c.quadraticCurveTo(186,722,196,716); c.lineTo(196,700); c.lineTo(206,700); c.lineTo(206,716); c.quadraticCurveTo(216,722,216,740); c.lineTo(216,800); c.closePath(); fs(c,vg(c,700,800,'#6b3a1e','#2c140a'),3);
   rr(c,193,690,16,14,4); fs(c,'#e3483c',2.5); shine(c,190,744,4,48,2,.35);
+  }
   // black lacquer tray
   shadow(c,437,984,230,22,.45);
   rr(c,232,772,410,206,18); fs(c,vg(c,772,978,'#3a3532','#0f0d0c'),4,'#000');
   rr(c,250,788,374,174,12); fs(c,vg(c,788,962,'#1a1716','#262220'),2,'rgba(255,255,255,.08)');
   c.save(); c.globalAlpha=.16; c.fillStyle='#fff'; c.beginPath(); c.moveTo(270,792); c.lineTo(420,792); c.lineTo(330,958); c.lineTo(255,958); c.closePath(); c.fill(); c.restore();
   shine(c,246,776,380,4,2,.25);
+  if(!props) return;
   // water glass on a coaster
   ell(c,743,812,70,17,vg(c,795,829,'#f8eedc','#e2d0b2'),2.5); shadow(c,743,812,48,10,.25);
   c.beginPath(); c.moveTo(688,692); c.lineTo(798,692); c.lineTo(784,808); c.lineTo(702,808); c.closePath();
@@ -511,6 +514,26 @@ function drawTebo(c,x,y,full,ang){ c.save(); c.translate(x,y); c.rotate(ang||0);
   c.save(); c.clip(); c.strokeStyle='rgba(91,58,46,.5)'; c.lineWidth=1.1; for(let k=-40;k<40;k+=6){ c.beginPath(); c.moveTo(k,-24); c.lineTo(k+30,30); c.moveTo(k,-24); c.lineTo(k-30,30); c.stroke(); }
     if(full && ok(IMG.noodles)) c.drawImage(IMG.noodles,-30,-36,60,37); c.restore();
   ell(c,0,-22,28,6,null,3); c.restore(); }
+/* tebos in the boiler: ① on the left, ② on the right (mirrored so they face each other) when there are two */
+function mirrorAt(c,x,on){ if(!on) return; c.translate(x,0); c.scale(-1,1); c.translate(-x,0); }
+function drawTebos(c,t){
+  const wob=Math.sin(t*14)*1.5, R=K.rise||[0,0], WL=386, two=twoTebo();
+  const busy=n=> (K.M&&K.M.t==='tebo'&&(K.M.slot??0)===n) || (K.hand&&K.hand.t==='tebo'&&(K.hand.slot??0)===n);
+  const badge=(n,x,y)=>{ if(!G.rush) return; ell(c,x,y,11,11,SLOT_COL[n],2.5,'#fff'); txt(c,String(n+1),x,y+1,11,'#fff',700); };
+  const one=(n,st,x,mir)=>{ if(busy(n)) return;
+    if(st==='boiling'){ const y=TEBO_IN[1]-8-(R[n]||0)*36;
+      c.save(); c.beginPath(); c.rect(0,0,400,WL); c.clip(); c.translate(mir?-wob:wob,0); mirrorAt(c,x,mir); drawTebo(c,x,y,true,0); c.restore();
+      ell(c,x+wob,WL,30,5,'rgba(255,255,255,.55)',0); for(let k=0;k<4;k++){ const ph=(t*2.2+k*.25)%1; ell(c,x-20+k*13,WL-ph*4,1.5+ph*2,1+ph,'rgba(255,255,255,.8)',0); }
+      badge(n,x+(mir?-40:40),352-(R[n]||0)*36); }
+    else { const kick=K.teboKick*10, nd=nbowl(n).nood; c.save(); mirrorAt(c,x,mir); drawTebo(c,x,TEBO_UP[1]+kick,true,0); c.restore();
+      if(Math.random()<.25+nd.water*.6) K.parts.push({x:K.px0+x-16+Math.random()*32,y:TEBO_UP[1]+22,vx:0,vy:40,r:2.5,col:'#9fd3e6',life:.6,g:900,stopY:388});
+      const wx=G.rush? x-31 : 326, wy=G.rush? 262 : 340; rr(c,wx,wy,62,30,8); fs(c,'#fffaf0',2.5); txt(c,(G.rush?(n+1)+' · ':'')+'Water',wx+31,wy+9,9,OUT,600); txt(c,Math.round(nd.water*100)+'%',wx+31,wy+22,12,nd.water<=CFG.WATER_OK?'#3e8e3a':'#d2322d',700);
+      badge(n,x+(mir?-40:40),318); } };
+  if(!G.rush){ const st=G.bowl.nood.state; if(st==='boiling'||st==='lifted') one(0,st,286,false); else if(!toolBusy('tebo')) drawTebo(c,TEBO_RACK[0],TEBO_RACK[1],false,.12); return; }
+  if(two){ [0,1].forEach(n=>{ const sl=G.rush.slots[n], st=(sl.gone||sl.served)?'none':sl.bowl.nood.state, x=teboX(n), mir=n===0;
+      if(st==='boiling'||st==='lifted') one(n,st,x,mir); else if(!busy(n)){ c.save(); mirrorAt(c,x,mir); drawTebo(c,x+(mir?-6:6),362,false,.12); c.restore(); badge(n,x+(mir?-44:44),352); } }); }
+  else { const u=live().find(s=>['boiling','lifted'].includes(s.bowl.nood.state)); if(u) one(u.i,u.bowl.nood.state,286,false); else if(!toolBusy('tebo')) drawTebo(c,TEBO_RACK[0],TEBO_RACK[1],false,.12); }
+}
 function drawBundle(c,x,y,w=72){ if(!ok(IMG.noodles)) return; const h=w*IMG.noodles.height/IMG.noodles.width; c.drawImage(IMG.noodles,x-w/2,y-h/2,w,h);
   rr(c,x-7,y-h/2+2,14,h-4,3); fs(c,'#fffaf0',2); c.fillStyle='#d9483b'; c.fillRect(x-7,y-3,14,5); }
 function drawSprite(c,im,x,y,w,ang){ if(!ok(im)) return; const h=w*im.height/im.width; c.save(); c.translate(x,y); c.rotate(ang||0); c.drawImage(im,-w/2,-h/2,w,h); c.restore(); }
@@ -602,8 +625,8 @@ const STATION_ART=[
       c.fillStyle=`hsl(${48-i*7},${78-i*8}%,${66+i*5}%)`; c.fillRect(l,303.5,w,13);
       txt(c,['X-Firm','Firm','Normal','Soft','X-Soft'][i],gx+cc/span*gw,327,9,OUT,700); });
     rr(c,gx,302,gw,16,8); fs(c,null,2.5);
-    const tt = nd.state==='boiling' ? boilT(nd) : nd.time;
-    if(tt!=null){ const nx=gx+Math.min(1,tt/span)*gw; rr(c,nx-2.5,296,5,28,2); fs(c,'#d2322d',1.5,'#fff'); txt(c,tt.toFixed(1)+'s',nx,288,10,'#d2322d',700,'center',3); }
+    (G.rush ? live().map(s=>[s.i,s.bowl.nood]) : [[null,nd]]).forEach(([i,n])=>{ const tt = n.state==='boiling' ? boilT(n) : (G.rush && n.state!=='lifted' ? null : n.time);
+      if(tt==null) return; const nx=gx+Math.min(1,tt/span)*gw, col=i==null?'#d2322d':SLOT_COL[i]; rr(c,nx-2.5,296,5,28,2); fs(c,col,1.5,'#fff'); txt(c,(i==null?'':(i+1)+' · ')+tt.toFixed(1)+'s',nx,288-(i||0)*12,10,col,700,'center',3); });
     // noodle box with paper-wrapped bundles
     shadow(c,90,470,76,6);
     for(let k=0;k<Math.min(4,stockOf('noodle'));k++) drawBundle(c,44+k*30,402+(k%2)*4,58);
@@ -614,22 +637,13 @@ const STATION_ART=[
     shadow(c,286,470,104,6);
     rr(c,188,384,196,82,12); fs(c,steel(c,188,384),3);
     ell(c,286,388,90,12,vg(c,376,400,'#cfe9f1','#9fcbd9'),3);
-    const boiling = nd.state==='boiling';
+    const boiling = NSL().some(s=>s.bowl.nood.state==='boiling');
     for(let k=0;k<(boiling?10:5);k++){ const ph=(t*1.6+k*.37)%1; ell(c,206+((k*53)%160),388-ph*3,2+ph*3,1.2+ph*2,'rgba(255,255,255,.75)',0); }
     rr(c,206,420,60,22,4); fs(c,'#fffaf0',2); txt(c,'BOILER',236,431,10.5,'#3a2013',700);
     // steam
     c.save(); for(let k=0;k<4;k++){ const ph=(t*.5+k*.25)%1; c.globalAlpha=(1-ph)*.45; ell(c,220+k*44+Math.sin(t+k)*6,370-ph*80,14+ph*16,10+ph*12,'#fff'); } c.restore();
-    // tebo
-    if(!toolBusy('tebo')){
-      if(boiling){ const wob=Math.sin(t*14)*1.5, WL=386;   // water line: the net is under water, only the rim + handle stick out
-        c.save(); c.beginPath(); c.rect(0,0,400,WL); c.clip(); drawTebo(c,TEBO_IN[0]+wob,TEBO_IN[1]-8,true,0); c.restore();
-        c.save(); c.beginPath(); c.ellipse(286,388,90,12,0,0,Math.PI*2); c.clip(); c.fillStyle='rgba(170,215,228,.92)'; c.fillRect(196,WL,180,20); c.restore();
-        ell(c,286+wob,WL,30,5,'rgba(255,255,255,.55)',0); for(let k=0;k<4;k++){ const ph=(t*2.2+k*.25)%1; ell(c,266+k*13,WL-ph*4,1.5+ph*2,1+ph,'rgba(255,255,255,.8)',0); } }
-      else if(nd.state==='lifted'){ const kick=K.teboKick*10; drawTebo(c,TEBO_UP[0],TEBO_UP[1]+kick,true,0);
-        if(Math.random()<.25+nd.water*.6) K.parts.push({x:K.px0+TEBO_UP[0]-16+Math.random()*32,y:TEBO_UP[1]+22,vx:0,vy:40,r:2.5,col:'#9fd3e6',life:.6,g:900,stopY:388});
-        rr(c,326,340,62,30,8); fs(c,'#fffaf0',2.5); txt(c,'Water',357,349,9,OUT,600); txt(c,Math.round(nd.water*100)+'%',357,362,12,nd.water<=CFG.WATER_OK?'#3e8e3a':'#d2322d',700); }
-      else drawTebo(c,TEBO_RACK[0],TEBO_RACK[1],false,.12);
-    }
+    // tebo(s)
+    drawTebos(c,t);
   },
   function toppings(c,t){
     const b=G.bowl;
@@ -708,30 +722,44 @@ function toStage(e){ const r=kc.getBoundingClientRect(); return {x:(e.clientX-r.
 const inBox=(p,b)=>p.x>=b[0]&&p.x<=b[0]+b[2]&&p.y>=b[1]&&p.y<=b[1]+b[3];
 const overBowl=p=>p.x>=BOWL_HIT.x&&p.x<=BOWL_HIT.x+BOWL_HIT.w&&p.y>=BOWL_HIT.y&&p.y<=BOWL_HIT.y+BOWL_HIT.h;
 const overBoiler=p=>{ const q={x:p.x-K.px0,y:p.y}; return q.x>=BOILER.x&&q.x<=BOILER.x+BOILER.w&&q.y>=BOILER.y&&q.y<=BOILER.y+BOILER.h; };
+/* noodles with one or two bowls: ① always first */
+const NSL=()=> G.rush ? live() : [{i:0,bowl:G.bowl}];
+const nbowl=n=> G.rush ? G.rush.slots[n].bowl : G.bowl;
+const twoTebo=()=> !!G.rush && has('tebo2nd');
+const teboX=n=> twoTebo() ? [226,346][n] : 286;
+function teboTarget(){ const L=NSL(); return (L.find(s=>s.bowl.nood.state==='lifted')||L.find(s=>s.bowl.nood.state==='boiling')||{i:null}).i; }
+function bundleSlot(){ const L=NSL(); if(!twoTebo() && L.some(s=>['boiling','lifted'].includes(s.bowl.nood.state))) return {busy:true};
+  const f=L.find(s=>s.bowl.nood.state==='none'); return f?{i:f.i}:{full:true}; }
 function settled(){ return Math.abs(K.cam-K.stn*KW)<6 && !K.pan; }
 function hitObject(p){
-  if(!settled()) return null; const q={x:p.x-K.px0,y:p.y}, nd=G.bowl.nood;
-  if(K.stn===NOODLE_STEP && nd.state==='lifted' && overBowl(p)) return {kind:'bowlTebo'};
-  for(const o of OBJS[K.stn]){ if(o.kind==='tebo' && !(nd.state==='boiling'||nd.state==='lifted')) continue; if(inBox(q,o.box)) return o; }
+  if(!settled()) return null; const q={x:p.x-K.px0,y:p.y}, L=NSL(), lifted=L.some(s=>s.bowl.nood.state==='lifted'), inPot=L.some(s=>['boiling','lifted'].includes(s.bowl.nood.state));
+  if(K.stn===NOODLE_STEP && lifted && bowlAt(p)!=null) return {kind:'bowlTebo'};
+  for(const o of OBJS[K.stn]){ if(o.kind==='tebo' && !inPot) continue; if(inBox(q, o.kind==='tebo'&&G.rush ? [186,292,200,180] : o.box)) return o; }
   return null;
 }
 function homeOf(o){ return {x:K.px0+(o.home?o.home[0]:0), y:o.home?o.home[1]:0}; }
 kc.addEventListener('pointerdown',e=>{
   const p=toStage(e); K.idle=0; kc.setPointerCapture(e.pointerId);
   if(K.M) return;   // Momo is still busy with the last scoop — extra taps are ignored (no more spam-tapping)
+  if(K.ask){ const bi=bowlAt(p); if(bi!=null){ K.ask=false; $('#serveAsk').hidden=true; rushServe([bi]); return; }
+    if(!(p.y>596&&p.x>64&&p.x<336)){ K.ask=false; $('#serveAsk').hidden=true; } }
   const o=hitObject(p);
+  if(!o && G.rush){ const bi=bowlAt(p); if(bi!=null && bi!==G.rush.active){ setSlot(bi); blip(560,.05); renderKTicket(); return; } }   // tap a bowl to work on it
   if(!o){ K.pan={x0:p.x,cam0:K.cam,lastX:p.x,lastT:performance.now(),v:0,moved:false,momo:p.y>596&&p.x>64&&p.x<336}; return; }
   const b=G.bowl, nd=b.nood;
   if(o.kind==='pour'){ K.pour=true; K.dirty=true; return; }
-  if(o.kind==='rice'){ if(K.rice) return; if(b.rice){ b.rice=false; floatTxt('Removed',BROTH.x+70,BROTH.y-60); blip(300); } else { K.rice={T:0}; blip(520,.06); } return; }
-  if(o.kind==='bowlTebo'){ K.M={t:'tebo',x:K.px0+TEBO_UP[0],y:TEBO_UP[1],from:{x:K.px0+TEBO_UP[0],y:TEBO_UP[1]},to:POUR_AT,stage:'go',T:0,apply:teboToBowl,keep:false}; return; }
-  if(o.kind==='bundle' && nd.state!=='none'){ toast(nd.state==='bowl'?'The noodles are already in the bowl':'One bundle per bowl'); return; }
-  if(o.kind==='tebo' && nd.state==='boiling'){ nd.state='lifted'; nd.time=boilT(nd); nd.water=1; blip(880,.12); floatTxt(firmLabel(nd.time)+' · '+nd.time.toFixed(1)+'s',K.px0+250,372); }
+  if(o.kind==='rice'){ if(K.rice) return; if(b.rice){ b.rice=false; floatTxt('Removed',BROTH.x+(G.rush?0:70),BROTH.y-60); blip(300); } else { K.rice={T:0}; blip(520,.06); } return; }
+  if(o.kind==='bowlTebo'){ const n=teboTarget(); if(G.rush){ setSlot(n); renderKTicket(); }   // lifted noodles always go into their own bowl
+    K.M={t:'tebo',slot:n,x:K.px0+teboX(n),y:TEBO_UP[1],from:{x:K.px0+teboX(n),y:TEBO_UP[1]},to:POUR_AT,stage:'go',T:0,apply:()=>teboToBowl(n),keep:false}; return; }
+  if(o.kind==='bundle'){ const t=bundleSlot(); if(t.i==null){ toast(!G.rush ? (nd.state==='bowl'?'The noodles are already in the bowl':'One bundle per bowl')
+      : t.busy ? 'Only one tebo — wait until it is free<br><small>A second tebo is on the iPad</small>' : 'Both bowls already have noodles'); return; } }
+  let tn=0; if(o.kind==='tebo'){ tn=teboTarget(); const td=nbowl(tn).nood;   // one tap: tebo ① first
+    if(td.state==='boiling'){ td.state='lifted'; td.time=boilT(td); td.water=1; blip(880,.12); floatTxt((G.rush?`${tn+1} · `:'')+firmLabel(td.time)+' · '+td.time.toFixed(1)+'s',K.px0+teboX(tn)-36,372); } }
   const SK={green:'green',white:'white',chashu:'chashu',nori:'nori',bundle:'noodle'}[o.id];
   if(SK && stockOf(SK)<=0 && !(o.kind!=='bundle' && b[o.id])){ toast(`Out of ${MARKET[SK].name.toLowerCase()}!<br><small>Buy more at night</small>`); return; }
-  const home = o.kind==='tebo' ? {x:K.px0+TEBO_UP[0],y:TEBO_UP[1]} : homeOf(o);
+  const home = o.kind==='tebo' ? {x:K.px0+teboX(tn),y:TEBO_UP[1]} : homeOf(o);
   K.hand={t:o.kind==='tebo'?'tebo':(o.kind==='scoop'?o.id:(o.kind==='fat'?'fat':(o.kind==='bundle'?'bundle':o.id))), kind:o.kind, o, home, x:home.x, y:home.y, sx:p.x, sy:p.y, gx:p.x-home.x, gy:p.y-home.y,
-    moved:false, full:o.kind==='scoop', lastX:p.x, lastY:p.y, dir:0, travel:0, down:0};
+    moved:false, full:o.kind==='scoop', lastX:p.x, lastY:p.y, dir:0, travel:0, down:0, slot:tn};
   if(o.kind==='scoop') blip(320,.1,'triangle',.1); else blip(520,.05);
 });
 kc.addEventListener('pointermove',e=>{
@@ -742,7 +770,7 @@ kc.addEventListener('pointermove',e=>{
   if(Math.hypot(p.x-h.sx,p.y-h.sy)>8) h.moved=true;
   if(h.moved){ h.x=p.x-h.gx*.4; h.y=p.y-h.gy*.4-10; }
   if(h.t==='fat') fatShake(h,p);
-  if(h.t==='tebo'){ const dy=p.y-h.lastY; if(dy>0) h.down+=dy; else if(dy<-2 && h.down>26){ flick(); h.down=0; } }
+  if(h.t==='tebo'){ const dy=p.y-h.lastY; if(dy>0) h.down+=dy; else if(dy<-2 && h.down>26){ flick(h.slot); h.down=0; } }
   h.lastX=p.x; h.lastY=p.y;
 });
 function endPointer(e){
@@ -754,20 +782,21 @@ function endPointer(e){
   const p={x:h.x,y:h.y};
   if(!h.moved){   // tap = Momo does the whole motion for you
     if(h.kind==='top'||h.kind==='rice'||h.kind==='nori'){ const id=h.t; if(b[id]){ b[id]=false; giveStock(id); K.dirty=true; floatTxt('Removed',BROTH.x,BROTH.y-60); blip(300); return; } }
-    if(h.kind==='tebo'){ flick(); return; }
+    if(h.kind==='tebo'){ flick(h.slot); return; }
     autoAct(h); return;
   }
-  if(h.kind==='bundle'){ if(overBoiler(p)){ K.M={t:'bundle',x:p.x,y:p.y,from:p,to:{x:K.px0+TEBO_IN[0],y:TEBO_IN[1]-20},stage:'go',T:0,apply:dropBundle,keep:false}; } else K.M={t:'bundle',x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:false}; return; }
-  if(h.kind==='tebo'){ if(overBowl(p)) K.M={t:'tebo',x:p.x,y:p.y,from:p,to:p,stage:'act',T:0,apply:teboToBowl,keep:false}; return; }
+  if(h.kind==='bundle'){ const n=bundleSlot().i; if(overBoiler(p) && n!=null){ K.M={t:'bundle',x:p.x,y:p.y,from:p,to:{x:K.px0+teboX(n),y:TEBO_IN[1]-20},stage:'go',T:0,apply:()=>dropBundle(n),keep:false}; } else K.M={t:'bundle',x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:false}; return; }
+  if(h.kind==='tebo'){ if(bowlAt(p)!=null){ const n=h.slot; if(G.rush){ setSlot(n); renderKTicket(); } K.M={t:'tebo',slot:n,x:p.x,y:p.y,from:p,to:p,stage:'act',T:0,apply:()=>teboToBowl(n),keep:false}; } return; }
   if(h.kind==='fat'){ K.M={t:'fat',x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:true}; return; }
-  if(overBowl({x:p.x,y:p.y+24})) K.M={t:h.t,x:p.x,y:p.y,from:p,to:p,stage:'act',T:0,apply:applyFor(h),keep:keepsTool(h),home:h.home,full:h.full};
+  const bi=bowlAt({x:p.x,y:p.y+24});   // a drag drops into whichever bowl it's over — the selection stays as it was
+  if(bi!=null) K.M={t:h.t,x:p.x,y:p.y,from:p,to:p,stage:'act',T:0,apply:()=>onBowl(bi,()=>applyFor(h)()),keep:keepsTool(h),home:h.home,full:h.full};
   else K.M={t:h.t,x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:true,home:h.home};
 }
 kc.addEventListener('pointerup',endPointer); kc.addEventListener('pointercancel',endPointer);
 const keepsTool=h=>h.kind==='scoop'||h.kind==='fat';
 const RICE_T=.9;   // rice cooker: lid opens, a bowl of rice appears beside the ramen, lid closes
 function autoAct(h){   // Momo carries the tool to the bowl (or the bundle to the boiler) by herself
-  if(h.kind==='bundle'){ K.M={t:'bundle',x:h.home.x,y:h.home.y,from:h.home,to:{x:K.px0+TEBO_IN[0],y:TEBO_IN[1]-20},stage:'go',T:0,apply:dropBundle,keep:false}; return; }
+  if(h.kind==='bundle'){ const n=bundleSlot().i; if(n==null) return; K.M={t:'bundle',x:h.home.x,y:h.home.y,from:h.home,to:{x:K.px0+teboX(n),y:TEBO_IN[1]-20},stage:'go',T:0,apply:()=>dropBundle(n),keep:false}; return; }
   K.M={t:h.t,x:h.home.x,y:h.home.y,from:h.home,to:POUR_AT,stage:'go',T:0,apply:applyFor(h),keep:keepsTool(h),home:h.home,full:h.full,src:h.o.id};
   K.lastTap={t:h.t,kind:h.kind,o:h.o,home:h.home,full:h.full};
 }
@@ -781,32 +810,35 @@ function applyFor(h){
     const cap={tare:6,garlic:7,chili:5}[h.t], key={tare:'tare',garlic:'garlic',chili:'spice'}[h.t];
     if(b[key]>=cap){ toast('That is as much as the bowl can take'); return; }
     b[key]++; spray(h.t); blip(260+b[key]*40,.09,'sine');
-    floatTxt(h.t==='tare'? `Tare × ${b.tare}` : h.t==='garlic'? `Garlic: ${GARLIC_LIST[b.garlic]}` : `Chili × ${b.spice}`, BROTH.x+70, BROTH.y-70);
+    floatTxt(h.t==='tare'? `Tare × ${b.tare}` : h.t==='garlic'? `Garlic: ${GARLIC_LIST[b.garlic]}` : `Chili × ${b.spice}`, BROTH.x+(G.rush?0:70), BROTH.y-70);
   };
   if(h.kind==='fat') return ()=>shakeFat(POUR_AT.x,POUR_AT.y);
   return ()=>{ const id=h.t; if(b[id]){ toast('Already in the bowl'); return; } b[id]=true; takeStock(id); blip(760,.08);
-    floatTxt({green:'Green onion',white:'White onion',chashu:'Chashu',nori:'Seaweed',rice:'Rice'}[id], BROTH.x+70, BROTH.y-70); };
+    floatTxt({green:'Green onion',white:'White onion',chashu:'Chashu',nori:'Seaweed',rice:'Rice'}[id], BROTH.x+(G.rush?0:70), BROTH.y-70); };
 }
 /* back-fat shake: once over the bowl, every change of direction after a stroke of ≥ 20 units = one shake */
 const FAT_STROKE=20, FAT_GAP=90;
 function fatShake(h,p){
-  const near = p.x>BOWL_HIT.x-50 && p.x<BOWL_HIT.x+BOWL_HIT.w+50 && h.y>BOWL_HIT.y-110 && h.y<BOWL_HIT.y+BOWL_HIT.h;
+  const tb = G.rush ? live().map(s=>s.i).find(i=>p.x>=RUSH_BX[i]-25 && p.x<=RUSH_BX[i]+215) : 0;   // the bowl under the strainer
+  const hx = G.rush&&tb!=null ? RUSH_BX[tb]-5 : BOWL_HIT.x;
+  const near = tb!=null && p.x>hx-50 && p.x<hx+BOWL_HIT.w+50 && h.y>BOWL_HIT.y-110 && h.y<BOWL_HIT.y+BOWL_HIT.h; h.tb=tb;
   if(!near){ h.ext=null; h.dir=0; return; }
   if(h.ext==null){ h.ext=p.x; h.dir=0; return; }
   const now=performance.now(), ready=!h.lastShake || now-h.lastShake>FAT_GAP;
   if(h.dir===0){ if(p.x!==h.ext){ h.dir=Math.sign(p.x-h.ext); h.ext=p.x; } return; }   // arriving over the bowl only sets the direction
   if((h.dir>0 && p.x>h.ext) || (h.dir<0 && p.x<h.ext)) h.ext=p.x;            // still going the same way: remember the far point
-  else if(Math.abs(p.x-h.ext)>=FAT_STROKE && ready){ h.dir=-h.dir; h.ext=p.x; h.lastShake=now; shakeFat(h.x,h.y); }
+  else if(Math.abs(p.x-h.ext)>=FAT_STROKE && ready){ h.dir=-h.dir; h.ext=p.x; h.lastShake=now; onBowl(h.tb,()=>shakeFat(h.x,h.y)); }
 }
-function shakeFat(x,y){ const b=G.bowl; if(b.fat>=4){ floatTxt('Max richness',BROTH.x+70,BROTH.y-70); return; }
+function shakeFat(x,y){ const b=G.bowl; if(b.fat>=4){ floatTxt('Max richness',BROTH.x+(G.rush?0:70),BROTH.y-70); return; }
   b.fat++; K.dirty=true; blip(700,.05,'square',.04); for(let k=0;k<12;k++) K.parts.push({x:x-14+Math.random()*28,y:y+8,vx:(Math.random()-.5)*40,vy:20+Math.random()*40,r:2+Math.random()*2,col:'#fffaf0',life:.9,g:700,stopY:BROTH.y+Math.random()*20});
-  floatTxt(RICH_NAME[b.fat],BROTH.x+70,BROTH.y-70); }
-function flick(){ const nd=G.bowl.nood; if(nd.state!=='lifted') return; nd.flicks++; nd.water = UP.oneFlick() ? Math.min(nd.water,.04) : nd.water*CFG.FLICK_KEEP*UP.flick(); K.teboKick=1; blip(240+nd.flicks*40,.08,'sine');
-  for(let k=0;k<8;k++) K.parts.push({x:K.px0+TEBO_UP[0]-20+Math.random()*40,y:TEBO_UP[1]+20,vx:(Math.random()-.5)*120,vy:60+Math.random()*80,r:2.5+Math.random()*1.5,col:'#9fd3e6',life:.7,g:900,stopY:390});
-  if(nd.water<=CFG.WATER_OK && nd.flicks>=1) floatTxt('Nicely drained!',K.px0+250,372); }
-function dropBundle(){ const nd=G.bowl.nood; takeStock('noodle'); nd.state='boiling'; nd.start=performance.now(); nd.time=null; blip(300,.2,'sine');
-  for(let k=0;k<10;k++) K.parts.push({x:K.px0+286-30+Math.random()*60,y:388,vx:(Math.random()-.5)*80,vy:-80-Math.random()*60,r:2.5,col:'#cfe9f1',life:.5,g:600,stopY:400}); }
-function teboToBowl(){ const b=G.bowl, nd=b.nood; nd.state='bowl'; K.dirty=true; if(b.soup<0.05){ b.noodlesBeforeSoup=true; toast('Noodles went in before the soup!'); } else blip(660,.1); }
+  floatTxt(RICH_NAME[b.fat],BROTH.x+(G.rush?0:70),BROTH.y-70); }
+function flick(n){ if(n==null) n=teboTarget(); if(n==null) return; const nd=nbowl(n).nood; if(nd.state!=='lifted') return; nd.flicks++; nd.water = UP.oneFlick() ? Math.min(nd.water,.04) : nd.water*CFG.FLICK_KEEP*UP.flick(); K.teboKick=1; blip(240+nd.flicks*40,.08,'sine');
+  for(let k=0;k<8;k++) K.parts.push({x:K.px0+teboX(n)-20+Math.random()*40,y:TEBO_UP[1]+20,vx:(Math.random()-.5)*120,vy:60+Math.random()*80,r:2.5+Math.random()*1.5,col:'#9fd3e6',life:.7,g:900,stopY:390});
+  if(nd.water<=CFG.WATER_OK && nd.flicks>=1) floatTxt((G.rush?`${n+1} · `:'')+'Nicely drained!',K.px0+teboX(n)-36,372); }
+function dropBundle(n=0){ const nd=nbowl(n).nood; takeStock('noodle'); nd.state='boiling'; nd.start=performance.now(); nd.time=null; blip(300,.2,'sine');
+  K.rise=K.rise||[0,0]; K.rise[n]=1; if(G.rush) floatTxt(`Tebo ${n+1}`,K.px0+teboX(n)-20,330);   // the tebo with the new bundle pops up so you can see which one
+  for(let k=0;k<10;k++) K.parts.push({x:K.px0+teboX(n)-30+Math.random()*60,y:388,vx:(Math.random()-.5)*80,vy:-80-Math.random()*60,r:2.5,col:'#cfe9f1',life:.5,g:600,stopY:400}); }
+function teboToBowl(n=0){ const b=nbowl(n), nd=b.nood; nd.state='bowl'; K.dirty=true; b._v=(b._v||0)+1; if(b.soup<0.05){ b.noodlesBeforeSoup=true; toast('Noodles went in before the soup!'); } else blip(660,.1); }
 function spray(t){ const col={tare:'#4a1c08',garlic:'#f1dc9c',chili:'#c8301a'}[t], n=t==='tare'?14:9;
   for(let k=0;k<n;k++) K.parts.push({x:POUR_AT.x-8+Math.random()*10,y:POUR_AT.y+4,vx:(Math.random()-.5)*30,vy:40+Math.random()*60,r:t==='garlic'?3.5:2.5,col,life:.8,g:900,stopY:BROTH.y+Math.random()*16}); }
 function floatTxt(s,x,y){ K.fx.push({s,x,y,t:0}); }
@@ -815,15 +847,27 @@ function floatTxt(s,x,y){ K.fx.push({s,x,y,t:0}); }
    11f. moving between steps
    --------------------------------------------------------------------- */
 function goStation(i){ i=Math.max(0,Math.min(6,i)); K.camT=i*KW; K.queue=0; if(i!==K.stn){ K.stn=i; K.hop=.6; blip(420+i*30,.06); updateHighlight(); } }
-function renderKTicket(){ const el=$('#kTicket'); el.classList.toggle('focus',!ticketMini); renderTicket(el,G.order,false);
-  if(!el.querySelector('.tk-more')) el.insertAdjacentHTML('beforeend','<div class="tk-more"></div>'); }
-function updateHighlight(){
-  const el=$('#kTicket'), hl=el.querySelector('.tk-hl'); if(!hl||!G.order) return;
+const addMore=el=>{ if(!el.querySelector('.tk-more')) el.insertAdjacentHTML('beforeend','<div class="tk-more"></div>'); };
+function renderKTicket(){ const el=$('#kTicket'), el2=$('#kTicket2'); $('#kStage').classList.toggle('rush',!!G.rush);
+  if(!G.rush){ $('#btnRemake').style.top=''; $('#btnToss').style.top=''; el2.hidden=true; el.hidden=false; el.classList.remove('act'); el.classList.toggle('focus',!ticketMini); renderTicket(el,G.order,false); addMore(el); return; }
+  G.rush.slots.forEach((s,i)=>{ const t=i?el2:el, show=!s.gone && !s.served && (K.open==null || K.open===i); t.hidden=!show; if(!show) return;
+    t.classList.toggle('focus',K.open!==i); t.classList.toggle('act',G.rush.active===i); renderTicket(t,s.order,false); addMore(t);
+    t.querySelector('.tk-hd').insertAdjacentHTML('afterbegin',`<span class="tk-num n${i+1}">${i+1}</span>`); const pb=t.querySelector('.tk-pat i'); if(pb) pb.style.width=s.pat+'%'; });
+  requestAnimationFrame(()=>{ updateHighlight(); layoutSlips(); }); }
+function layoutSlips(){ const a=$('#kTicket'), b=$('#kTicket2'); b.style.top=(a.hidden ? 16 : a.offsetTop+a.offsetHeight+6)+'px';
+  const last=b.hidden?a:b, y=(last.hidden?16:last.offsetTop+last.offsetHeight)+8;   // Remake / Toss sit just under the slips
+  $('#btnRemake').style.top=y+'px'; $('#btnToss').style.top=y+'px'; }
+function toggleSlip(i){ K.open = K.open===i ? null : i; if(G.rush.active!==i) setSlot(i); blip(600,.04); renderKTicket(); }
+function updateHighlight(){ if(!G.order) return;
+  const els = G.rush ? [[$('#kTicket'),0],[$('#kTicket2'),1]].filter(([e])=>!e.hidden) : [[$('#kTicket'),null]];
+  els.forEach(([el,i])=>hlSlip(el, i==null?G.order:G.rush.slots[i].order, i==null?ticketMini:K.open===i));
+  if(G.rush) layoutSlips(); }
+function hlSlip(el,order,full){ const hl=el.querySelector('.tk-hl'); if(!hl) return;
   const cur=STATIONS[K.stn].rows; el.querySelectorAll('.tk-row').forEach(r=>r.classList.toggle('cur',cur.includes(r.dataset.k)));
   const hd=el.querySelector('.tk-hd'); let st=hd.querySelector('.tk-step'); if(!st){ st=document.createElement('span'); st.className='tk-step'; hd.querySelector('.no').before(st); }
   st.textContent=`STEP ${K.stn+1}/7 · ${STATIONS[K.stn].name}`;
-  const more=el.querySelector('.tk-more'); if(more) more.innerHTML=ticketMini?'Tap to fold ▴':`${STATIONS[K.stn].hint} · <b>tap for the full order ▾</b>`;
-  if(el.classList.contains('focus')){ hl.hidden=true; drawCircles(el,G.order); return; }
+  const more=el.querySelector('.tk-more'); if(more) more.innerHTML=full?'Tap to fold ▴':`${STATIONS[K.stn].hint} · <b>tap for the full order ▾</b>`;
+  if(el.classList.contains('focus')){ hl.hidden=true; drawCircles(el,order); return; }
   const rows=STATIONS[K.stn].rows.map(k=>el.querySelector(`.tk-row[data-k="${k}"]`));
   const top=rows[0].offsetTop-2, bot=rows[rows.length-1].offsetTop+rows[rows.length-1].offsetHeight+1;
   hl.hidden=false; hl.style.top=top+'px'; hl.style.height=(bot-top)+'px'; hl.dataset.step='STEP '+(K.stn+1);
@@ -842,7 +886,7 @@ function kitchenFrame(dt){
   const b=G.bowl, nd=b.nood;
   if(K.pour){ b.soup=Math.min(1.15,b.soup+dt*CFG.SOUP_RATE*UP.soup()); K.dirty=true; if(Math.random()<dt*8) blip(180+Math.random()*40,.05,'sine',.03); }
   // tool motion (tap = automatic; drag-release = pour where you let go)
-  if(K.rice){ K.rice.T+=dt; if(!K.rice.served && K.rice.T>=RICE_T*.5){ K.rice.served=true; b.rice=true; blip(760,.08); floatTxt('Rice',BROTH.x+70,BROTH.y-70); }
+  if(K.rice){ K.rice.T+=dt; if(!K.rice.served && K.rice.T>=RICE_T*.5){ K.rice.served=true; b.rice=true; blip(760,.08); floatTxt('Rice',BROTH.x+(G.rush?0:70),BROTH.y-70); }
     if(K.rice.T>=RICE_T) K.rice=null; }
   const M=K.M; if(M){ M.T+=dt;
     if(M.stage==='go'){ const k=Math.min(1,M.T/(.24*CFG.SCOOP_TIME)), e=k*k*(3-2*k); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*40; if(k>=1){ M.stage='act'; M.T=0; } }
@@ -854,11 +898,13 @@ function kitchenFrame(dt){
   if(!K.M && !K.lastTap) K.queue=0;
   // boil chip when the noodles are cooking out of sight
   const chip=$('#boilChip');
-  if(nd.state==='boiling' && has('bell') && G.order){ const t=boilT(nd), w=want(G.order.pos).noodle;
-    if(!nd.rang && Math.abs(t-CFG.FIRM_CENTERS[w])<=CFG.FIRM_TOL*.6){ nd.rang=true; blip(1320,.25,'sine',.12); setTimeout(()=>blip(1760,.3,'sine',.1),120); floatTxt('Ding! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+250:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } }
-  if(nd.state==='boiling' && K.stn!==NOODLE_STEP){ const t=boilT(nd); chip.hidden=false; $('#boilTxt').textContent=`${t.toFixed(1)}s · ${firmLabel(t)} ›`; } else chip.hidden=true;
+  if(K.rise) K.rise=K.rise.map(r=>Math.max(0,r-dt*1.1));
+  NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling' || !has('bell') || !ord) return; const t=boilT(n), w=want(ord.pos).noodle;
+    if(!n.rang && Math.abs(t-CFG.FIRM_CENTERS[w])<=CFG.FIRM_TOL*.6){ n.rang=true; blip(1320,.25,'sine',.12); setTimeout(()=>blip(1760,.3,'sine',.1),120); floatTxt((G.rush?`${s.i+1} · `:'')+'Ding! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
+  const boilingNow=NSL().filter(s=>s.bowl.nood.state==='boiling');
+  if(boilingNow.length && K.stn!==NOODLE_STEP){ chip.hidden=false; $('#boilTxt').textContent=boilingNow.map(s=>{ const t=boilT(s.bowl.nood); return `${G.rush?(s.i+1)+' · ':''}${t.toFixed(1)}s · ${firmLabel(t)}`; }).join('   ')+' ›'; } else chip.hidden=true;
 
-  $('#btnToss').hidden = !(K.stn===NOODLE_STEP && ['boiling','lifted','bowl'].includes(nd.state));
+  $('#btnToss').hidden = !(K.stn===NOODLE_STEP && NSL().some(s=>['boiling','lifted','bowl'].includes(s.bowl.nood.state)));
   const tl=has('restore')?'⟲ Restore noodles':'Toss noodles'; if($('#btnToss').textContent!==tl) $('#btnToss').textContent=tl;
   if(G.tut) tutKitchen();
   // ---- draw ----
@@ -871,20 +917,36 @@ function kitchenFrame(dt){
   for(let i=i0;i<=i1;i++){ c.save(); c.translate(i*KW,0); drawShelf(c,i); if(ticketMini) drawPlaque(c,i); STATION_ART[i](c,K.t); c.restore(); }   // the step name lives on the slip while it's folded
   c.restore();
   // hint glow on the current step's tools after a moment of no input
-  if(settled() && !K.hand && !K.M && (K.idle>2.5 || (G.tut && !tutStepDone()))) OBJS[K.stn].forEach(o=>{ if(o.kind==='tebo' && !(nd.state==='boiling'||nd.state==='lifted')) return; glow(c,K.px0+o.box[0]+8,o.box[1]+8,o.box[2]-16,o.box[3]-16,14,K.t); });
+  if(settled() && !K.hand && !K.M && (K.idle>2.5 || (G.tut && !tutStepDone()))) OBJS[K.stn].forEach(o=>{ if(o.kind==='tebo' && !NSL().some(s=>['boiling','lifted'].includes(s.bowl.nood.state))) return; glow(c,K.px0+o.box[0]+8,o.box[1]+8,o.box[2]-16,o.box[3]-16,14,K.t); });
   // bowl on the pass
+  if(G.rush){ if(K.dirty){ G.bowl._v=(G.bowl._v||0)+1; K.dirty=false; }
+    G.rush.slots.forEach(s=>{ if(s.gone||s.served) return; const x=RUSH_BX[s.i], act=G.rush.active===s.i, bx=x+CX*BK, by=BOWL.y+CY*BK;
+      shadow(c,bx,BOWL.y+478*BK,80,10,.25);
+      const pul=act||K.ask, ph=.5+.5*Math.sin(K.t*5), bs=pul?1+.025*ph:1;   // selected bowl(s) pulse; while choosing which to serve, both do
+      if(pul) drawOutline(c,s,x,.75+.25*ph,bs);
+      if(s.cv._v!==s.bowl._v){ drawRamen(s.cv,s.bowl); s.cv._v=s.bowl._v; }
+      { const w=BOWL.s*bs, ox=x-(w-BOWL.s)/2, oy=BOWL.y-(w-BOWL.s)/2; c.drawImage(s.cv,ox,oy,w,w); }
+      const bdx=s.i?x+172:x+18; ell(c,bdx,BOWL.y+118,13,13,SLOT_COL[s.i],3,'#fff'); txt(c,String(s.i+1),bdx,BOWL.y+119,13,'#fff',700);
+      if(s.bowl.rice){ const pop=act&&K.rice&&K.rice.served? Math.min(1,(K.rice.T-RICE_T*.5)/(RICE_T*.25)) : 1, sc=pop<1? .4+.6*pop+Math.sin(pop*Math.PI)*.15 : 1; drawSprite(c,IMG.rice,x+165,585,50*sc,0); } });
+  } else {
   shadow(c,BROTH.x,BOWL.y+478*BK,86,10,.25);
   if(K.dirty){ drawRamen(bowlCv,b); K.dirty=false; }
   c.drawImage(bowlCv,BOWL.x,BOWL.y,BOWL.s,BOWL.s);
-  if(b.rice){ const pop=K.rice&&K.rice.served? Math.min(1,(K.rice.T-RICE_T*.5)/(RICE_T*.25)) : 1, sc=pop<1? .4+.6*pop+Math.sin(pop*Math.PI)*.15 : 1; drawSprite(c,IMG.rice,340,512,74*sc,0); }
+  }
+  if(!G.rush && b.rice){ const pop=K.rice&&K.rice.served? Math.min(1,(K.rice.T-RICE_T*.5)/(RICE_T*.25)) : 1, sc=pop<1? .4+.6*pop+Math.sin(pop*Math.PI)*.15 : 1; drawSprite(c,IMG.rice,340,512,74*sc,0); }
   if(K.stn===1){ c.save(); c.setLineDash([5,5]); c.lineWidth=2; c.strokeStyle='rgba(210,50,45,.8)'; c.beginPath(); c.ellipse(BROTH.x,BROTH.y,RX*BK,RY*BK,0,0,6.29); c.stroke(); c.restore();
-    rr(c,302,474,58,24,8); fs(c,'#fffaf0',2.5); txt(c,Math.round(b.soup*100)+'%',331,486,12,Math.abs(b.soup-CFG.SOUP_TARGET)<=CFG.SOUP_TOL?'#3e8e3a':OUT,700);
+    rr(c,BROTH.x-29,BOWL.y+16,58,24,8); fs(c,'#fffaf0',2.5); txt(c,Math.round(b.soup*100)+'%',BROTH.x,BOWL.y+28,12,Math.abs(b.soup-CFG.SOUP_TARGET)<=CFG.SOUP_TOL?'#3e8e3a':OUT,700);
     txt(c,'fill line',BROTH.x+RX*BK-6,BROTH.y-RY*BK-6,9,'#d2322d',700,'right',3); }
-  if(K.pour){ const L=Math.min(b.soup/CFG.SOUP_TARGET,1), sy=BOWL.y+(CY+(1-L)*50)*BK; c.fillStyle='rgba(222,170,80,.92)'; rr(c,K.px0+196+Math.sin(K.t*40)*.6,478,8,Math.max(4,sy-478),4); c.fill(); ell(c,BROTH.x,sy,14+Math.sin(K.t*30)*2,4,'rgba(255,240,200,.8)'); }
+  if(K.pour){ const L=Math.min(b.soup/CFG.SOUP_TARGET,1), sy=BOWL.y+(CY+(1-L)*50)*BK; c.fillStyle='rgba(222,170,80,.92)'; rr(c,BROTH.x-4+Math.sin(K.t*40)*.6,478,8,Math.max(4,sy-478),4); c.fill(); ell(c,BROTH.x,sy,14+Math.sin(K.t*30)*2,4,'rgba(255,240,200,.8)'); }
   if(b.soup>0.3){ c.save(); for(let k=0;k<3;k++){ const ph=(K.t*.45+k*.33)%1; c.globalAlpha=(1-ph)*.35; ell(c,BROTH.x-40+k*40+Math.sin(K.t+k)*6,BROTH.y-20-ph*70,12+ph*14,9+ph*10,'#fff'); } c.restore(); }
   // particles (fall into the bowl / boiler)
   K.parts=K.parts.filter(q=>{ q.life-=dt; q.vy+=q.g*dt; q.x+=q.vx*dt; q.y+=q.vy*dt; if(q.y>q.stopY) return false; ell(c,q.x,q.y,q.r,q.r,q.col,1,'rgba(91,58,46,.35)'); return q.life>0; });
   drawMomo(c,dt);
+  K.sweat=K.sweat||[]; if(G.rush && !G.serving && K.work>.5){ if(Math.random()<dt*9){ const left=Math.random()<.5, a=(left?-1:1)*(.5+Math.random()*.7);
+      K.sweat.push({x:200+(left?-110:110)+Math.random()*20-10, y:548+Math.random()*30, vx:Math.sin(a)*120, vy:-90-Math.random()*60, t:0, side:left?-1:1}); } }
+  { K.sweat=K.sweat.filter(d=>{ d.t+=dt; d.vy+=420*dt; d.x+=d.vx*dt; d.y+=d.vy*dt; const al=Math.max(0,1-d.t/.7);   // sweat flying off a rushing Momo
+      c.save(); c.globalAlpha=al; c.translate(d.x,d.y); c.scale(1.7*d.side,1.7); c.rotate(Math.max(-.6,Math.min(.6,d.vy/400))); c.beginPath(); c.moveTo(-9,0); c.quadraticCurveTo(2,-7,6,0); c.quadraticCurveTo(2,7,-9,0);   // point faces Momo, round end flies outwards
+      c.fillStyle='#9fdcf5'; c.fill(); c.lineWidth=2; c.strokeStyle='#3f86b0'; c.stroke(); c.restore(); return d.t<.7; }); }
   // held / moving tool on top
   const tool=K.hand||K.M; if(tool) drawTool(c,tool.t,tool.x,tool.y,tool.ang||0, K.hand? K.hand.full : tool.full!==false);
   K.fx=K.fx.filter(f=>{ f.t+=dt; c.save(); c.globalAlpha=Math.max(0,1-f.t/1.2); txt(c,f.s,f.x,f.y-f.t*30,15,OUT,700,'center',5,'#fff'); c.restore(); return f.t<1.2; });
@@ -1064,7 +1126,16 @@ function refreshHome(){ const endless=P.lastMode==='endless';   // the tray show
   $('#hotTray .hm:not(.hmEnd)').hidden=endless; $('#hotTray .hmEnd').hidden=!endless; $('#hmBest').textContent=(P.endlessBest||0).toLocaleString();
   $('#btnEndless').innerHTML=`Endless${P.endlessBest?` · Best ${P.endlessBest} bowl${P.endlessBest===1?'':'s'}`:''} ▶<small>Just make ramen. No rent, no stock, no rush.</small>`;
   $('#hmDay').textContent=P.day; $('#hmMoney').textContent=P.money.toLocaleString(); $('#hmRent').textContent=ECON.rent(P.day).toLocaleString(); $('#btnDay').innerHTML= P.resume&&P.resume.day===P.day ? `Continue Day ${P.day} · ${clockStr(Math.min(P.resume.D.clock||DAY.OPEN,DAY.CLOSE))} ▶<small>Pick up where you saved</small>` : `Story · Day ${P.day} ▶<small>Rent, stock, patience and night prep</small>`; $('#hotDrink').classList.toggle('locked',!P.tutorialDone); }
-function goHome(){ G.clockHold=false; G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
+/* patch notes live in patch-notes.js; shown once per VERSION (remembered on this phone, outside the game save) */
+function showPatch(){ const N=typeof PATCH_NOTES!=='undefined'?PATCH_NOTES:null; if(!N||!N.SHOW) return;
+  let seen=null; try{ seen=localStorage.getItem('momo-ramen-shop.patch'); }catch(e){}
+  if(seen===N.VERSION) return;
+  if(seen===null && P.served===0 && !P.tutorialDone){ try{ localStorage.setItem('momo-ramen-shop.patch',N.VERSION); }catch(e){} return; }   // brand-new players skip it
+  $('#patchVer').textContent='VERSION '+N.VERSION; $('#patchTitle').textContent=N.TITLE; $('#btnPatch').textContent=N.BUTTON||'OK';
+  $('#patchList').innerHTML=(N.INTRO?`<p class="pIntro">${N.INTRO}</p>`:'')+N.SECTIONS.map(([h,lines,kind])=>`<h4 class="${kind==='sub'?'sub':''}">${h}</h4>${lines&&lines.length?`<ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul>`:''}`).join('')+(N.OUTRO?`<p class="pOutro">${N.OUTRO}</p>`:'');
+  $('#patch').hidden=false;
+  $('#btnPatch').onclick=()=>{ try{ localStorage.setItem('momo-ramen-shop.patch',N.VERSION); }catch(e){} $('#patch').hidden=true; blip(700,.06); }; }
+function goHome(){ endRush(); G.clockHold=false; G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
   $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); showScene('shop'); layoutStage(false); buildHome(); refreshHome(); music('title'); }
 
 /* =====================================================================
@@ -1079,7 +1150,7 @@ function enterService(){ G.order=null; $('#modeSheet').classList.remove('on'); G
   resetMomoBack(); updateHud(); layoutStage(false); music('day',true); later(nextCustomer,400); }
 function startDay(){ P.lastMode='story'; G.play='story'; G.tut=!P.tutorialDone; G.firstOrder=!P.firstDone||G.tut;
   STOCK_KEYS.forEach(lotsOf);
-  Object.assign(D,{n:Infinity,clock:DAY.OPEN,over:undefined,done:0,sales:0,tips:0,walk:0,rep0:repOf(),event:P.day>1?(P.nextEvent||'normal'):'normal'});
+  Object.assign(D,{n:Infinity,rushAt:planRushes(P.day),clock:DAY.OPEN,over:undefined,done:0,sales:0,tips:0,walk:0,rep0:repOf(),event:P.day>1?(P.nextEvent||'normal'):'normal'});
   if(P.resume && P.resume.day===P.day) Object.assign(D,P.resume.D);                          // continue a saved day
   else P.dayStart={day:P.day,money:P.money,stock:{...P.stock},lots:JSON.parse(JSON.stringify(P.lots||{})),rep:repOf(),served:P.served};   // for "Restart the day"
   P.resume=null; saveGame(); enterService();
@@ -1101,9 +1172,10 @@ function clockTick(dt){
   if(G.arriveIn>0){ G.arriveIn-=dt; if(G.arriveIn<=0){ G.arriveIn=0; if(closed()) closeShop(); else arrive(); } } }
 function domArms(root,w,h,mode,deg){ if(root._arms!==mode){ root._arms=mode; placeArms(root,w,h,mode==='head'?ARM:ARM_TORSO); } setArms(root,deg); }
 function resetMomoBack(){ const m=$('#shopMomo'); m.classList.remove('front'); m.querySelector('.body').src=ASSET_SRC.momo_body; domArms(m,440,475,'torso',26); }
-function clearTrayFx(){ $('#stage').classList.remove('zoomed','shineOn','gloomOn'); $('#sparkles').innerHTML=''; }
+function clearTrayFx(){ $('#stage').classList.remove('zoomed','shineOn','gloomOn'); $('#sparkles').innerHTML=''; $('#shine').style.transform=''; if(typeof clearDuoFx==='function') clearDuoFx(); }
 function nextCustomer(){
   G.clockHold=false;
+  endRush();
   $('#btnNextCust').hidden=true; $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); clearTrayFx(); resetMomoBack();
   if(G.play==='tutorial' && D.done>=1){ toast('Tutorial complete!'); goHome(); return; }
   if(G.play==='story' && closed()){ closeShop(); return; }
@@ -1113,16 +1185,19 @@ function nextCustomer(){
 }
 function arrive(){
   G.clockHold=true;   // the clock waits while the customer orders (until 'To the kitchen')
+  const rw=rushWindow(); if(rw){ arriveRush(rw); return; }
+  D.singles=(D.singles||0)+1;
   const id = G.firstOrder ? 'soso' : pickCustomer(G.lastCust); G.lastCust=id; G.ticketNo++;
   G.order={cust:id,no:G.ticketNo,pos:genOrder(id)}; G.bowl=newBowl(); G.result=null; K.dirty=true; G.pat=100;
   $('#shopBowl').classList.add('hidden-o'); $('#shopRice').classList.add('hidden-o');
   const c=$('#cust'); c.classList.add('away'); c.classList.remove('impatient');
-  later(()=>{ placeCustomer(id); c.innerHTML=custHTML(id,'idle'); c.classList.remove('away','eat');
+  later(()=>{ c.style.left=''; placeCustomer(id); c.innerHTML=custHTML(id,'idle'); c.classList.remove('away','eat');
     later(()=>{ say(CUSTOMERS[id].hi); renderTicket($('#shopTicket'),G.order); $('#orderSheet').classList.add('on'); layoutStage('cust');
       const timed = G.play==='story' && !G.tut; G.timedOrder=timed; G.waiting=false;   // patience starts when Momo heads to the kitchen $('#patBar').classList.toggle('hide',!timed); $('#app').classList.toggle('notimed',!timed);
       $('#orderCoach').hidden=!G.tut; $('#scoreCoach').hidden=!G.tut; later(redrawAllCircles,60); later(redrawAllCircles,520); },650); },350);
 }
 function patienceTick(dt){
+  if(G.rush){ rushPatience(dt); return; }
   if(!G.waiting || G.play!=='story' || G.tut) return;
   G.pat=Math.max(0,G.pat-dt*100*ECON.PATIENCE_SLOWER/(ECON.patience(P.day)*UP.pat()*(CUSTOMERS[G.order.cust].pat||1)));
   const cls=G.pat<30?'low':G.pat<60?'mid':'';
@@ -1140,6 +1215,8 @@ function favHit(id,r){ const f=CUSTOMERS[id].fav; if(!f || lowGrade(r)) return f
   const p=G.order.pos, asked=Object.keys(f.order||{}).every(k=>p[k]===f.order[k]), row=r.rows.find(x=>x.label===f.row);
   return asked && !!row && row.pts>=row.max; }
 function closingWalk(){   // the shop is closing: the last customer leaves politely (no reputation loss)
+  if(G.rush){ G.waiting=false; live().forEach(s=>{ s.gone=true; s.waiting=false; D.done++; sayAt(s.i,"Oh, you're closing? I'll come back tomorrow!"); slotBar(s.i).classList.add('hide'); later(()=>rushLeave(s.i),1800); });
+    if(G.scene!=='shop') showScene('shop'); $('#orderSheet').classList.remove('on'); layoutStage(false); if(!G.serving) later(closeShop,2600); return; }
   G.waiting=false; D.done++; const id=G.order.cust; if(G.scene!=='shop') showScene('shop');
   $('#orderSheet').classList.remove('on'); $('#patBar').classList.add('hide'); layoutStage(false);
   const c=$('#cust'); c.classList.remove('impatient'); say("Oh, you're closing? I'll come back tomorrow!");
@@ -1152,13 +1229,190 @@ function walkout(){
   later(()=>{ hush(); c.classList.add('away'); },1800);
   later(()=>{ D.done++; saveGame(); nextCustomer(); },2600);
 }
+
+/* =====================================================================
+   16b. RUSH — from RUSH.FROM_DAY, lunch & dinner bring two customers at once
+   ① = left customer · left bowl · left tebo   ② = right
+   ===================================================================== */
+const RUSH_CX=[300,655], RUSH_BX=[10,200], SLOT_COL=['#d2322d','#2e78c8'];
+function rushCount(d){ if(d<RUSH.FROM_DAY) return 0; const row=[...RUSH.SCHEDULE].reverse().find(r=>d>=r[0]); return Math.min(RUSH.MAX, row[1]+(Math.random()<row[2]?1:0)); }
+/* the clock times today's rushes start, spread evenly between opening and closing (a little jitter) */
+function planRushes(d){ const n=rushCount(d), span=DAY.CLOSE-DAY.OPEN; return [...Array(n)].map((_,k)=>Math.round(DAY.OPEN+span*(k+.5+(Math.random()-.5)*.4)/n)); }
+const rushName=t=>RUSH.NAMES.find(([upto])=>t<upto)[1];
+const SINGLE_S=60, RUSH_S=90;   // rough kitchen seconds for one single bowl / one rush, used to keep the 5 single orders safe
+function rushWindow(){ if(G.play!=='story' || G.tut || !D.rushAt || !D.rushAt.length || D.rushAt[0]>D.clock) return null;
+  const left=(DAY.CLOSE-D.clock)*(typeof DAY.SECONDS==='function'?DAY.SECONDS(P.day):DAY.SECONDS)/(DAY.CLOSE-DAY.OPEN);   // kitchen seconds left today
+  const need=Math.max(0,RUSH.SINGLES-(D.singles||0))*SINGLE_S;
+  if(left < need+RUSH_S){ D.rushAt.shift(); return null; }   // running behind: skip this rush so the single orders still fit
+  const t=D.rushAt.shift(); return [t,t,rushName(t)]; }
+const slotEl=i=>i?$('#cust2'):$('#cust'), slotBar=i=>i?$('#patBar2'):$('#patBar'), slotBubble=i=>i?$('#custBubble2'):$('#custBubble');
+const live=()=> G.rush ? G.rush.slots.filter(s=>!s.gone&&!s.served) : [];
+function sayAt(i,t){ const b=slotBubble(i); if(b.textContent!==t) b.textContent=t; b.classList.remove('off'); }
+const sayC=t=> G.rush&&G.rush.cur!=null ? sayAt(G.rush.cur,t) : say(t);
+function setGeom(x){ BOWL.x=x; BROTH.x=x+CX*BK; BOWL_HIT.x=x-5; POUR_AT.x=x+95; }
+/* do something to bowl i without changing which bowl is selected (used by drag & drop) */
+function onBowl(i,f){ if(!G.rush || i==null || i===G.rush.active) return f(); const prev=G.rush.active; setSlot(i); try{ f(); } finally{ const b=G.bowl; b._v=(b._v||0)+1; setSlot(prev); } }
+function setSlot(i){ const s=G.rush.slots[i]; G.rush.active=i; G.order=s.order; G.bowl=s.bowl; G.pat=s.pat; setGeom(RUSH_BX[i]); K.dirty=true; }
+/* yellow outline of a bowl with a soft glow (selected bowl / "serve which?") */
+function bowlSil(s){ if(s.sil && s.sil._v===s.cv._v) return s.sil; const m=s.sil||document.createElement('canvas'); m.width=m.height=512; const x=m.getContext('2d');
+  x.clearRect(0,0,512,512); x.drawImage(s.cv,0,0); x.globalCompositeOperation='source-in'; x.fillStyle='#ffe27a'; x.fillRect(0,0,512,512); x.globalCompositeOperation='source-over'; m._v=s.cv._v; s.sil=m; return m; }
+function drawOutline(c,s,x,a,sc=1){ const m=bowlSil(s), W=BOWL.s*sc, g=7, ox=x-(W-BOWL.s)/2, oy=BOWL.y-(W-BOWL.s)/2; c.save(); c.globalAlpha=a; c.shadowColor='rgba(255,220,90,1)'; c.shadowBlur=18;
+  c.drawImage(m,ox-g,oy-g,W+2*g,W+2*g); c.drawImage(m,ox-g,oy-g,W+2*g,W+2*g); c.restore(); }   // 7 px yellow rim (1 px thicker), drawn twice = brighter
+function mkCv(){ const c=document.createElement('canvas'); c.width=c.height=512; c._v=-1; return c; }
+function bowlAt(p){ if(!G.rush) return overBowl(p)?0:null;
+  for(const s of live()){ const x=RUSH_BX[s.i]-5; if(p.x>=x&&p.x<=x+200&&p.y>=BOWL_HIT.y&&p.y<=BOWL_HIT.y+BOWL_HIT.h) return s.i; } return null; }
+function placeAt(el,id,cx){ const h=CUST_H[id], sc=csize(id), bottom=752+h*sc*.38; el.style.top=(bottom-h)+'px'; el.style.height=h+'px'; el.style.left=(cx-180)+'px'; return bottom-h*sc; }
+function arriveRush(w){
+  const a=pickCustomer(G.lastCust), b=pickCustomer(a); G.lastCust=b;
+  G.rush={name:w[2], active:0, cur:null, slots:[a,b].map((id,i)=>({i, cust:id, order:{cust:id,no:++G.ticketNo,pos:genOrder(id)}, bowl:newBowl(), pat:100, waiting:false, cv:mkCv()}))};
+  setSlot(0); G.result=null; G.serveQ=[]; G.serving=false;
+  $('#shopBowl').classList.add('hidden-o'); $('#shopRice').classList.add('hidden-o');
+  [0,1].forEach(i=>{ const el=slotEl(i); el.hidden=false; el.classList.add('away'); el.classList.remove('impatient','eat'); slotBar(i).hidden=false; slotBar(i).classList.add('hide'); });
+  toast(`${w[2]}!<br><small>Two customers at once</small>`); blip(880,.1); later(()=>blip(1100,.12),120);
+  later(()=>{ G.rush.slots.forEach((s,i)=>{ const el=slotEl(i), head=placeAt(el,s.cust,RUSH_CX[i]); el.innerHTML=custHTML(s.cust,'idle'); el.classList.remove('away');
+      const bu=slotBubble(i); bu.style.left=(RUSH_CX[i]-160)+'px'; bu.style.top=(head-250)+'px'; const bar=slotBar(i); bar.style.left=(RUSH_CX[i]-120)+'px'; bar.style.top=(head-62)+'px'; });
+    later(()=>{ G.rush.slots.forEach((s,i)=>sayAt(i,CUSTOMERS[s.cust].hi));
+      const go=()=>{ renderRushTabs(0); $('#orderSheet h3').textContent=`${G.rush.name} · 2 orders`; $('#orderSheet').classList.add('on'); layoutStage(false);
+        G.rush.slots.forEach((s,i)=>slotBar(i).classList.remove('hide')); G.rush.timed=true;   // patience starts in the kitchen $('#app').classList.remove('notimed');
+        later(redrawAllCircles,60); later(redrawAllCircles,520); };
+      P.seen=P.seen||{}; if(!P.seen.rush) showRushIntro(go); else go(); },650); },350);
+}
+function renderRushTabs(sel){ const T=$('#rushTabs'); T.hidden=false;
+  T.innerHTML=G.rush.slots.map((s,i)=>`<button data-i="${i}" class="${i===sel?'on':''}"><b class="n${i+1}">${i+1}</b>${CUSTOMERS[s.cust].name}<i><u style="width:${s.pat}%"></u></i></button>`).join('');
+  T.querySelectorAll('button').forEach(b=>b.onclick=()=>renderRushTabs(+b.dataset.i));
+  const s=G.rush.slots[sel]; renderTicket($('#shopTicket'),s.order); G.rush.tab=sel; }
+/* rush tutorial: 4 picture cards */
+const RUSH_CARDS=[
+  {cap:'Two customers at once! <b class="n1">1</b> is on the left, <b class="n2">2</b> on the right.', draw:(c)=>{
+    const table=()=>{ rr(c,0,262,600,58,0); fs(c,vg(c,262,320,'#b0221b','#7b0000'),0); };
+    [['kuma',170],['bun',430]].forEach(([id,x],i)=>{ const im=new Image(); im.src=CUST_IMG[id]; const go=()=>{ const w=180*csize(id), h=w*im.height/im.width; c.drawImage(im,x-w/2,300-h,w,h); table(); riBadge(c,170,70,0); riBadge(c,500,70,1); }; im.complete?go():im.onload=go; });
+    table(); } },
+  {cap:'<b>Tap a bowl</b> to work on it — it glows.', draw:(c)=>{
+    [150,450].forEach((x,i)=>{ if(i===0){ c.save(); c.shadowColor='rgba(255,200,60,1)'; c.shadowBlur=18; c.filter='brightness(0) invert(1) sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)'; drawSprite(c,IMG.bowl,x,190,250,0); c.restore(); }
+      drawSprite(c,IMG.bowl,x,190,230,0); riBadge(c,x+(i?110:-110),120,i); });
+    riFinger(c,150,205); } },
+  {cap:'Noodles go to <b class="n1">1</b> first — <b>one tap</b> lifts tebo <b class="n1">1</b> before <b class="n2">2</b>.', draw:(c)=>{
+    c.save(); c.translate(-243,-600); c.scale(1.9,1.9);
+    rr(c,188,384,196,82,12); fs(c,steel(c,188,384),3); ell(c,286,388,90,12,vg(c,376,400,'#cfe9f1','#9fcbd9'),3);
+    c.save(); mirrorAt(c,226,true); drawTebo(c,226,346,true,0); c.restore();
+    c.save(); c.beginPath(); c.rect(0,0,600,386); c.clip(); drawTebo(c,346,396,true,0); c.restore();
+    c.restore(); riBadge(c,110,60,0); riBadge(c,470,150,1); riFinger(c,250,230); txt(c,'1 tap',250,282,20,'#d2322d',700); } },
+  {cap:'<b>Tap Momo</b> to serve, then tap a bowl — or tap Momo again for <b>both</b>.', draw:(c)=>{
+    drawSprite(c,IMG.bowl,120,170,190,0); drawSprite(c,IMG.bowl,480,170,190,0); riBadge(c,40,110,0); riBadge(c,560,110,1);
+    if(ok(IMG.momo_body)){ const w=200, h=w*IMG.momo_body.height/IMG.momo_body.width; c.drawImage(IMG.momo_body,300-w/2,330-h*.72,w,h); }
+    riFinger(c,330,250); } },
+];
+function riBadge(c,x,y,i){ ell(c,x,y,26,26,SLOT_COL[i],5,'#fff'); txt(c,String(i+1),x,y+2,26,'#fff',700); }
+function riFinger(c,x,y){ c.save(); c.globalAlpha=.9; ell(c,x,y,22,22,'rgba(255,255,255,.55)',4,'#e0a800'); ell(c,x,y,8,8,'#e0a800',0); c.restore(); }
+function riShow(k){ const cv=$('#riCanvas'), c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,600,320); RUSH_CARDS[k].draw(c);
+  $('#riCap').innerHTML=RUSH_CARDS[k].cap; $('#riDots').innerHTML=RUSH_CARDS.map((_,i)=>`<i class="${i===k?'on':''}"></i>`).join('');
+  $('#btnRushGo').textContent= k===RUSH_CARDS.length-1 ? "Let's go! ▶" : 'Next ▶'; }
+function showRushIntro(go){ G.paused=true; $('#riTitle').textContent=`${G.rush.name}!`; $('#rushIntro').hidden=false; let k=0; riShow(0);
+  const done=()=>{ P.seen.rush=true; saveGame(); $('#rushIntro').hidden=true; G.paused=false; last=performance.now(); go(); };
+  $('#btnRushGo').onclick=()=>{ blip(600,.04); if(k<RUSH_CARDS.length-1) riShow(++k); else done(); };
+  $('#btnRushSkip').onclick=done; }
+function rushPatience(dt){ if(G.play!=='story' || G.tut || G.serving) return;   // frozen while a bowl is judged, eaten and paid for
+  G.rush.slots.forEach((s,i)=>{ if(s.gone||s.served||!s.waiting) return;
+    s.pat=Math.max(0,s.pat-dt*100*ECON.PATIENCE_SLOWER/(ECON.patience(P.day)*UP.pat()*(CUSTOMERS[s.cust].pat||1)));
+    const cls=s.pat<30?'low':s.pat<60?'mid':'', pw=(Math.round(s.pat*2)/2)+'%', key=cls+pw;
+    if(key!==s.key){ s.key=key; const bar=slotBar(i); bar.classList.toggle('mid',cls==='mid'); bar.classList.toggle('low',cls==='low'); bar.firstElementChild.style.width=pw;
+      const k=$(i?'#kTicket2':'#kTicket').querySelector('.tk-pat'); if(k){ k.className='tk-pat '+cls; k.firstElementChild.style.width=pw; }
+      const tb=$(`#rushTabs button[data-i="${i}"] u`); if(tb) tb.style.width=pw;
+      if(G.rush.tab===i){ const sk=$('#shopTicket .tk-pat'); if(sk){ sk.className='tk-pat '+cls; sk.firstElementChild.style.width=pw; } } }
+    const el=slotEl(i); el.classList.toggle('impatient',s.pat<20);
+    const up=s.pat<UPSET_PATIENCE, im=el.querySelector('.csprite'); if(im && im.dataset.upset!==(up?'1':'0')){ im.src=up?CUST_UPSET[s.cust]:CUST_IMG[s.cust]; im.dataset.upset=up?'1':'0'; }
+    if(s.pat<=0) rushWalkout(i); });
+  if(G.rush){ const a=G.rush.slots[G.rush.active]; if(a) G.pat=a.pat; G.waiting=G.rush.slots.some(s=>!s.gone&&!s.served&&s.waiting); }
+}
+function rushWalkout(i){ const s=G.rush.slots[i]; s.gone=true; s.waiting=false; D.walk++; D.done++; bumpRep('walkout');
+  const el=slotEl(i); el.classList.remove('impatient'); el.innerHTML=custHTML(s.cust,'sad',true); sayAt(i,WALK_LINE[s.cust]); blip(200,.35,'sawtooth',.05); slotBar(i).classList.add('hide');
+  if(G.scene==='kitchen') toast(`${CUSTOMERS[s.cust].name} (${i+1}) got tired of waiting and left!`);
+  later(()=>{ slotBubble(i).classList.add('off'); el.classList.add('away'); },1800);
+  const rest=live();
+  if(rest.length){ if(G.rush.active===i){ setSlot(rest[0].i); } if(G.scene==='kitchen') renderKTicket(); else if(G.rush.tab===i) renderRushTabs(rest[0].i); }
+  else if(!G.serving){ if(G.scene!=='shop') showScene('shop'); $('#orderSheet').classList.remove('on'); layoutStage(false); later(()=>{ saveGame(); nextCustomer(); },2600); }
+  saveGame(); }
+function endRush(){ if(!G.rush) return; if(G.rush.duo){ drawShopFront(); $('#stage').classList.remove('duo'); $('#coinPop2').classList.remove('on'); $('#scoreSheet').classList.remove('duo');
+    ['#shopBowl','#shopBowl2','#shopRice','#shopRice2'].forEach(q=>{ const e=$(q); e.classList.remove('duoBowl','duoRice'); e.style.left=''; e.classList.add('hidden-o'); }); } G.rush=null; G.serveQ=[]; G.serving=false; K.ask=false; $('#serveAsk').hidden=true;
+  setGeom(105); $('#cust2').hidden=true; $('#cust2').classList.add('away'); $('#patBar2').hidden=true; $('#custBubble2').classList.add('off'); $('#rushTabs').hidden=true;
+  $('#cust').style.left=''; $('#patBar').style.left=''; $('#patBar').style.top=''; $('#orderSheet h3').textContent='New order'; $('#kTicket2').hidden=true; }
+/* serving during a rush: tap Momo → pick a bowl, or tap Momo again for both */
+function rushServeTap(){ const L=live(); if(!L.length) return;
+  if(L.length===1){ rushServe([L[0].i]); return; }
+  if(!K.ask){ K.ask=true; $('#serveAsk').hidden=false; blip(660,.06); return; }
+  K.ask=false; $('#serveAsk').hidden=true; rushServe(L.map(s=>s.i)); }
+function rushServe(list){
+  for(const i of list){ const b=G.rush.slots[i].bowl;
+    if(b.tare===0 && b.soup<0.05 && b.nood.state!=='bowl'){ toast(`Bowl ${i+1} is still empty!`); return; }
+    if(b.nood.state==='boiling'||b.nood.state==='lifted'){ toast(`Bowl ${i+1}'s noodles are still in the boiler!`); return; } }
+  G.serving=true; if(list.length===2){ serveBoth(); return; } G.serveQ=list.slice(); rushServeNext(); }
+function rushServeNext(){ const i=G.serveQ.shift(), s=G.rush.slots[i]; setSlot(i); G.rush.cur=i; s.waiting=false; s.served=true; slotBar(i).classList.add('hide'); serveBowl(); }
+/* both bowls at once: side by side on the tray, two score cards, both eat and pay together */
+function serveBoth(){ G.clockHold=true; G.serveQ=[]; K.ask=false; $('#serveAsk').hidden=true; $('#coach').hidden=true;
+  const R=G.rush; R.duo=true; R.res=R.slots.map(s=>{ s.waiting=false; s.served=true; slotBar(s.i).classList.add('hide'); const r=score(s.order,s.bowl); bookRecord(s.bowl,r.total,s.cust); return r; });
+  P.firstDone=true; saveGame(); G.waiting=false;
+  showScene('shop'); layoutStage(false); drawShopFront(false); $('#stage').classList.add('duo');
+  const m=$('#shopMomo'); domArms(m,440,475,'head',120);
+  R.slots.forEach((s,i)=>{ const cv=i?$('#shopBowl2'):$('#shopBowl'), rc=i?$('#shopRice2'):$('#shopRice'); drawRamen(cv,s.bowl);
+    cv.classList.add('duoBowl'); cv.style.left=(i?447:207)+'px'; cv.style.transition='none'; cv.style.transform='translate(0,360px) scale(.5)'; cv.classList.remove('hidden-o');
+    rc.classList.add('duoRice'); rc.style.left=(i?585:345)+'px'; rc.style.transition='none'; rc.style.transform='translate(0,280px) scale(.5)'; rc.classList.toggle('hidden-o',!s.bowl.rice); });
+  requestAnimationFrame(()=>requestAnimationFrame(()=>['#shopBowl','#shopBowl2','#shopRice','#shopRice2'].forEach(q=>{ const e=$(q); e.style.transition=''; e.style.transform=''; })));
+  later(()=>sfx('bowl'),650); blip(520,.1); later(()=>blip(780,.12),250);
+  later(()=>{ domArms(m,440,475,'torso',26); layoutStage('tray'); const st=$('#stage'), lo=Math.min(...R.res.map(r=>r.total)), hi=Math.max(...R.res.map(r=>r.total)); st.classList.add('zoomed');
+    duoFx(R.res.map(r=>r.total>=GRADING.SHINE?'glow':r.total<=GRADING.GLOOM?'gloom':'')); },1000);
+  later(showScoreBoth,1900); }
+/* each bowl gets its own golden shine or purple gloom; sound depends on the mix */
+const DUO_DX=[-110,130];
+function duoFx(kind){ const sc=$('#scene'); clearDuoFx();
+  kind.forEach((k,i)=>{ if(!k) return; const src=$(k==='glow'?'#shine':'#gloom'), el=src.cloneNode(true); el.removeAttribute('id'); el.className='duoFx '+(k==='glow'?'dShine':'dGloom');
+    const bw=i?$('#shopBowl2'):$('#shopBowl');
+    if(k==='glow'){ const W=400, cx=bw.offsetLeft+bw.offsetWidth/2, cy=bw.offsetTop+bw.offsetHeight/2;   // centred on that bowl, from the bowl's own position
+      Object.assign(el.style,{left:(cx-W/2)+'px', top:(cy-W/2)+'px', width:W+'px', height:W+'px', animation:'none'}); $('#shopBowl').before(el); }   // behind both bowls   // sized & placed (not transformed: the spin animation owns transform), centred on the bowl
+    else el.style.transform=`translateX(${DUO_DX[i]}px) scale(.7)`; if(k!=='glow') sc.insertBefore(el, $('#shopBowl')); requestAnimationFrame(()=>el.classList.add('on'));
+    (i?$('#shopBowl2'):$('#shopBowl')).classList.toggle('dull',k==='gloom');
+    if(k==='glow') $('#sparkles').insertAdjacentHTML('beforeend',[[250,690],[400,680],[230,860],[420,880],[330,630]].map(([x,y],n)=>`<span class="spark" style="left:${x+DUO_DX[i]+110}px;top:${y}px;animation-delay:${n*.22}s">✦</span>`).join('')); });
+  const g=kind.filter(k=>k==='glow').length, m=kind.filter(k=>k==='gloom').length;
+  const play=(k,v)=>later(()=>sfx(k,{vol:v}),200);
+  if(g===2) play('golden',1); else if(m===2) play('bad',1);
+  else if(g&&m){ play('golden',.5); play('bad',.5); } else if(g) play('golden',.5); else if(m) play('bad',.5); }
+function clearDuoFx(){ document.querySelectorAll('.duoFx').forEach(e=>e.remove()); ['#shopBowl','#shopBowl2'].forEach(q=>$(q).classList.remove('dull')); }
+function showScoreBoth(){ const R=G.rush, sh=$('#scoreSheet'); sh.classList.add('duo');
+  $('#scoreDuo').innerHTML=R.slots.map((s,i)=>{ const r=R.res[i];
+    return `<div class="sdCol"><div class="sdHd"><b class="n${i+1}">${i+1}</b>${CUSTOMERS[s.cust].name}</div>
+      <div class="sdTop"><div class="stamp">${r.grade}</div><div class="total">${r.total}<small>/100</small></div></div>
+      <div class="sdRows">${r.rows.map(x=>{ const cls= x.max===0?'ng': x.pts===x.max?'ok': x.pts>0?'mid':'ng'; return `<div><span>${x.label}</span><span class="${cls}">${x.max?x.pts+'/'+x.max:x.pts}</span></div>`; }).join('')}</div></div>`; }).join('');
+  sh.classList.add('on'); blip(990,.25,'sine'); }
+function eatBoth(){ const R=G.rush; $('#scoreSheet').classList.remove('on','duo'); clearTrayFx(); layoutStage(false);
+  R.slots.forEach((s,i)=>later(()=>{ slotEl(i).classList.add('eat'); ['Slurp!','Slurrrp…'].forEach((w,k)=>later(()=>slurpText(RUSH_CX[i]-150+k*130,420),k*500)); },800));
+  later(()=>blip(300,.1,'sine',.05),900);
+  later(()=>R.slots.forEach((s,i)=>{ s.bowl.eaten=true; drawRamen(i?$('#shopBowl2'):$('#shopBowl'),s.bowl); (i?$('#shopRice2'):$('#shopRice')).classList.add('hidden-o'); }),2200);
+  later(()=>{ let total=0; const pays=R.slots.map((s,i)=>{ const r=R.res[i], id=s.cust, C=CUSTOMERS[id], el=slotEl(i); el.classList.remove('eat');
+      G.order=s.order; const fv=favHit(id,r); el.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); sayAt(i, fv?C.fav.line:(C.react[r.grade]||C.react.C));
+      const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
+      const tip = r.total>=GRADING.TIP_FROM ? Math.round((s.pat>66?ECON.TIP_HIGH:s.pat>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
+      P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; D.done++; total+=r.total; return [base+tip+bonus,tip+bonus]; });
+    saveGame(); updateHud();
+    const f=faceFor(Math.round(total/2)), m=$('#shopMomo');
+    later(()=>ppFlip(m.querySelector('.flip'),()=>{ m.classList.add('front'); m.querySelector('.body').src=f.img; }).then(()=>{
+      [['#coinPop','#cpAmt','#cpTip'],['#coinPop2','#cpAmt2','#cpTip2']].forEach(([b,a,t],i)=>{ $(a).textContent='+'+yen(pays[i][0]); $(t).textContent=pays[i][1]?`incl. ${yen(pays[i][1])} tip`:''; $(b).classList.add('on'); });
+      sfx('pay'); later(()=>{ const b=$('#momoBubble'); b.textContent=f.line; b.classList.remove('off'); },350);
+      later(()=>{ const bt=$('#btnNextCust'); bt.textContent= closed() ? 'Close the shop ▶' : 'Next customer ▶'; G.btnAct=()=>{ G.serving=false; nextCustomer(); }; bt.hidden=false; },800); }),600);
+  },3300); }
+function rushLeave(i){ const el=slotEl(i); slotBubble(i).classList.add('off'); el.classList.add('away'); }
+function rushAfterReveal(bt){ const cur=G.rush.cur;
+  const tidy=()=>{ $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); clearTrayFx(); resetMomoBack(); $('#shopBowl').classList.add('hidden-o'); $('#shopRice').classList.add('hidden-o'); rushLeave(cur); };
+  if(G.serveQ.length){ bt.textContent='Next bowl ▶'; G.btnAct=()=>{ tidy(); later(rushServeNext,500); }; }
+  else if(live().length){ bt.textContent='Back to the kitchen ▶'; G.btnAct=()=>{ tidy(); G.serving=false; G.rush.cur=null; setSlot(live()[0].i); toKitchen(); }; }
+  else { bt.textContent= closed() ? 'Close the shop ▶' : 'Next customer ▶'; G.btnAct=()=>{ G.serving=false; nextCustomer(); }; } }
 function say(t){ const b=$('#custBubble'); if(b.textContent!==t) b.textContent=t; b.classList.remove('off'); }
 function hush(){ $('#custBubble').classList.add('off'); }
 function toKitchen(){
+  $('#custBubble2').classList.add('off');
   G.clockHold=false; if(G.timedOrder){ G.waiting=true; G.timedOrder=false; }
+  if(G.rush && G.rush.timed){ G.rush.timed=false; G.rush.slots.forEach(s=>{ if(!s.gone&&!s.served) s.waiting=true; }); G.waiting=true; }
   $('#orderSheet').classList.remove('on'); hush();
   showScene('kitchen'); K.cam=K.camT=0; K.stn=0; K.hop=.6; K.hand=null; K.M=null; K.rice=null; K.queue=0; K.lastTap=null; K.parts=[]; K.fx=[]; K.idle=0; K.dirty=true;
-  ticketMini=false; tutKey=''; $('#coach').hidden=!G.tut; $('#btnNext').classList.remove('pulse'); $('#serveHint').classList.remove('pulse');
+  ticketMini=false; K.open=null; K.ask=false; K.rise=[0,0]; $('#serveAsk').hidden=true; tutKey=''; $('#coach').hidden=!G.tut; $('#btnNext').classList.remove('pulse'); $('#serveHint').classList.remove('pulse');
   requestAnimationFrame(()=>renderKTicket());
 }
 function bookRecord(b,total,cust){
@@ -1166,12 +1420,13 @@ function bookRecord(b,total,cust){
   const e=P.book[id]||{o,n:0,best:0}; e.n++; e.best=Math.max(e.best,total); e.at=Date.now(); e.cust=cust; e.o=o; P.book[id]=e;
   P.cbook=P.cbook||{}; const c=P.cbook[cust]||{n:0,best:0}; c.n++; c.best=Math.max(c.best,total); P.cbook[cust]=c;   // Customer Book
 }
-function serve(){
+function serve(){ if(G.rush) return rushServeTap(); serveBowl(); }
+function serveBowl(){
   const b=G.bowl;
   if(b.tare===0 && b.soup<0.05 && b.nood.state!=='bowl'){ toast('The bowl is still empty!'); return; }
   if(b.nood.state==='boiling'||b.nood.state==='lifted'){ toast('The noodles are still in the boiler!'); return; }
   G.clockHold=true;   // …and while they eat, until the player continues
-  G.tutWas=G.tut; G.waiting=false; G.patServe=G.pat; $('#patBar').classList.add('hide'); $('#coach').hidden=true;
+  G.tutWas=G.tut; G.waiting=!!(G.rush&&live().some(s=>s.waiting)); G.patServe=G.pat; (G.rush?slotBar(G.rush.cur):$('#patBar')).classList.add('hide'); $('#coach').hidden=true; K.ask=false; $('#serveAsk').hidden=true;
   G.result=score(G.order,b); P.firstDone=true; bookRecord(b,G.result.total,G.order.cust); saveGame();
   showScene('shop'); layoutStage(false);
   drawRamen($('#shopBowl'),b);
@@ -1192,7 +1447,7 @@ function showScore(){
   const r=G.result;
   $('#scStamp').textContent=r.grade; $('#scStamp').style.animation='none'; void $('#scStamp').offsetWidth; $('#scStamp').style.animation='';
   $('#scTotal').innerHTML=`${r.total}<small> / 100</small>`;
-  $('#scMomo').textContent= G.play==='story'&&!G.tutWas ? `Grade ${r.grade} · patience left ${Math.round(G.patServe)}%` : `Grade ${r.grade}`;
+  $('#scMomo').textContent= (G.rush?`Bowl ${G.rush.cur+1} · ${CUSTOMERS[G.order.cust].name} · `:'')+(G.play==='story'&&!G.tutWas ? `Grade ${r.grade} · patience left ${Math.round(G.patServe)}%` : `Grade ${r.grade}`);
   $('#scoreList').innerHTML=`<div class="r hd"><span>Item</span><span>Ordered</span><span>Made</span><span class="p">Pts</span></div>`+
     r.rows.map(x=>{ const cls= x.max===0?'ng': x.pts===x.max?'ok': x.pts>0?'mid':'ng';
       return `<div class="r"><span>${x.label}</span><span>${x.wnt}</span><span class="${cls}">${x.got}</span><span class="p ${cls}">${x.max?x.pts+'/'+x.max:x.pts}</span></div>`; }).join('');
@@ -1200,12 +1455,12 @@ function showScore(){
 }
 function eat(){
   $('#scoreSheet').classList.remove('on'); clearTrayFx(); layoutStage(false);
-  const id=G.order.cust, r=G.result, c=$('#cust');
+  const id=G.order.cust, r=G.result, c=G.rush?slotEl(G.rush.cur):$('#cust'), sx=G.rush?RUSH_CX[G.rush.cur]-190:260;
   later(()=>{ c.classList.add('eat');
-    ['Slurp!','Slurrrp…','Fuu fuu'].forEach((w,i)=>later(()=>{ slurpText(260+i*130,420); blip(300+i*60,.1,'sine',.05); },i*500));
+    ['Slurp!','Slurrrp…','Fuu fuu'].forEach((w,i)=>later(()=>{ slurpText(sx+i*130,420); blip(300+i*60,.1,'sine',.05); },i*500));
   },800);
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
-  later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; say(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
+  later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; sayC(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
     const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
@@ -1223,7 +1478,7 @@ function momoReveal(pay, extra, total){
   later(()=>ppFlip(m.querySelector('.flip'),()=>{ m.classList.add('front'); m.querySelector('.body').src=f.img; }).then(()=>{
     $('#cpAmt').textContent='+'+yen(pay); $('#cpTip').textContent= extra? `incl. ${yen(extra)} tip`:''; $('#coinPop').classList.add('on'); sfx('pay');
     later(()=>{ const b=$('#momoBubble'); b.textContent=f.line; b.classList.remove('off'); },350);
-    later(()=>{ const bt=$('#btnNextCust'); bt.textContent = G.play==='tutorial' ? 'Back home ▶' : G.play==='story' && closed() ? 'Close the shop ▶':'Next customer ▶'; bt.hidden=false; },800);
+    later(()=>{ const bt=$('#btnNextCust'); G.btnAct=null; if(G.rush) rushAfterReveal(bt); else bt.textContent = G.play==='tutorial' ? 'Back home ▶' : G.play==='story' && closed() ? 'Close the shop ▶':'Next customer ▶'; bt.hidden=false; },800);
   }),600);
 }
 function closeShop(){ G.waiting=false; P.resume=null; saveGame(); toast('Closing time! もも屋 is closed for today'); later(showNight,1500); }
@@ -1288,6 +1543,8 @@ function drawIcon(cv){ const c=cv.getContext('2d'); c.scale(2,2); const id=cv.da
   else if(id==='knife'){ c.beginPath(); c.moveTo(8,30); c.lineTo(40,14); c.lineTo(42,22); c.lineTo(14,34); c.closePath(); fs(c,steel(c,8,42),2); rr(c,2,30,14,7,3); fs(c,'#8b5a33',2); }
   else if(id==='doll'){ const im=new Image(); im.onload=()=>c.drawImage(im,4,4,44,46); im.src=ASSET_SRC.momo_happy; }
   else if(id==='lemon'){ const im=new Image(); im.onload=()=>c.drawImage(im,7,2,40,48); im.src=ASSET_SRC.lemon_water; }
+  else if(id==='sofa'){ rr(c,4,14,44,20,8); fs(c,vg(c,14,34,'#d9584f','#a8322b'),2); rr(c,2,26,48,14,6); fs(c,vg(c,26,40,'#e8736a','#b83a31'),2);
+    rr(c,0,22,8,18,4); fs(c,'#a8322b',2); rr(c,44,22,8,18,4); fs(c,'#a8322b',2); c.fillStyle='#5b3a2e'; c.fillRect(7,40,4,6); c.fillRect(41,40,4,6); }
   else if(id==='plush'||id==='fluffy'){ const f=id==='fluffy'; rr(c,5,f?16:20,42,f?28:22,f?14:9); fs(c,vg(c,16,44,f?'#ffd3e6':'#f6c08a',f?'#f29bc2':'#d98f4e'),2);
     [[6,f?17:21],[46,f?17:21],[6,f?43:41],[46,f?43:41]].forEach(([x,y])=>ell(c,x,y,3,3,f?'#e67fae':'#b8743a',1.5)); c.strokeStyle='rgba(91,58,46,.35)'; c.lineWidth=1.5; c.beginPath(); c.moveTo(14,f?30:31); c.quadraticCurveTo(26,f?24:27,38,f?30:31); c.stroke();
     if(f){ c.fillStyle='rgba(255,255,255,.7)'; [[14,12],[38,10],[26,8]].forEach(([x,y])=>{ c.beginPath(); c.arc(x,y,2.4,0,7); c.fill(); }); } }
@@ -1526,12 +1783,13 @@ function openBook(){
 /* =====================================================================
    20. TOSS NOODLES + TUTORIAL
    ===================================================================== */
-function tossNoodles(){ const b=G.bowl, nd=b.nood; if(!['boiling','lifted','bowl'].includes(nd.state)) return;
+function tossNoodles(){ const IN=['boiling','lifted','bowl'], L=NSL(), pick=L.find(s=>s.bowl===G.bowl&&IN.includes(s.bowl.nood.state))||L.find(s=>IN.includes(s.bowl.nood.state)); if(!pick) return;
+  const n=pick.i, b=pick.bowl, nd=b.nood; b._v=(b._v||0)+1;
   const wasBowl=nd.state==='bowl'; b.nood={state:'none',start:0,time:null,water:1,flicks:0}; K.dirty=true; K.hand=null; if(K.M&&K.M.t==='tebo') K.M=null;
   if(has('restore')){   // Dr Mo's time machine: the bundle is raw again and goes back in the box
-    giveStock('noodle'); for(let k=0;k<18;k++){ const a=k/18*6.283; K.parts.push({x:(wasBowl?BROTH.x:K.px0+286)+Math.cos(a)*40,y:(wasBowl?BROTH.y:340)+Math.sin(a)*40,vx:-Math.sin(a)*120,vy:Math.cos(a)*120-60,r:3.5,col:k%2?'#b58cff':'#7fe3ff',life:.7,g:0,stopY:820}); }
+    giveStock('noodle'); for(let k=0;k<18;k++){ const a=k/18*6.283; K.parts.push({x:(wasBowl?(G.rush?RUSH_BX[n]+CX*BK:BROTH.x):K.px0+teboX(n))+Math.cos(a)*40,y:(wasBowl?BROTH.y:340)+Math.sin(a)*40,vx:-Math.sin(a)*120,vy:Math.cos(a)*120-60,r:3.5,col:k%2?'#b58cff':'#7fe3ff',life:.7,g:0,stopY:820}); }
     blip(880,.12,'sine'); setTimeout(()=>blip(440,.14,'sine'),90); toast("Dr Mo's time machine! The noodles are raw again."); return; }
-  for(let k=0;k<12;k++) K.parts.push({x:(wasBowl?BROTH.x:K.px0+286)-30+Math.random()*60,y:(wasBowl?BROTH.y:340),vx:(Math.random()-.5)*160,vy:-120-Math.random()*80,r:3,col:'#f1d27a',life:.8,g:900,stopY:820});
+  for(let k=0;k<12;k++) K.parts.push({x:(wasBowl?(G.rush?RUSH_BX[n]+CX*BK:BROTH.x):K.px0+teboX(n))-30+Math.random()*60,y:(wasBowl?BROTH.y:340),vx:(Math.random()-.5)*160,vy:-120-Math.random()*80,r:3,col:'#f1d27a',life:.8,g:900,stopY:820});
   blip(220,.15,'sawtooth',.05); toast(stockOf('noodle')>0?'Noodles tossed. Drop in a fresh bundle!':'Noodles tossed… and no bundles left!'); }
 const TUT=[
   {t:"Dashi “Medium” means 2 scoops of tare. Tap the tare pot twice, or drag the ladle into the bowl.", done:b=>b.tare===2},
@@ -1595,15 +1853,16 @@ $('#btnReset').onclick=()=>{ const b=$('#btnReset');
   if(b.dataset.arm==='1'){ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0,cbook:P.cbook||{}}; saveGame(); refreshHome(); b.dataset.arm=''; b.textContent='Start a new story'; toast('New game started (your Customer Book is kept)'); return; }
   b.dataset.arm='1'; b.textContent='Tap again to reset money, stock and upgrades'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='Start a new story'; },2500); };
 $('#btnToKitchen').onclick=toKitchen;
-$('#btnEat').onclick=eat;
-$('#btnNextCust').onclick=nextCustomer;
+$('#btnEat').onclick=()=> G.rush&&G.rush.duo ? eatBoth() : eat();
+$('#btnNextCust').onclick=()=>{ const f=G.btnAct; G.btnAct=null; $('#btnNextCust').hidden=true; f?f():nextCustomer(); };
 $('#btnPrev').onclick=()=>goStation(K.stn-1);
 $('#btnNext').onclick=()=>goStation(K.stn+1);
 $('#boilChip').onclick=()=>goStation(NOODLE_STEP);
 $('#btnRemake').onclick=()=>{ const bt=$('#btnRemake');
-  if(K.remakeArm>performance.now()){ G.bowl=newBowl(); K.dirty=true; K.M=null; K.hand=null; bt.textContent='Remake'; toast('Fresh bowl (used toppings are gone)'); return; }
+  if(K.remakeArm>performance.now()){ G.bowl=newBowl(); if(G.rush) G.rush.slots[G.rush.active].bowl=G.bowl; K.dirty=true; K.M=null; K.hand=null; bt.textContent='Remake'; toast('Fresh bowl (used toppings are gone)'); return; }
   K.remakeArm=performance.now()+2200; bt.textContent='Tap again'; setTimeout(()=>{ bt.textContent='Remake'; },2200); };
-$('#kTicket').addEventListener('click',()=>{ ticketMini=!ticketMini; renderKTicket(); });   // ticketMini = showing the full order
+$('#kTicket').addEventListener('click',()=>{ if(G.rush) return toggleSlip(0); ticketMini=!ticketMini; renderKTicket(); });
+$('#kTicket2').addEventListener('click',()=>{ if(G.rush) toggleSlip(1); });   // ticketMini = showing the full order
 addEventListener('resize',()=>{ layoutAll(); if(G.order&&G.scene==='kitchen') renderKTicket(); });
 function shade(hex,k){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255; const t=k<0?0:255,p=Math.abs(k);
   r=Math.round(r+(t-r)*p); g=Math.round(g+(t-g)*p); b=Math.round(b+(t-b)*p); return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
@@ -1656,4 +1915,4 @@ function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   requestAnimationFrame(loop); }
 $('#btnMute').onclick=e=>{ e.stopPropagation(); audioInit(); setMuted(!SND.muted); };
 setMuted(SND.muted);
-goHome(); requestAnimationFrame(loop);
+goHome(); showPatch(); requestAnimationFrame(loop);

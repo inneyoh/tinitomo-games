@@ -85,11 +85,19 @@ const BOOK_RATINGS={
 /* ---- STORY DAY: the shop is open on a clock; customers keep coming until closing time ---- */
 const DAY={
   OPEN:11*60, CLOSE:21*60,     // shop hours (minutes after midnight): 11:00 → 21:00
-  SECONDS:d=> d<=3 ? 210 : d<=6 ? 300 : 420,   // seconds of cooking from OPEN to CLOSE: 3.5 min (days 1–3), 5 min (days 4–6), 7 min (day 7 on).
+  SECONDS:d=> d<=3 ? 210 : d<=6 ? 300 : d<=21 ? 420 : d<=34 ? 510 : 600,   // 3.5 → 5 → 7 → 8.5 → 10 min (max) as rushes get more frequent   // seconds of cooking from OPEN to CLOSE: 3.5 min (1–3), 5 min (4–6), 7 min (7–21), 8.5 min (22–34), 10 min (35 on).
                                // The clock stops while a customer orders and while they eat — it only runs in the kitchen and between customers.
   OVERTIME:45,                 // after closing, the last customer is served for at most this many seconds, then leaves — a day never passes ~4 min
   GAP:.8,                      // seconds before the next customer walks in (always the same)
 }
+
+/* ---- RUSH: from FROM_DAY, customers who walk in during these hours come two at a time ---- */
+const RUSH={ FROM_DAY:7, MAX:4, SINGLES:5,   // at most 4 rushes a day, and at least 5 single orders always come first
+  // how many rushes a day: [first day, rushes for sure, chance of one more]
+  SCHEDULE:[[7,1,0],[10,1,.3],[13,1,.5],[19,1,.7],[22,2,0],[26,2,.3],[29,2,.5],[35,2,.7],
+            [39,3,0],[42,3,.3],[45,3,.5],[51,3,.7],[54,4,0]],
+  // rushes are spread through the day; the name comes from the time they start
+  NAMES:[[15*60,'Lunch rush'],[17*60,'Afternoon rush'],[24*60,'Dinner rush']] };
 
 /* ---- DEMAND: tomorrow's event is rolled at night (shown on the iPad) so you can stock up for it ----
    weight = how often it happens · price = bowl price × · chashu / onion = chance an order wants it */
@@ -135,6 +143,7 @@ const UPGRADES=[
   {id:'tebo',   name:'Tebo strainer',     price:1000,  flick:.8,  desc:'Each flick drains 20% better.', cat:'kitchen'},
   {id:'tebo2',  name:'Tebo Plus',         price:3500,  flick:.5,  desc:'Each flick drains 50% better.', req:'tebo', cat:'kitchen'},
   {id:'tebo3',  name:'Ultra Tebo',        price:8000,  oneFlick:true, desc:'One flick drains it all.', req:'tebo2', cat:'kitchen'},
+  {id:'tebo2nd', name:'Second tebo',     price:2000,             desc:'Rushes: cook two portions of noodles at once, one tebo for each bowl.', minDay:7, cat:'kitchen'},
   {id:'bell',   name:'Timer bell',        price:1500,             desc:'Dings when the noodles reach the ordered texture.', cat:'kitchen'},
   {id:'restore',name:'Restoranator',      price:67600,            desc:"Dr Mo's time machine! “Toss noodles” becomes “Restore noodles”: boiled noodles go back in the box raw.", cat:'kitchen'},
   {id:'knife',  name:'Chashu knife',      price:2000,             desc:'Wider timing when slicing chashu at night.', cat:'prep'},
@@ -145,6 +154,7 @@ const UPGRADES=[
   {id:'inv',    name:'Inventory Up!',       price:6000,  types:4,   desc:'4 kinds of ingredients delivered each night instead of 3.', cat:'prep'},
   {id:'plush',  name:'Plush cushion',     price:3000,  pat:1.2,   desc:'Customers wait 1.2× longer.', cat:'store'},
   {id:'fluffy', name:'Fluffy cushion',    price:7000,  pat:1.7,   desc:'Customers wait 1.7× longer.', req:'plush', cat:'store'},
+  {id:'sofa',   name:'Sofa seats',        price:9000,  pat:2.0,   desc:'Customers wait 2.0× longer.', req:'fluffy', cat:'store'},
   {id:'lemon',  name:"Soso's lemon water",price:2000,  bonus:.03, desc:'+3% on every bowl.', cat:'store'},
   {id:'noren',  name:'Noren curtain',     price:5000,  bonus:.07, desc:'+7% on every bowl.', cat:'store'},
   {id:'doll',   name:'Momo doll',         price:8000,  bonus:.12, desc:'+12% on every bowl.', cat:'store'},
