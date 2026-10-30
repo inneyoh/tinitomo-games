@@ -9,7 +9,7 @@ const CFG = {
   SOUP_TARGET:0.80, SOUP_TOL:0.06, SOUP_RATE:0.30,     // bowl fill ratio, per second while the tap is held
   BOIL_MAX:22.4, FIRM_CENTERS:[5.6,8.8,12,15.2,18.4], FIRM_TOL:1.6, // seconds in the water for each texture (20% faster than v1)
   FLICK_KEEP:0.55, WATER_OK:0.15,                       // each flick keeps 55% of the water; ≤15% is a clean drain
-  PRICE:980,
+  PRICE:1100,
   SCOOP_TIME:.85,                                      // ladle trip length (1 ≈ 0.66 s); .72 lets taps ~0.5 s apart count, faster taps are ignored
 };
 
@@ -20,19 +20,19 @@ const CFG = {
               (or `score` = minimum total), `line` is what they say when you nail it ---- */
 const FAV_CHANCE=.5;   // extra chance that a customer orders their favourite
 const CUSTOMERS = {
-  soso:{name:'Soso', rate:1, size:1, pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
+  soso:{name:'Soso', rate:.8, size:1, pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
     react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"},
     profile:"Momo's twin sister. Cutesy, chaotic and very fluffy — loves strawberry milk and Momo.", likes:"Spice level 5",
     fav:{order:{spice:5}, row:'Spice', line:"Level 5 spice~!! Soso's favourite ♡"}},
-  rang:{name:'Rang', rate:1, size:.87, pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
+  rang:{name:'Rang', rate:.8, size:.87, pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"},
     profile:"Loud, cheerful and free. Laughs at everything — rangahahaha!", likes:"Rich broth",
     fav:{order:{rich:3}, row:'Richness', line:"RANGAHAHA! That rich broth hits the spot!"}},
-  kew:{name:'Kew', rate:1, size:.82, pat:1.5, tip:1, perfect:370, hi:"…One bowl, please.",
+  kew:{name:'Kew', rate:.8, size:.82, pat:1.5, tip:1, perfect:370, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."},
     profile:"Quiet and polite. Treats every bowl like training. Patience is a virtue.", likes:"Seaweed",
     fav:{order:{nori:0}, row:'Seaweed', line:"…Seaweed. The ocean, in a bowl. Thank you."}},
-  bae:{name:'Bae', rate:1, size:.87, pat:1.2, tip:1.5, perfect:300, hi:"Hello, one bowl of Ramen please!",
+  bae:{name:'Bae', rate:.8, size:.87, pat:1.2, tip:1.5, perfect:300, hi:"Hello, one bowl of Ramen please!",
     react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"},
     profile:"Gentle, graceful and polite, but worries a little too easily.", likes:"Soft noodles",
     fav:{order:{noodle:3}, row:'Noodles', line:"Soft noodles, just how I like them! Thank you!"}},
@@ -40,6 +40,20 @@ const CUSTOMERS = {
     react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"},
     profile:"The actual owner of the store and the (2nd) best cook in town. Loves her ribbons.", likes:"A perfect bowl",
     fav:{score:95, line:"A perfect bowl. I'm proud of you, Momo."}},
+
+  // ---- Dollyworld regulars (general customers)
+  kuma:{name:'Kuma', rate:1, size:1, pat:1, tip:1, perfect:200, hi:"Hello! One bowl of Ramen please!",
+    react:{S:"Delish! Best ramen in town!",A:"I'm full! Thank you.",B:"Oh this...",C:"Kuma..."},
+    profile:"Citizen of Dollyworld, the bears are always nice.", likes:"Everything"},
+  bun:{name:'Bun', rate:1, size:1, pat:1, tip:1, perfect:200, hi:"One bowl of Ramen please!",
+    react:{S:"Yum! Best ramen in town!",A:"I'm full! Thank you.",B:"Oh this...",C:"Bun..."},
+    profile:"Citizen of Dollyworld, the bunnies are picky with their veggies.", likes:"Everything"},
+  piyo:{name:'Piyo', rate:1, size:1, pat:1, tip:1, perfect:200, hi:"HI...! One bowl please.",
+    react:{S:"Piyo! Best ramen in town.",A:"Thank you, I liked it.",B:"Oh...!",C:"Piyo..."},
+    profile:"Citizen of Dollyworld, the birds are always polite.", likes:"Everything"},
+  gwoof:{name:'Gwoof', rate:1, size:1, pat:1, tip:1, perfect:200, hi:"It's Dr Mo! Ramen please!",
+    react:{S:"Wowzers! Best ramen in town!",A:"As expected!",B:"Hmm...",C:"Woof...!!"},
+    profile:"Citizen of Dollyworld, the puppies likes extra chashu.", likes:"Everything"},
 };
 
 /* ---- GRADING: how a bowl is scored and what each score leads to ---- */
@@ -71,28 +85,29 @@ const BOOK_RATINGS={
 /* ---- STORY DAY: the shop is open on a clock; customers keep coming until closing time ---- */
 const DAY={
   OPEN:11*60, CLOSE:21*60,     // shop hours (minutes after midnight): 11:00 → 21:00
-  SECONDS:420,                 // real seconds (7 min) the clock takes to go from OPEN to CLOSE (only ticks while serving, not while paused)
-  GAP:8,                       // seconds before the next customer walks in (shorter with good reputation or a busy event)
-};
+  SECONDS:180,                 // real seconds (3 min) the clock takes to go from OPEN to CLOSE (only ticks while serving, not while paused)
+  OVERTIME:45,                 // after closing, the last customer is served for at most this many seconds, then leaves — a day never passes ~4 min
+  GAP:2,                       // seconds before the next customer walks in (always the same)
+}
 
 /* ---- DEMAND: tomorrow's event is rolled at night (shown on the iPad) so you can stock up for it ----
-   weight = how often it happens · crowd = customers come ×more often · price = bowl price × · chashu / onion = chance an order wants it */
+   weight = how often it happens · price = bowl price × · chashu / onion = chance an order wants it */
 const EVENTS=[
   {id:'normal',   weight:4, name:'Ordinary day',   desc:'Business as usual.'},
   {id:'chashu',   weight:1, name:'Chashu craze',   desc:'A food show praised chashu — nearly everyone orders it.', chashu:.97},
   {id:'onion',    weight:1, name:'Onion lovers',   desc:'Onions are in season — lots of green, white and both.', onion:.95},
-  {id:'festival', weight:1, name:'Market festival',desc:'Ramen is 30% off: more customers, less money per bowl.', price:.7, crowd:1.3},
+  {id:'festival', weight:1, name:'Market festival',desc:'Ramen is 30% off today: less money per bowl.', price:.7},
 ];
 
-/* ---- REPUTATION (0–100, shown as ★ out of 5): good bowls bring more customers ---- */
+/* ---- REPUTATION (0–100, shown as ★ out of 5): a poor reputation shrinks your tips ---- */
 const REPUTATION={
   START:50,
   CHANGE:{S:4, A:2, B:1, C:-2, D:-4, walkout:-5},   // per bowl (story mode)
-  CROWD_MIN:.6, CROWD_MAX:1.4,                       // customers come ×0.6 as often at 0 ★, ×1.4 at 5 ★ (×1 at 2.5 ★)
-};
+  TIP_AT_0:.4, TIP_AT_HALF:1, TIP_AT_5:1.2,          // tips × at 0 ★, 2.5 ★ and 5 ★ (in between is blended)
+}
 
 /* ---- SHELF LIFE: days a fresh batch stays usable (random in [min, max]); seaweed keeps ---- */
-const SHELF={ green:[3,4], white:[3,4], chashu:[2,3], noodle:[4,5] };
+const SHELF={ green:[3,4], white:[3,4], chashu:[3,4], noodle:[4,5] };
 
 /* ---- audio volumes (0–1) ---- */
 const VOL={ titleMusic:.13, titleShop:.36, dayMusic:.25, nightMusic:.27, sfx:.95 };   // music ×0.6 (v8 feedback)
@@ -141,10 +156,10 @@ const UPGRADES=[
 const ECON={
   START_MONEY:2000,
   START_STOCK:{chashu:4,green:4,white:3,nori:4,noodle:6},
-  rent:d=>Math.min(3500, 800+100*(d-1)),  // paid every night: ¥800 on day 1, +¥100 a day, never more than ¥3,500
-  patience:d=>Math.max(85,120-(d-1)*4),   // seconds a customer waits from order to tray (120 s on day 1, −4 s a day, at least 85 s)
+  rent:d=>Math.min(1800, 400+50*(d-1)),   // paid every night: ¥400 on day 1, +¥50 a day, never more than ¥1,800
+  patience:d=>Math.max(90,120-(d-1)*3),   // seconds a customer waits from order to tray (120 s on day 1, −3 s a day, at least 90 s)
   TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ GRADING.TIP_FROM); each customer multiplies these
-  PREP_YIELD:2/3,                         // a perfect prep turns a pack into ⅔ of its base portions (was ⅓ — too costly once stock spoils)
+  PREP_YIELD:.75,                         // a perfect prep turns a pack into ¾ of its base portions
   PATIENCE_SLOWER:.85,                    // patience drains 15% slower for everyone
 };
 

@@ -50,12 +50,14 @@ const MOMO_FACE={ confused:{img:'assets/momo_confused.webp', line:'…Wait. Wher
                   smug:    {img:'assets/momo_smug.webp',     line:'Hmph. As calculated.'} };
 const faceFor = total => total<=GRADING.MOMO_CONFUSED ? MOMO_FACE.confused : total>=GRADING.MOMO_SMUG ? MOMO_FACE.smug : MOMO_FACE.normal;
 const lowGrade = r => r.total<=GRADING.UPSET;   // C and below
-const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp', bae:'assets/cu_bae.webp', popo:'assets/cu_popo.webp'};
+const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp', bae:'assets/cu_bae.webp', popo:'assets/cu_popo.webp',
+  kuma:'assets/cu_kuma.webp', bun:'assets/cu_bun.webp', piyo:'assets/cu_piyo.webp', gwoof:'assets/cu_gwoof.webp'};
 /* angry Soso · upset Kew · confused Rang · worried Bae · cross Popo — a C-or-lower bowl, or low patience (GRADING in config.js) */
-const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp', bae:'assets/cu_bae_upset.webp', popo:'assets/cu_popo_upset.webp'};
+const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp', bae:'assets/cu_bae_upset.webp', popo:'assets/cu_popo_upset.webp',
+  kuma:'assets/cu_kuma_upset.webp', bun:'assets/cu_bun_upset.webp', piyo:'assets/cu_piyo_upset.webp', gwoof:'assets/cu_gwoof_upset.webp'};
 const UPSET_PATIENCE=GRADING.UPSET_PATIENCE;
 Object.values(CUST_UPSET).forEach(src=>{ new Image().src=src; });   // preload so the swap is instant
-const CUST_H={soso:394, kew:408, rang:416, bae:457, popo:467};   // picture height at 360 px wide
+const CUST_H={soso:394, kew:408, rang:416, bae:457, popo:467, kuma:422, bun:520, piyo:456, gwoof:334};   // picture height at 360 px wide
 const csize=id=>CUSTOMERS[id].size||1;
 /* who walks in next: weighted by `rate` in config.js (1 normal · 0.5 rare · 0.2 ultra rare), never the same one twice in a row */
 function pickCustomer(not, from){ const ids=(from||Object.keys(CUSTOMERS)).filter(id=>id!==not), w=ids.map(id=>CUSTOMERS[id].rate??1);
@@ -298,7 +300,7 @@ function drawShopBack(){
   const rg=c.createRadialGradient(450,520,40,450,520,520); rg.addColorStop(0,'rgba(255,228,170,.55)'); rg.addColorStop(1,'rgba(255,228,170,0)'); c.fillStyle=rg; c.fillRect(0,0,900,770);
   // menu rail + plaques
   rr(c,150,330,600,12,4); fs(c,vg(c,330,342,'#a8743f','#7a4f2a'),3);
-  const MENU=[['Shoyu','¥980'],['Chashu','+250'],['Rice','¥150'],['Nori','+100'],['Garlic','free'],['Spicy','free']];
+  const MENU=[['Shoyu','¥'+CFG.PRICE.toLocaleString()],['Chashu','+250'],['Rice','¥150'],['Nori','+100'],['Garlic','free'],['Spicy','free']];
   MENU.forEach(([a,p],i)=>{ const x=176+i*94, y=346;
     c.strokeStyle=OUT; c.lineWidth=2; c.beginPath(); c.moveTo(x+20,342); c.lineTo(x+20,y+4); c.moveTo(x+56,342); c.lineTo(x+56,y+4); c.stroke();
     shadow(c,x+40,y+108,32,4,.12); rr(c,x,y,78,100,6); fs(c,vg(c,y,y+100,'#f3d6a6','#ddb47a'),3);
@@ -943,7 +945,7 @@ const repStars=v=>(Math.round(v/10)/2).toFixed(1);   // 0–5 in half stars
 function bumpRep(k){ if(G.play!=='story'||G.tut) return; P.rep=Math.max(0,Math.min(100,repOf()+(REPUTATION.CHANGE[k]||0))); }
 const curEvent=()=>G.play==='story' && !G.tut ? EVENTS.find(e=>e.id===D.event)||null : null;
 function rollEvent(){ let x=Math.random()*EVENTS.reduce((a,e)=>a+e.weight,0); for(const e of EVENTS){ x-=e.weight; if(x<0) return e.id; } return 'normal'; }
-const crowd=()=>{ const r=repOf()/100; return (REPUTATION.CROWD_MIN+(REPUTATION.CROWD_MAX-REPUTATION.CROWD_MIN)*r)*((curEvent()||{}).crowd||1); };
+const repTip=()=>{ if(G.play!=='story') return 1; const r=repOf()/100, R=REPUTATION; return r<.5 ? R.TIP_AT_0+(R.TIP_AT_HALF-R.TIP_AT_0)*r*2 : R.TIP_AT_HALF+(R.TIP_AT_5-R.TIP_AT_HALF)*(r-.5)*2; };   // reputation scales tips
 const clockStr=m=>`${Math.floor(m/60)}:${String(Math.floor(m%60)).padStart(2,'0')}`;
 const closed=()=>D.clock>=DAY.CLOSE;
 
@@ -1058,7 +1060,8 @@ function goHome(){ G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause
 /* =====================================================================
    16. A BUSINESS DAY — customers, patience, serving, paying
    ===================================================================== */
-const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere else!", kew:'…My patience has limits.', bae:'Bae… I have to go…', popo:'This is taking way too long!'};
+const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere else!", kew:'…My patience has limits.', bae:'Bae… I have to go…', popo:'This is taking way too long!',
+  kuma:'Kuma will come back another time…', bun:'Bun can\'t wait any longer!', piyo:'Piyo… has to go now…', gwoof:'Woof! Too slow!'};
 /* three ways to play: story (rent/stock/patience), endless (just ramen), tutorial replay (one guided bowl) */
 /* delayed steps of a day only run if the player is still in that same session (not after Home / Restart) */
 function later(f,ms){ const ss=G.sess; return setTimeout(()=>{ if(ss===G.sess) f(); },ms); }
@@ -1066,7 +1069,7 @@ function enterService(){ G.order=null; $('#modeSheet').classList.remove('on'); G
   resetMomoBack(); updateHud(); layoutStage(false); music('day',true); later(nextCustomer,400); }
 function startDay(){ P.lastMode='story'; G.play='story'; G.tut=!P.tutorialDone; G.firstOrder=!P.firstDone||G.tut;
   STOCK_KEYS.forEach(lotsOf);
-  Object.assign(D,{n:Infinity,clock:DAY.OPEN,done:0,sales:0,tips:0,walk:0,rep0:repOf(),event:P.day>1?(P.nextEvent||'normal'):'normal'});
+  Object.assign(D,{n:Infinity,clock:DAY.OPEN,over:undefined,done:0,sales:0,tips:0,walk:0,rep0:repOf(),event:P.day>1?(P.nextEvent||'normal'):'normal'});
   if(P.resume && P.resume.day===P.day) Object.assign(D,P.resume.D);                          // continue a saved day
   else P.dayStart={day:P.day,money:P.money,stock:{...P.stock},lots:JSON.parse(JSON.stringify(P.lots||{})),rep:repOf(),served:P.served};   // for "Restart the day"
   P.resume=null; saveGame(); enterService();
@@ -1083,7 +1086,8 @@ function clockTick(dt){
   if(G.play!=='story' || G.mode!=='service' || G.tut) return;
   if(!closed()){ const m0=Math.floor(D.clock); D.clock+=dt*(DAY.CLOSE-DAY.OPEN)/DAY.SECONDS;
     if(Math.floor(D.clock)!==m0) updateHud();
-    if(closed() && !G.arriveIn) toast('Closing time! Finish this last bowl'); }
+    if(closed() && !G.arriveIn){ D.over=0; toast(`Closing time! ${DAY.OVERTIME} s to finish this last bowl`); } }
+  else if(G.waiting && D.over!==undefined){ D.over+=dt; if(D.over>=DAY.OVERTIME){ D.over=undefined; closingWalk(); } }
   if(G.arriveIn>0){ G.arriveIn-=dt; if(G.arriveIn<=0){ G.arriveIn=0; if(closed()) closeShop(); else arrive(); } } }
 function domArms(root,w,h,mode,deg){ if(root._arms!==mode){ root._arms=mode; placeArms(root,w,h,mode==='head'?ARM:ARM_TORSO); } setArms(root,deg); }
 function resetMomoBack(){ const m=$('#shopMomo'); m.classList.remove('front'); m.querySelector('.body').src=ASSET_SRC.momo_body; domArms(m,440,475,'torso',26); }
@@ -1093,7 +1097,7 @@ function nextCustomer(){
   if(G.play==='tutorial' && D.done>=1){ toast('Tutorial complete!'); goHome(); return; }
   if(G.play==='story' && closed()){ closeShop(); return; }
   updateHud(); $('#cust').classList.add('away');
-  if(G.play==='story' && !G.tut && !G.firstOrder){ G.arriveIn = D.done===0 && !G.order ? .4 : Math.max(1.2, DAY.GAP/crowd()); return; }   // the next customer walks in after a gap (clockTick)
+  if(G.play==='story' && !G.tut && !G.firstOrder){ G.arriveIn = D.done===0 && !G.order ? .4 : DAY.GAP; return; }   // the next customer walks in after a gap (clockTick)
   arrive();
 }
 function arrive(){
@@ -1123,6 +1127,11 @@ function favHit(id,r){ const f=CUSTOMERS[id].fav; if(!f || lowGrade(r)) return f
   if(f.score) return r.total>=f.score;
   const p=G.order.pos, asked=Object.keys(f.order||{}).every(k=>p[k]===f.order[k]), row=r.rows.find(x=>x.label===f.row);
   return asked && !!row && row.pts>=row.max; }
+function closingWalk(){   // the shop is closing: the last customer leaves politely (no reputation loss)
+  G.waiting=false; D.done++; const id=G.order.cust; if(G.scene!=='shop') showScene('shop');
+  $('#orderSheet').classList.remove('on'); $('#patBar').classList.add('hide'); layoutStage(false);
+  const c=$('#cust'); c.classList.remove('impatient'); say("Oh, you're closing? I'll come back tomorrow!");
+  later(()=>{ hush(); c.classList.add('away'); },1800); later(closeShop,2600); }
 function walkout(){
   G.waiting=false; D.walk++; bumpRep('walkout'); const id=G.order.cust;
   if(G.scene!=='shop') showScene('shop');
@@ -1184,7 +1193,7 @@ function eat(){
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
   later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; say(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
-    const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
+    const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
     else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++;
       if(E.served>(P.endlessBest||0)){ if(P.endlessBest && !E.newBest){ E.newBest=true; later(()=>toast(`New best: ${E.served} bowls!`),1400); } P.endlessBest=E.served; saveGame(); } }
