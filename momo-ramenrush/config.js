@@ -92,12 +92,12 @@ const DAY={
 }
 
 /* ---- RUSH: from FROM_DAY, customers who walk in during these hours come two at a time ---- */
-const RUSH={ FROM_DAY:7, MAX:5, SINGLES:3,   // at most 4 rushes a day, and at least 5 single orders always come first
+const RUSH={ FROM_DAY:7, MAX:7, SINGLES:3,   // at most 4 rushes a day, and at least 5 single orders always come first
   // how many rushes a day: [first day, rushes for sure, chance of one more]
   SCHEDULE:[[7,1,.3],[9,1,.5],[11,1,.7],[14,2,0],[17,2,.5],[20,2,.7],[21,3,0],[22,3,.5],
-            [24,3,.7],[25,4,0],[30,4,.5],[34,4,.7],[36,5,0.5]],
+            [24,3,.7],[25,4,0],[30,4,.5]],
   // rushes are spread through the day; the name comes from the time they start
-  NAMES:[[15*60,'Lunch rush'],[17*60,'Afternoon rush'],[24*60,'Dinner rush']] };
+  NAMES:[[12*60,14*60,'Lunch rush'],[17*60,18*60,'Afternoon rush'],[19*60,21*60,'Dinner rush']] };
 
 /* ---- DEMAND: tomorrow's event is rolled at night (shown on the iPad) so you can stock up for it ----
    weight = how often it happens · price = bowl price × · chashu / onion = chance an order wants it */
