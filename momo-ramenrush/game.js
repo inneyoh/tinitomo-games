@@ -1119,7 +1119,7 @@ function arrive(){
   const c=$('#cust'); c.classList.add('away'); c.classList.remove('impatient');
   later(()=>{ placeCustomer(id); c.innerHTML=custHTML(id,'idle'); c.classList.remove('away','eat');
     later(()=>{ say(CUSTOMERS[id].hi); renderTicket($('#shopTicket'),G.order); $('#orderSheet').classList.add('on'); layoutStage('cust');
-      const timed = G.play==='story' && !G.tut; G.waiting=timed; $('#patBar').classList.toggle('hide',!timed); $('#app').classList.toggle('notimed',!timed);
+      const timed = G.play==='story' && !G.tut; G.timedOrder=timed; G.waiting=false;   // patience starts when Momo heads to the kitchen $('#patBar').classList.toggle('hide',!timed); $('#app').classList.toggle('notimed',!timed);
       $('#orderCoach').hidden=!G.tut; $('#scoreCoach').hidden=!G.tut; later(redrawAllCircles,60); later(redrawAllCircles,520); },650); },350);
 }
 function patienceTick(dt){
@@ -1155,7 +1155,7 @@ function walkout(){
 function say(t){ const b=$('#custBubble'); if(b.textContent!==t) b.textContent=t; b.classList.remove('off'); }
 function hush(){ $('#custBubble').classList.add('off'); }
 function toKitchen(){
-  G.clockHold=false;
+  G.clockHold=false; if(G.timedOrder){ G.waiting=true; G.timedOrder=false; }
   $('#orderSheet').classList.remove('on'); hush();
   showScene('kitchen'); K.cam=K.camT=0; K.stn=0; K.hop=.6; K.hand=null; K.M=null; K.rice=null; K.queue=0; K.lastTap=null; K.parts=[]; K.fx=[]; K.idle=0; K.dirty=true;
   ticketMini=false; tutKey=''; $('#coach').hidden=!G.tut; $('#btnNext').classList.remove('pulse'); $('#serveHint').classList.remove('pulse');
