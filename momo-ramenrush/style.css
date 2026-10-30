@@ -415,6 +415,9 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 .cbRow .pips i{width:9px;height:9px;border-radius:50%;background:#e6dccb;border:1.5px solid #cdbb9c}
 .cbRow .pips i.on{background:#e0a800;border-color:#a87b00}
 .cbRow .v{opacity:.8}
+.cb.unmet .cbPic{background:radial-gradient(circle at 50% 40%,#efe6d6,#d9ccb5)}
+.cb.unmet .cbPic img{filter:brightness(0);opacity:.85}
+.cb.unmet .cbRow{grid-template-columns:62px 1fr}
 .cbStat{font-size:11px;font-weight:600;color:var(--good);margin-top:2px}
 #bookEmpty{grid-column:1/-1;text-align:center;font-size:14px;opacity:.75;padding:30px 10px}
 

@@ -44,18 +44,22 @@ const ONION_NAME={green:'Green Onion',white:'White Onion',both:'Green + White',n
    4. CUSTOMERS — sprites from Soso's Ice Cream Stand
    ===================================================================== */
 const MOMO_LINE={S:'As calculated.',A:'Acceptable.',B:'…Room for improvement.',C:'…Recollecting data.'};
-/* Momo's face when she turns round: 0–40 confused · 41–85 normal · 86–100 smug */
-const MOMO_FACE=[ {max:40, img:'assets/momo_confused.webp', line:'…Wait. Where did that go wrong?'},
-                  {max:85, img:'assets/momo_front.webp',    line:'Not bad. Next one.'},
-                  {max:100,img:'assets/momo_smug.webp',     line:'Hmph. As calculated.'} ];
-const faceFor = total => MOMO_FACE.find(f=>total<=f.max);
+/* Momo's face when she turns round — thresholds in GRADING (config.js) */
+const MOMO_FACE={ confused:{img:'assets/momo_confused.webp', line:'…Wait. Where did that go wrong?'},
+                  normal:  {img:'assets/momo_front.webp',    line:'Not bad. Next one.'},
+                  smug:    {img:'assets/momo_smug.webp',     line:'Hmph. As calculated.'} };
+const faceFor = total => total<=GRADING.MOMO_CONFUSED ? MOMO_FACE.confused : total>=GRADING.MOMO_SMUG ? MOMO_FACE.smug : MOMO_FACE.normal;
+const lowGrade = r => r.total<=GRADING.UPSET;   // C and below
 const CUST_IMG={soso:'assets/cu_soso.webp', kew:'assets/cu_kew.webp', rang:'assets/cu_rang.webp', bae:'assets/cu_bae.webp', popo:'assets/cu_popo.webp'};
-/* angry Soso · upset Kew · confused Rang · worried Bae — a bowl under 40 points, or patience under 20% */
+/* angry Soso · upset Kew · confused Rang · worried Bae · cross Popo — a C-or-lower bowl, or low patience (GRADING in config.js) */
 const CUST_UPSET={soso:'assets/cu_soso_upset.webp', kew:'assets/cu_kew_upset.webp', rang:'assets/cu_rang_upset.webp', bae:'assets/cu_bae_upset.webp', popo:'assets/cu_popo_upset.webp'};
-const UPSET_SCORE=40, UPSET_PATIENCE=20;
+const UPSET_PATIENCE=GRADING.UPSET_PATIENCE;
 Object.values(CUST_UPSET).forEach(src=>{ new Image().src=src; });   // preload so the swap is instant
 const CUST_H={soso:394, kew:408, rang:416, bae:457, popo:467};   // picture height at 360 px wide
 const csize=id=>CUSTOMERS[id].size||1;
+/* who walks in next: weighted by `rate` in config.js (1 normal · 0.5 rare · 0.2 ultra rare), never the same one twice in a row */
+function pickCustomer(not, from){ const ids=(from||Object.keys(CUSTOMERS)).filter(id=>id!==not), w=ids.map(id=>CUSTOMERS[id].rate??1);
+  let x=Math.random()*w.reduce((a,b)=>a+b,0); for(let i=0;i<ids.length;i++){ x-=w[i]; if(x<0) return ids[i]; } return ids[ids.length-1]; }
 function custHTML(id, mood, upset){
   const fx = mood==='happy' ? '<img class="cfx" src="assets/ui_heart.webp" alt="" style="left:262px;top:-14px"><img class="cfx" src="assets/ui_heart.webp" alt="" style="left:14px;top:30px;width:60px;animation-delay:.25s">'
            : mood==='sad' ? '<img class="cfx" src="assets/ui_anger_mark.webp" alt="" style="left:258px;top:10px">' : '';
@@ -875,7 +879,7 @@ function kitchenFrame(dt){
    12. SCORING
    ===================================================================== */
 function score(order,b){
-  const w=want(order.pos), rows=[]; const add=(label,wnt,got,pts,max)=>rows.push({label,wnt,got,pts:Math.max(0,Math.round(pts)),max});
+  const w=want(order.pos), rows=[]; const add=(label,wnt,got,pts,max)=>{ const M=GRADING.POINTS[label]??max; rows.push({label,wnt,got,pts:Math.max(0,Math.round(pts/max*M)),max:M}); };   // formulas below work out of their own max, rescaled to GRADING.POINTS
   const near=(a,bb,full,half)=>a===bb?full:Math.abs(a-bb)===1?half:0, nd=b.nood;
   add('Dashi', `${DASHI_NAME[w.dashi]} · ${w.dashi+1} scoop${w.dashi?'s':''}`, `${b.tare} scoop${b.tare===1?'':'s'}`, near(b.tare,w.dashi+1,12,5), 12);
   add('Soup level','To the line', Math.round(b.soup*100)+'%', b.soup<.05||b.soup>1.02?0:(()=>{const d=Math.abs(b.soup-CFG.SOUP_TARGET); return d<=CFG.SOUP_TOL?8:8-(d-CFG.SOUP_TOL)*50;})(), 8);
@@ -891,9 +895,10 @@ function score(order,b){
   add('Seaweed', w.nori?'Yes':'No', b.nori?'Yes':'No', b.nori===w.nori?4:0, 4);
   add('Rice', w.rice?'Yes':'No', b.rice?'Yes':'No', b.rice===w.rice?4:0, 4);
   let total=rows.reduce((s,r)=>s+r.pts,0);
-  if(b.noodlesBeforeSoup){ rows.push({label:'Order',wnt:'Soup → noodles',got:'Noodles first',pts:-8,max:0}); total-=8; }
+  if(b.noodlesBeforeSoup){ rows.push({label:'Order',wnt:'Soup → noodles',got:'Noodles first',pts:-GRADING.ORDER_PENALTY,max:0}); total-=GRADING.ORDER_PENALTY; }
+  if(!inBowl) total=Math.min(total,GRADING.NO_NOODLE_CAP);
   total=Math.max(0,Math.min(100,total));
-  return {rows,total,grade: total>=90?'S': total>=75?'A': total>=55?'B':'C'};
+  return {rows,total,grade:(GRADING.GRADES.find(([min])=>total>=min)||[0,'D'])[1]};
 }
 
 /* =====================================================================
@@ -973,7 +978,7 @@ function bowlFromPack(o){ return {tare:o.dashi+1, soup:CFG.SOUP_TARGET, fat:o.ri
 function randomBowl(){ const r=a=>a[Math.floor(Math.random()*a.length)];
   return bowlFromPack({dashi:r([0,1,2]),richness:r([0,1,2,3,4]),garlic:r([0,2,3,4]),onion:r([0,0,1,3]),chashu:r([1,1,0]),spice:r([0,1,2,3]),texture:r([1,2]),seaweed:r([1,1,0])}); }
 function seatCustomers(){
-  const ids=shuffled(Object.keys(CUSTOMERS)).slice(0,SEAT_X.length);
+  const ids=[]; for(let i=0;i<SEAT_X.length;i++) ids.push(pickCustomer(null,Object.keys(CUSTOMERS).filter(id=>!ids.includes(id))));   // rarer customers sit down less often
   const big=ids.reduce((m,id,i)=>csize(id)>csize(ids[m])?i:m,0); if(csize(ids[big])>1) [ids[1],ids[big]]=[ids[big],ids[1]];   // the biggest toy takes the middle seat
   const ws=ids.map(id=>250*csize(id)); HOME.x=SEAT_X.slice();
   // a big toy pushes its neighbours out a little so they don't hide behind it
@@ -1058,9 +1063,7 @@ function nextCustomer(){
   if(G.play==='tutorial' && D.done>=1){ toast('Tutorial complete!'); goHome(); return; }
   if(G.play==='story' && D.done>=D.n){ closeShop(); return; }
   updateHud();
-  if(!G.custQueue.length) G.custQueue=Object.keys(CUSTOMERS).sort(()=>Math.random()-.5);
-  if(G.firstOrder) G.custQueue=['soso',...G.custQueue.filter(c=>c!=='soso')];
-  const id=G.custQueue.shift(); G.ticketNo++;
+  const id = G.firstOrder ? 'soso' : pickCustomer(G.lastCust); G.lastCust=id; G.ticketNo++;
   G.order={cust:id,no:G.ticketNo,pos:genOrder(id)}; G.bowl=newBowl(); G.result=null; K.dirty=true; G.pat=100;
   $('#shopBowl').classList.add('hidden-o'); $('#shopRice').classList.add('hidden-o');
   const c=$('#cust'); c.classList.add('away'); c.classList.remove('impatient');
@@ -1082,7 +1085,7 @@ function patienceTick(dt){
   if(G.pat<=0) walkout();
 }
 /* did the bowl nail this customer's favourite? (they must have ordered it, and the bowl isn't a C) */
-function favHit(id,r){ const f=CUSTOMERS[id].fav; if(!f || r.grade==='C') return false;
+function favHit(id,r){ const f=CUSTOMERS[id].fav; if(!f || lowGrade(r)) return false;
   if(f.score) return r.total>=f.score;
   const p=G.order.pos, asked=Object.keys(f.order||{}).every(k=>p[k]===f.order[k]), row=r.rows.find(x=>x.label===f.row);
   return asked && !!row && row.pts>=row.max; }
@@ -1124,8 +1127,8 @@ function serve(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ sb.style.transition=''; sr.style.transition=''; sb.style.transform=''; sr.style.transform=''; }));
   blip(520,.1); later(()=>blip(780,.12),250);
   later(()=>{ domArms(m,440,475,'torso',26); layoutStage('tray'); const st=$('#stage'), t=G.result.total; st.classList.add('zoomed');
-    if(t>95){ st.classList.add('shineOn'); $('#sparkles').innerHTML=[[300,700],[580,690],[250,880],[640,900],[440,640],[700,800]].map(([x,y],i)=>`<span class="spark" style="left:${x}px;top:${y}px;animation-delay:${i*.22}s">✦</span>`).join(''); later(()=>sfx('golden'),200); }
-    else if(t<20){ st.classList.add('gloomOn'); later(()=>sfx('bad'),200); } },1000);
+    if(t>=GRADING.SHINE){ st.classList.add('shineOn'); $('#sparkles').innerHTML=[[300,700],[580,690],[250,880],[640,900],[440,640],[700,800]].map(([x,y],i)=>`<span class="spark" style="left:${x}px;top:${y}px;animation-delay:${i*.22}s">✦</span>`).join(''); later(()=>sfx('golden'),200); }
+    else if(t<=GRADING.GLOOM){ st.classList.add('gloomOn'); later(()=>sfx('bad'),200); } },1000);
   later(showScore,1900);
 }
 function showScore(){
@@ -1145,9 +1148,9 @@ function eat(){
     ['Slurp!','Slurrrp…','Fuu fuu'].forEach((w,i)=>later(()=>{ slurpText(260+i*130,420); blip(300+i*60,.1,'sine',.05); },i*500));
   },800);
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
-  later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, r.grade==='C'?'sad':'happy', r.total<UPSET_SCORE); say(fv?CUSTOMERS[id].fav.line:CUSTOMERS[id].react[r.grade]); if(fv) blip(1180,.12,'sine');
+  later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; say(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus()));
-    const C=CUSTOMERS[id], tip = r.total>=55 ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip) : 0, bonus = r.total>=95?C.perfect:0;
+    const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
     else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++;
       if(E.served>(P.endlessBest||0)){ if(P.endlessBest && !E.newBest){ E.newBest=true; later(()=>toast(`New best: ${E.served} bowls!`),1400); } P.endlessBest=E.served; saveGame(); } }
@@ -1449,6 +1452,10 @@ function openBook(){
   $('#bookCount').textContent=`${ids.filter(id=>cb[id]).length} / ${ids.length} met`;
   const row=(name,r)=>`<div class="cbRow"><span class="k">${name}</span><span class="pips">${'<i class="on"></i>'.repeat(r.pips)}${'<i></i>'.repeat(r.of-r.pips)}</span><span class="v">${r.label}</span></div>`;
   $('#bookGrid').innerHTML=ids.map(id=>{ const C=CUSTOMERS[id], st=cb[id];
+    if(!st) return `<div class="cb unmet"><div class="cbPic"><img src="${CUST_IMG[id]}" alt="Unknown customer"></div>
+      <div class="cbBody"><h3>???</h3><p class="cbProf">???</p><div class="cbLikes">♡ Likes: <b>???</b></div>
+        <div class="cbRow"><span class="k">Patience</span><span class="v">???</span></div><div class="cbRow"><span class="k">Tips</span><span class="v">???</span></div><div class="cbRow"><span class="k">Bonus tip</span><span class="v">???</span></div>
+        <div class="cbStat" style="color:inherit;opacity:.6">Serve them a bowl to fill in this page</div></div></div>`;
     return `<div class="cb"><div class="cbPic"><img src="${CUST_IMG[id]}" alt="${C.name}"></div>
       <div class="cbBody"><h3>${C.name}</h3><p class="cbProf">${C.profile||''}</p>
         <div class="cbLikes">♡ Likes: <b>${C.likes||'—'}</b></div>

@@ -13,32 +13,52 @@ const CFG = {
   SCOOP_TIME:.85,                                      // ladle trip length (1 ≈ 0.66 s); .72 lets taps ~0.5 s apart count, faster taps are ignored
 };
 
-/* ---- customers: pat = patience ×, tip = tip ×, perfect = bonus at 95+, size = how big they look (Soso = 1)
+/* ---- customers: rate = how often they visit (1 normal · 0.5 rare · 0.2 ultra rare), size = how big they look (Soso = 1)
+        pat = patience ×, tip = tip ×, perfect = bonus for an S bowl
         profile / likes = what the Customer Book says about them
         fav = their favourite: `order` is what they ask for more often, `row` is the score line that must be perfect
               (or `score` = minimum total), `line` is what they say when you nail it ---- */
 const FAV_CHANCE=.5;   // extra chance that a customer orders their favourite
 const CUSTOMERS = {
-  soso:{name:'Soso', size:1, pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
+  soso:{name:'Soso', rate:1, size:1, pat:.7, tip:2.6, perfect:300, hi:"Soso's here~ ♡ You know my usual, right?",
     react:{S:"Soso love Momo Ramen! ♡",A:"Yummy~! Soso will come again!",B:"Hmm, not quite… Soso will still eat it!",C:"So…?"},
     profile:"Momo's twin sister. Cutesy, chaotic and very fluffy — loves strawberry milk and Momo.", likes:"Spice level 5",
     fav:{order:{spice:5}, row:'Spice', line:"Level 5 spice~!! Soso's favourite ♡"}},
-  rang:{name:'Rang', size:.87, pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
+  rang:{name:'Rang', rate:1, size:.87, pat:1, tip:1, perfect:700, hi:"Rangahahaha! I'm STARVING!",
     react:{S:"RANGAHAHAHA!! The best!!",A:"Haha! Tasty!",B:"Eh, close enough!",C:"Rang…?"},
     profile:"Loud, cheerful and free. Laughs at everything — rangahahaha!", likes:"Rich broth",
     fav:{order:{rich:3}, row:'Richness', line:"RANGAHAHA! That rich broth hits the spot!"}},
-  kew:{name:'Kew', size:.82, pat:1.5, tip:1, perfect:370, hi:"…One bowl, please.",
+  kew:{name:'Kew', rate:1, size:.82, pat:1.5, tip:1, perfect:370, hi:"…One bowl, please.",
     react:{S:"…Perfect ramen, thank you.",A:"Mm. A bowl that calms the mind.",B:"This too is training.",C:"…Kew."},
     profile:"Quiet and polite. Treats every bowl like training. Patience is a virtue.", likes:"Seaweed",
     fav:{order:{nori:0}, row:'Seaweed', line:"…Seaweed. The ocean, in a bowl. Thank you."}},
-  bae:{name:'Bae', size:.87, pat:1.2, tip:1.5, perfect:300, hi:"Hello, one bowl of Ramen please!",
+  bae:{name:'Bae', rate:1, size:.87, pat:1.2, tip:1.5, perfect:300, hi:"Hello, one bowl of Ramen please!",
     react:{S:"Yum! Thank you for the great meal.",A:"Taste good, thank you...!",B:"Oh... not what I expected...",C:"Bae...!"},
     profile:"Gentle, graceful and polite, but worries a little too easily.", likes:"Soft noodles",
     fav:{order:{noodle:3}, row:'Noodles', line:"Soft noodles, just how I like them! Thank you!"}},
-  popo:{name:'Popo', size:1.1, pat:0.75, tip:2, perfect:500, hi:"How is the shop doing?",
+  popo:{name:'Popo', rate:0.5, size:1.1, pat:0.75, tip:2, perfect:500, hi:"How is the shop doing?",
     react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"},
     profile:"The actual owner of the store and the (2nd) best cook in town. Loves her ribbons.", likes:"A perfect bowl",
     fav:{score:95, line:"A perfect bowl. I'm proud of you, Momo."}},
+};
+
+/* ---- GRADING: how a bowl is scored and what each score leads to ---- */
+const GRADING={
+  // grade letters: the first one whose minimum the total reaches
+  GRADES:[[95,'S'],[85,'A'],[70,'B'],[51,'C'],[0,'D']],
+  // most points each part of the bowl can give (they add up to 100). No noodles = Noodles + Draining are 0.
+  POINTS:{ 'Dashi':10, 'Soup level':7, 'Richness':10, 'Garlic':9, 'Spice':9, 'Noodles':25, 'Draining':10,
+           'Onion':6, 'Chashu':5, 'Seaweed':5, 'Rice':4 },
+  NO_NOODLE_CAP:70,       // a bowl without noodles can never score more than this
+  ORDER_PENALTY:8,        // noodles went in before the soup
+  MOMO_SMUG:85,           // Momo turns round smug at this score or more…
+  MOMO_CONFUSED:69,       // …and confused at this score or less (C and below); normal in between
+  UPSET:69,               // customer pulls their upset face at this score or less (C and below)
+  GLOOM:69,               // purple gloom over the bowl at this score or less (C and below)
+  SHINE:95,               // golden shine at this score or more (S)
+  TIP_FROM:71,            // tips are only paid from this score
+  PERFECT_FROM:95,        // the customer's perfect bonus is paid from this score
+  UPSET_PATIENCE:20,      // customer looks upset when patience drops below this %
 };
 
 /* ---- Customer Book ratings: a customer gets the first label whose minimum they reach ---- */
