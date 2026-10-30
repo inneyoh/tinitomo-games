@@ -85,7 +85,7 @@ const BOOK_RATINGS={
 /* ---- STORY DAY: the shop is open on a clock; customers keep coming until closing time ---- */
 const DAY={
   OPEN:11*60, CLOSE:21*60,     // shop hours (minutes after midnight): 11:00 → 21:00
-  SECONDS:d=> d<=3 ? 210 : d<=6 ? 300 : d<=21 ? 420 : d<=34 ? 510 : 600,   // 3.5 → 5 → 7 → 8.5 → 10 min (max) as rushes get more frequent   // seconds of cooking from OPEN to CLOSE: 3.5 min (1–3), 5 min (4–6), 7 min (7–21), 8.5 min (22–34), 10 min (35 on).
+  SECONDS:d=> d<=3 ? 210 : d<=6 ? 240 : d<=21 ? 300 : d<=34 ? 330 : 420,   // 3.5 → 4 → 5 → 5.5 → 7 min (max) as rushes get more frequent   // seconds of cooking from OPEN to CLOSE: 3.5 min (1–3), 5 min (4–6), 7 min (7–21), 8.5 min (22–34), 10 min (35 on).
                                // The clock stops while a customer orders and while they eat — it only runs in the kitchen and between customers.
   OVERTIME:45,                 // after closing, the last customer is served for at most this many seconds, then leaves — a day never passes ~4 min
   GAP:.8,                      // seconds before the next customer walks in (always the same)
