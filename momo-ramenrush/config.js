@@ -68,6 +68,32 @@ const BOOK_RATINGS={
   perfect:[[700,'Very good'],[365,'Good'],[0,'Normal']],
 };
 
+/* ---- STORY DAY: the shop is open on a clock; customers keep coming until closing time ---- */
+const DAY={
+  OPEN:11*60, CLOSE:21*60,     // shop hours (minutes after midnight): 11:00 → 21:00
+  SECONDS:420,                 // real seconds (7 min) the clock takes to go from OPEN to CLOSE (only ticks while serving, not while paused)
+  GAP:8,                       // seconds before the next customer walks in (shorter with good reputation or a busy event)
+};
+
+/* ---- DEMAND: tomorrow's event is rolled at night (shown on the iPad) so you can stock up for it ----
+   weight = how often it happens · crowd = customers come ×more often · price = bowl price × · chashu / onion = chance an order wants it */
+const EVENTS=[
+  {id:'normal',   weight:4, name:'Ordinary day',   desc:'Business as usual.'},
+  {id:'chashu',   weight:1, name:'Chashu craze',   desc:'A food show praised chashu — nearly everyone orders it.', chashu:.97},
+  {id:'onion',    weight:1, name:'Onion lovers',   desc:'Onions are in season — lots of green, white and both.', onion:.95},
+  {id:'festival', weight:1, name:'Market festival',desc:'Ramen is 30% off: more customers, less money per bowl.', price:.7, crowd:1.3},
+];
+
+/* ---- REPUTATION (0–100, shown as ★ out of 5): good bowls bring more customers ---- */
+const REPUTATION={
+  START:50,
+  CHANGE:{S:4, A:2, B:1, C:-2, D:-4, walkout:-5},   // per bowl (story mode)
+  CROWD_MIN:.6, CROWD_MAX:1.4,                       // customers come ×0.6 as often at 0 ★, ×1.4 at 5 ★ (×1 at 2.5 ★)
+};
+
+/* ---- SHELF LIFE: days a fresh batch stays usable (random in [min, max]); seaweed keeps ---- */
+const SHELF={ green:[3,4], white:[3,4], chashu:[2,3], noodle:[4,5] };
+
 /* ---- audio volumes (0–1) ---- */
 const VOL={ titleMusic:.13, titleShop:.36, dayMusic:.25, nightMusic:.27, sfx:.95 };   // music ×0.6 (v8 feedback)
 
@@ -115,11 +141,10 @@ const UPGRADES=[
 const ECON={
   START_MONEY:2000,
   START_STOCK:{chashu:4,green:4,white:3,nori:4,noodle:6},
-  rent:d=>1200+400*(d-1),                 // paid every night
-  customers:d=>Math.min(8,3+d),           // customers per day
-  patience:d=>Math.max(55,110-(d-1)*8),   // seconds a customer waits from order to tray
-  TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ 55); each customer multiplies these
-  PREP_YIELD:1/3,                         // minigame restock is ⅓ of a pack's base (2/3 less than v5)
+  rent:d=>Math.min(3500, 800+100*(d-1)),  // paid every night: ¥800 on day 1, +¥100 a day, never more than ¥3,500
+  patience:d=>Math.max(85,120-(d-1)*4),   // seconds a customer waits from order to tray (120 s on day 1, −4 s a day, at least 85 s)
+  TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ GRADING.TIP_FROM); each customer multiplies these
+  PREP_YIELD:2/3,                         // a perfect prep turns a pack into ⅔ of its base portions (was ⅓ — too costly once stock spoils)
   PATIENCE_SLOWER:.85,                    // patience drains 15% slower for everyone
 };
 

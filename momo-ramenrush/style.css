@@ -347,6 +347,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 .ipTabs button{flex:1;border:2px solid var(--ink);border-radius:12px;background:#fff;font-weight:700;font-size:13px;padding:6px 0;cursor:pointer}
 .ipTabs button.on{background:var(--ink);color:#fff}
 .ipList{flex:1;overflow:auto;padding:0 12px 8px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.ipEvent{background:#fff3c4;border:2px solid #e0a800;border-radius:12px;padding:6px 10px;font-size:12px;line-height:1.35}
 .ipCats{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:4px;padding:2px 0 6px;background:#f4eee2;scrollbar-width:none;flex-shrink:0}
 .ipCats::-webkit-scrollbar{display:none}
 .ipCats button{flex:1 1 auto;border:2px solid #d9c7a8;border-radius:999px;background:#fff;font-weight:700;font-size:11px;padding:4px 6px;white-space:nowrap;cursor:pointer;color:var(--ink)}

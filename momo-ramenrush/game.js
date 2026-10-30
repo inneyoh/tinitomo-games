@@ -28,7 +28,7 @@ const SHEET = [
   {key:'spice',  en:'Spice',    opts:['0','1','2','3','4','5']},
   {key:'noodle', en:'Noodles',  opts:['Extra Firm','Firm','Normal','Soft','Extra Soft']},
   // ---- toppings (盛り付け) last ----
-  {key:'onion',  en:'Onion',    opts:['Green Onion','White Onion','No onion']},
+  {key:'onion',  en:'Onion',    opts:['Green Onion','White Onion']},   // no circle = no onion, circle between = both
   {key:'chashu', en:'Chashu',   opts:['Yes','No']},
   {key:'nori',   en:'Seaweed',  opts:['Yes','No']},
   {key:'rice',   en:'Rice',     opts:['Yes','No']},
@@ -84,11 +84,13 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 function genOrder(cust){
   if(G.firstOrder){ G.firstOrder=false; // = the reference sprite: medium · rich · 1 clove · green · chashu · spice 2 · firm · no rice · seaweed
     return {dashi:1,rich:3,garlic:4,onion:0,chashu:0,spice:2,noodle:1,rice:1,nori:0}; }
-  const r=Math.random, fav=cust&&CUSTOMERS[cust]&&CUSTOMERS[cust].fav;
+  const r=Math.random, fav=cust&&CUSTOMERS[cust]&&CUSTOMERS[cust].fav, ev=curEvent();
   const o={ dashi:pick([0,1,2]), rich:pick([0,1,2,2,3,4]),
     garlic: r()<.18 ? pick([4.5,6]) : pick([0,1,2,3,3,4,5]),
     onion: r()<.2 ? 0.5 : pick([0,0,1,2]), chashu:r()<.75?0:1, spice:pick([0,0,1,2,3,4,5]),
     noodle:pick([0,1,1,2,2,3,4]), rice:r()<.35?0:1, nori:r()<.7?0:1 };
+  if(ev && ev.chashu!==undefined) o.chashu = r()<ev.chashu ? 0 : 1;                       // demand event: chashu craze
+  if(ev && ev.onion!==undefined) o.onion = r()<ev.onion ? pick([0,0,1,0.5,0.5]) : 2;      // demand event: onion lovers
   if(fav && fav.order && r()<FAV_CHANCE) Object.assign(o,fav.order);   // their favourite, more often
   return o;
 }
@@ -127,7 +129,8 @@ function drawCircles(el, order){
   const sc=box.width/el.offsetWidth; let out='';   // sc ≠ 1 inside the scaled kitchen stage
   SHEET.forEach((s,ri)=>{
     const row=el.querySelector(`.tk-row[data-k="${s.key}"]`); const spans=[...row.querySelectorAll('.tk-opts span')];
-    const pos=order.pos[s.key]; const r=i=>spans[i].getBoundingClientRect(); let cx,cy,rx,ry=8.5*sc;
+    const pos=order.pos[s.key]; if(s.key==='onion' && pos===2) return;   // no onion: nothing circled
+    const r=i=>spans[i].getBoundingClientRect(); let cx,cy,rx,ry=8.5*sc;
     if(Number.isInteger(pos) && pos<spans.length){ const b=r(pos); cx=b.left+b.width/2; cy=b.top+b.height/2; rx=b.width/2+6*sc; }
     else if(pos>=spans.length){ const b=r(spans.length-1); cx=b.right+14*sc; cy=b.top+b.height/2; rx=9*sc; }
     else { const a=r(Math.floor(pos)), b=r(Math.ceil(pos)); cx=(a.right+b.left)/2; cy=a.top+a.height/2; rx=8*sc; }
@@ -923,8 +926,26 @@ const D={n:0,done:0,sales:0,tips:0,walk:0};   // today
 const E={served:0,money:0};                   // endless session
 const useStock=()=>G.play==='story';           // endless + tutorial replay have unlimited ingredients
 const stockOf=k=>useStock()?P.stock[k]:Infinity;
-function takeStock(k){ if(useStock() && k in P.stock) P.stock[k]=Math.max(0,P.stock[k]-1); }
-function giveStock(k){ if(useStock() && k in P.stock) P.stock[k]++; }
+/* stock is kept in batches (lots) that spoil: exp = the last day a batch can be used (SHELF in config.js) */
+const shelfLife=k=>SHELF[k]? SHELF[k][0]+Math.floor(Math.random()*(SHELF[k][1]-SHELF[k][0]+1)) : 99999;
+function lotsOf(k){ P.lots=P.lots||{}; const L=P.lots[k]=P.lots[k]||[]; let sum=L.reduce((a,l)=>a+l.n,0);
+  if(sum<P.stock[k]) L.push({n:P.stock[k]-sum, exp:P.day+shelfLife(k)});          // keep lots in step with the count
+  while(sum>P.stock[k] && L.length){ const t=Math.min(L[0].n,sum-P.stock[k]); L[0].n-=t; sum-=t; if(!L[0].n) L.shift(); }
+  L.sort((a,b)=>a.exp-b.exp); return L; }
+function addStock(k,n){ if(n<=0) return; lotsOf(k); P.stock[k]+=n; P.lots[k].push({n,exp:P.day+shelfLife(k)}); P.lots[k].sort((a,b)=>a.exp-b.exp); }
+function takeStock(k){ if(!useStock() || !(k in P.stock) || P.stock[k]<=0) return; const L=lotsOf(k); P.stock[k]--; if(L.length){ L[0].n--; if(!L[0].n) L.shift(); } }   // oldest first
+function giveStock(k){ if(!useStock() || !(k in P.stock)) return; const L=lotsOf(k); P.stock[k]++; if(L.length) L[0].n++; else L.push({n:1,exp:P.day+shelfLife(k)}); }
+function spoilStock(){ const gone={}; STOCK_KEYS.forEach(k=>{ const L=lotsOf(k); let g=0; P.lots[k]=L.filter(l=>{ if(l.exp<=P.day){ g+=l.n; return false; } return true; }); if(g){ P.stock[k]-=g; gone[k]=g; } }); return gone; }
+const spoilsSoon=k=>lotsOf(k).filter(l=>l.exp<=P.day+1).reduce((a,l)=>a+l.n,0);   // at night: gone after tomorrow
+/* reputation (0–100) and today's demand event */
+const repOf=()=>P.rep??REPUTATION.START;
+const repStars=v=>(Math.round(v/10)/2).toFixed(1);   // 0–5 in half stars
+function bumpRep(k){ if(G.play!=='story'||G.tut) return; P.rep=Math.max(0,Math.min(100,repOf()+(REPUTATION.CHANGE[k]||0))); }
+const curEvent=()=>G.play==='story' && !G.tut ? EVENTS.find(e=>e.id===D.event)||null : null;
+function rollEvent(){ let x=Math.random()*EVENTS.reduce((a,e)=>a+e.weight,0); for(const e of EVENTS){ x-=e.weight; if(x<0) return e.id; } return 'normal'; }
+const crowd=()=>{ const r=repOf()/100; return (REPUTATION.CROWD_MIN+(REPUTATION.CROWD_MAX-REPUTATION.CROWD_MIN)*r)*((curEvent()||{}).crowd||1); };
+const clockStr=m=>`${Math.floor(m/60)}:${String(Math.floor(m%60)).padStart(2,'0')}`;
+const closed=()=>D.clock>=DAY.CLOSE;
 
 /* =====================================================================
    14. UI HELPERS + SCENES
@@ -1030,8 +1051,8 @@ function slurpText(x,y){ const s=document.createElement('div'); s.className='slu
 function refreshHome(){ const endless=P.lastMode==='endless';   // the tray shows whichever mode was played last
   $('#hotTray .hm:not(.hmEnd)').hidden=endless; $('#hotTray .hmEnd').hidden=!endless; $('#hmBest').textContent=(P.endlessBest||0).toLocaleString();
   $('#btnEndless').innerHTML=`Endless${P.endlessBest?` · Best ${P.endlessBest} bowl${P.endlessBest===1?'':'s'}`:''} ▶<small>Just make ramen. No rent, no stock, no rush.</small>`;
-  $('#hmDay').textContent=P.day; $('#hmMoney').textContent=P.money.toLocaleString(); $('#hmRent').textContent=ECON.rent(P.day).toLocaleString(); $('#btnDay').innerHTML= P.resume&&P.resume.day===P.day ? `Continue Day ${P.day} · ${Math.min(P.resume.D.done+1,P.resume.D.n)}/${P.resume.D.n} ▶<small>Pick up where you saved</small>` : `Story · Day ${P.day} ▶<small>Rent, stock, patience and night prep</small>`; $('#hotDrink').classList.toggle('locked',!P.tutorialDone); }
-function goHome(){ G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
+  $('#hmDay').textContent=P.day; $('#hmMoney').textContent=P.money.toLocaleString(); $('#hmRent').textContent=ECON.rent(P.day).toLocaleString(); $('#btnDay').innerHTML= P.resume&&P.resume.day===P.day ? `Continue Day ${P.day} · ${clockStr(Math.min(P.resume.D.clock||DAY.OPEN,DAY.CLOSE))} ▶<small>Pick up where you saved</small>` : `Story · Day ${P.day} ▶<small>Rent, stock, patience and night prep</small>`; $('#hotDrink').classList.toggle('locked',!P.tutorialDone); }
+function goHome(){ G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
   $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); showScene('shop'); layoutStage(false); buildHome(); refreshHome(); music('title'); }
 
 /* =====================================================================
@@ -1041,28 +1062,41 @@ const WALK_LINE={soso:'Hmph! Soso is leaving!', rang:"Haha… I'll eat somewhere
 /* three ways to play: story (rent/stock/patience), endless (just ramen), tutorial replay (one guided bowl) */
 /* delayed steps of a day only run if the player is still in that same session (not after Home / Restart) */
 function later(f,ms){ const ss=G.sess; return setTimeout(()=>{ if(ss===G.sess) f(); },ms); }
-function enterService(){ $('#modeSheet').classList.remove('on'); G.mode='service'; $('#shop').classList.remove('home'); G.custQueue=[];
+function enterService(){ G.order=null; $('#modeSheet').classList.remove('on'); G.mode='service'; $('#shop').classList.remove('home'); G.custQueue=[];
   resetMomoBack(); updateHud(); layoutStage(false); music('day',true); later(nextCustomer,400); }
 function startDay(){ P.lastMode='story'; G.play='story'; G.tut=!P.tutorialDone; G.firstOrder=!P.firstDone||G.tut;
-  Object.assign(D,{n:ECON.customers(P.day),done:0,sales:0,tips:0,walk:0});
+  STOCK_KEYS.forEach(lotsOf);
+  Object.assign(D,{n:Infinity,clock:DAY.OPEN,done:0,sales:0,tips:0,walk:0,rep0:repOf(),event:P.day>1?(P.nextEvent||'normal'):'normal'});
   if(P.resume && P.resume.day===P.day) Object.assign(D,P.resume.D);                          // continue a saved day
-  else P.dayStart={day:P.day,money:P.money,stock:{...P.stock},served:P.served};              // for "Restart the day"
-  P.resume=null; saveGame(); enterService(); }
+  else P.dayStart={day:P.day,money:P.money,stock:{...P.stock},lots:JSON.parse(JSON.stringify(P.lots||{})),rep:repOf(),served:P.served};   // for "Restart the day"
+  P.resume=null; saveGame(); enterService();
+  const ev=curEvent(); if(ev && ev.id!=='normal') setTimeout(()=>toast(`Today: ${ev.name}<br><small>${ev.desc}</small>`),600); }
 function startEndless(){ P.lastMode='endless'; E.newBest=false; saveGame(); G.play='endless'; G.tut=false; G.firstOrder=false; Object.assign(E,{served:0,money:0}); Object.assign(D,{n:Infinity,done:0,sales:0,tips:0,walk:0}); enterService(); }
 function startTutorial(){ if(!P.tutorialDone){ toast('The tutorial starts with your first story day'); return; }
   G.play='tutorial'; G.tut=true; G.firstOrder=true; Object.assign(D,{n:1,done:0,sales:0,tips:0,walk:0}); enterService(); }
 function updateHud(){
   if(G.play==='endless'){ $('#hudDay').textContent=`Endless · bowl ${E.served+1}`; $('#hudCoins').textContent=yen(E.money); }
   else if(G.play==='tutorial'){ $('#hudDay').textContent='Tutorial'; $('#hudCoins').textContent=''; }
-  else { $('#hudDay').textContent=`Day ${P.day} · ${Math.min(D.done+1,D.n)}/${D.n}${G.tut?' · tutorial':''}`; $('#hudCoins').textContent=yen(P.money); } }
+  else { $('#hudDay').textContent=`Day ${P.day} · ${G.tut?'tutorial':clockStr(Math.min(D.clock,DAY.CLOSE))} · ★${repStars(repOf())}`; $('#hudCoins').textContent=yen(P.money); } }
+/* the shop clock: only runs while serving in story mode (not during the tutorial bowl, not while paused) */
+function clockTick(dt){
+  if(G.play!=='story' || G.mode!=='service' || G.tut) return;
+  if(!closed()){ const m0=Math.floor(D.clock); D.clock+=dt*(DAY.CLOSE-DAY.OPEN)/DAY.SECONDS;
+    if(Math.floor(D.clock)!==m0) updateHud();
+    if(closed() && !G.arriveIn) toast('Closing time! Finish this last bowl'); }
+  if(G.arriveIn>0){ G.arriveIn-=dt; if(G.arriveIn<=0){ G.arriveIn=0; if(closed()) closeShop(); else arrive(); } } }
 function domArms(root,w,h,mode,deg){ if(root._arms!==mode){ root._arms=mode; placeArms(root,w,h,mode==='head'?ARM:ARM_TORSO); } setArms(root,deg); }
 function resetMomoBack(){ const m=$('#shopMomo'); m.classList.remove('front'); m.querySelector('.body').src=ASSET_SRC.momo_body; domArms(m,440,475,'torso',26); }
 function clearTrayFx(){ $('#stage').classList.remove('zoomed','shineOn','gloomOn'); $('#sparkles').innerHTML=''; }
 function nextCustomer(){
   $('#btnNextCust').hidden=true; $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); clearTrayFx(); resetMomoBack();
   if(G.play==='tutorial' && D.done>=1){ toast('Tutorial complete!'); goHome(); return; }
-  if(G.play==='story' && D.done>=D.n){ closeShop(); return; }
-  updateHud();
+  if(G.play==='story' && closed()){ closeShop(); return; }
+  updateHud(); $('#cust').classList.add('away');
+  if(G.play==='story' && !G.tut && !G.firstOrder){ G.arriveIn = D.done===0 && !G.order ? .4 : Math.max(1.2, DAY.GAP/crowd()); return; }   // the next customer walks in after a gap (clockTick)
+  arrive();
+}
+function arrive(){
   const id = G.firstOrder ? 'soso' : pickCustomer(G.lastCust); G.lastCust=id; G.ticketNo++;
   G.order={cust:id,no:G.ticketNo,pos:genOrder(id)}; G.bowl=newBowl(); G.result=null; K.dirty=true; G.pat=100;
   $('#shopBowl').classList.add('hidden-o'); $('#shopRice').classList.add('hidden-o');
@@ -1090,7 +1124,7 @@ function favHit(id,r){ const f=CUSTOMERS[id].fav; if(!f || lowGrade(r)) return f
   const p=G.order.pos, asked=Object.keys(f.order||{}).every(k=>p[k]===f.order[k]), row=r.rows.find(x=>x.label===f.row);
   return asked && !!row && row.pts>=row.max; }
 function walkout(){
-  G.waiting=false; D.walk++; const id=G.order.cust;
+  G.waiting=false; D.walk++; bumpRep('walkout'); const id=G.order.cust;
   if(G.scene!=='shop') showScene('shop');
   $('#orderSheet').classList.remove('on'); $('#patBar').classList.add('hide'); layoutStage(false);
   const c=$('#cust'); c.classList.remove('impatient'); c.innerHTML=custHTML(id,'sad',true); say(WALK_LINE[id]); blip(200,.35,'sawtooth',.05);
@@ -1149,7 +1183,7 @@ function eat(){
   },800);
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
   later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; say(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
-    const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus()));
+    const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
     const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
     else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++;
@@ -1166,7 +1200,7 @@ function momoReveal(pay, extra, total){
   later(()=>ppFlip(m.querySelector('.flip'),()=>{ m.classList.add('front'); m.querySelector('.body').src=f.img; }).then(()=>{
     $('#cpAmt').textContent='+'+yen(pay); $('#cpTip').textContent= extra? `incl. ${yen(extra)} tip`:''; $('#coinPop').classList.add('on'); sfx('pay');
     later(()=>{ const b=$('#momoBubble'); b.textContent=f.line; b.classList.remove('off'); },350);
-    later(()=>{ const bt=$('#btnNextCust'); bt.textContent = G.play==='tutorial' ? 'Back home ▶' : G.play==='story' && D.done>=D.n ? 'Close the shop ▶':'Next customer ▶'; bt.hidden=false; },800);
+    later(()=>{ const bt=$('#btnNextCust'); bt.textContent = G.play==='tutorial' ? 'Back home ▶' : G.play==='story' && closed() ? 'Close the shop ▶':'Next customer ▶'; bt.hidden=false; },800);
   }),600);
 }
 function closeShop(){ G.waiting=false; P.resume=null; saveGame(); toast('Closing time! もも屋 is closed for today'); later(showNight,1500); }
@@ -1180,8 +1214,9 @@ function showNight(){
   const rent=ECON.rent(P.day), after=P.money-rent;
   showScene('night'); music('night'); sfx('eod'); $('#report').hidden=false; $('#ipad').hidden=true; $('#sleep').hidden=true;
   $('#rpTitle').textContent=`Day ${P.day} closed`;
-  $('#rpSub').textContent=`${D.n-D.walk} served · ${D.walk} walked out`;
-  $('#rpLedger').innerHTML=`<span>Sales</span><span class="pos">+${yen(D.sales)}</span><span>Tips</span><span class="pos">+${yen(D.tips)}</span><span>Rent</span><span class="neg">−${yen(rent)}</span><span class="tot">Money left</span><span class="tot ${after<0?'neg':''}">${yen(after)}</span>`;
+  const gone=spoilStock(), dr=repOf()-(D.rep0??repOf()); P.nextEvent=rollEvent(); saveGame();
+  $('#rpSub').textContent=`${D.done-D.walk} served · ${D.walk} walked out · ★${repStars(repOf())} reputation (${dr>=0?'+':''}${dr})`;
+  $('#rpLedger').innerHTML=`<span>Sales</span><span class="pos">+${yen(D.sales)}</span><span>Tips</span><span class="pos">+${yen(D.tips)}</span><span>Rent</span><span class="neg">−${yen(rent)}</span>${Object.keys(gone).length?`<span>Spoiled</span><span class="neg">${Object.entries(gone).map(([k,n])=>`${n} ${MARKET[k].name.toLowerCase()}`).join(', ')}</span>`:''}<span class="tot">Money left</span><span class="tot ${after<0?'neg':''}">${yen(after)}</span>`;
   const bt=$('#btnIpad');
   if(after<0){ bt.textContent="Can't pay rent…"; bt.onclick=gameOver; }
   else { bt.textContent='Pay rent & open iPad ▶'; bt.onclick=()=>{ P.money=after; N.market=shuffled(STOCK_KEYS).slice(0,UP.types()); saveGame(); openIpad(); }; }
@@ -1199,10 +1234,11 @@ function renderIpad(){
   $('#btnIpCoach').onclick=()=>{ P.seen[tk]=true; saveGame(); renderIpad(); };
   const L=$('#ipList');
   if(N.tab==='market'){
-    L.innerHTML=`<div style="font-size:12px;opacity:.8;line-height:1.4">Tonight's delivery: <b>${N.market.map(k=>MARKET[k].name).join(', ')}</b>. Everything you buy, Momo preps tonight — neat prep keeps every portion.</div>`+
+    const tm=EVENTS.find(e=>e.id===P.nextEvent)||EVENTS[0];
+    L.innerHTML=`<div class="ipEvent"><b>Tomorrow: ${tm.name}</b><br>${tm.desc}</div><div style="font-size:12px;opacity:.8;line-height:1.4">Tonight's delivery: <b>${N.market.map(k=>MARKET[k].name).join(', ')}</b>. Everything you buy, Momo preps tonight — neat prep keeps every portion.</div>`+
       STOCK_KEYS.map(k=>{ const m=MARKET[k], on=N.market.includes(k), q=N.qty[k]||0;
         return `<div class="ipItem ${on?'tonight':'off'}"><div class="ic"><img src="${m.img}" alt=""></div>
-          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}<br>${on?`${m.pack} · ${yen(m.price)} → up to +${Math.round(m.base*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
+          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}${spoilsSoon(k)?` <span style="color:var(--marker)">· ${spoilsSoon(k)} spoil after tomorrow</span>`:''}<br>${on?`${m.pack} · ${yen(m.price)} → up to +${Math.round(m.base*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
           ${on?`<div class="step"><button data-k="${k}" data-d="-1" aria-label="Fewer">−</button><span>${q}</span><button data-k="${k}" data-d="1" aria-label="More">+</button></div>`:'<span></span>'}</div>`; }).join('');
     L.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; N.qty[k]=Math.max(0,Math.min(UP.maxBuy(),(N.qty[k]||0)+ +b.dataset.d)); blip(600,.04); renderIpad(); });
   } else {
@@ -1252,7 +1288,7 @@ $('#btnPrep').onclick=()=>{ const cost=marketCost(); if(cost>P.money) return; P.
   N.queue=N.market.filter(k=>(N.qty[k]||0)>0); N.results=[]; if(!N.queue.length) endPrep(); else startPrep(N.queue.shift()); };
 /* ingredients with no minigame tonight get the average of tonight's prep results */
 function endPrep(){ const done=N.results, avg=done.length?Math.round(done.reduce((s,r)=>s+r.gain,0)/done.length):0; N.bonus={};
-  STOCK_KEYS.filter(k=>!done.some(r=>r.key===k)).forEach(k=>{ if(avg>0){ P.stock[k]+=avg; N.bonus[k]=avg; } }); saveGame(); showSleep(); }
+  STOCK_KEYS.filter(k=>!done.some(r=>r.key===k)).forEach(k=>{ if(avg>0){ addStock(k,avg); N.bonus[k]=avg; } }); saveGame(); showSleep(); }
 function showSleep(){
   showScene('night'); $('#report').hidden=true; $('#ipad').hidden=true; $('#sleep').hidden=false;
   $('#slLedger').innerHTML=STOCK_KEYS.map(k=>{ const r=N.results.find(x=>x.key===k), bn=(N.bonus||{})[k]; return `<span>${MARKET[k].name}</span><span>${P.stock[k]} ${MARKET[k].unit}${r?` <b class="pos">(+${r.gain})</b>`:bn?` <b class="pos">(+${bn} avg)</b>`:''}</span>`; }).join('')
@@ -1415,7 +1451,7 @@ function prepFrame(dt){
 }
 function finishPrep(){
   const key=PR.key, p=Math.max(0,Math.min(1,PREP[key].score(PR.g))), q=N.qty[key], gain=Math.round(MARKET[key].base*q*(0.5+0.5*p)*ECON.PREP_YIELD);
-  P.stock[key]+=gain; N.results.push({key,gain,p}); saveGame();
+  addStock(key,gain); N.results.push({key,gain,p}); saveGame();
   $('#pdTitle').textContent=`+${gain} ${MARKET[key].name.toLowerCase()} ${MARKET[key].unit}`;
   $('#pdSub').textContent= p>=.9?'Perfect prep, nothing wasted.': p>=.6?'Nice work. A little went to waste.':'Messy… quite a bit went to waste.';
   $('#pDone').hidden=false; $('#btnPrepNext').textContent=N.queue.length?'Next prep ▶':'Done ▶';
@@ -1501,7 +1537,7 @@ function tutKitchen(){
    ===================================================================== */
 function pauseGame(){ if(G.paused) return; G.paused=true; G.pausedAt=performance.now(); K.pour=false; K.hand=null; K.pan=null;
   const story=G.play==='story';
-  $('#psSub').textContent = story ? `Day ${P.day} · customer ${Math.min(D.done+1,D.n)}/${D.n} · ${yen(P.money)}` : G.play==='endless' ? `Endless · ${E.served} bowls · ${yen(E.money)}` : 'Tutorial';
+  $('#psSub').textContent = story ? `Day ${P.day} · ${clockStr(Math.min(D.clock,DAY.CLOSE))} · ${D.done} served · ${yen(P.money)}` : G.play==='endless' ? `Endless · ${E.served} bowls · ${yen(E.money)}` : 'Tutorial';
   $('#btnRestartDay').textContent = story ? `Restart Day ${P.day}` : G.play==='endless' ? 'Restart endless' : 'Restart tutorial';
   $('#btnSaveHome').innerHTML = story ? 'Save &amp; go home' : 'Go home';
   $('#pause').hidden=false; blip(500,.06); }
@@ -1511,10 +1547,10 @@ function resumeGame(){ if(!G.paused) return; const away=performance.now()-G.paus
 $('#btnPause').onclick=pauseGame;
 $('#btnResume').onclick=resumeGame;
 $('#btnRestartDay').onclick=()=>{ const mode=G.play;
-  if(mode==='story' && P.dayStart && P.dayStart.day===P.day){ P.money=P.dayStart.money; P.stock={...P.dayStart.stock}; P.served=P.dayStart.served; }
+  if(mode==='story' && P.dayStart && P.dayStart.day===P.day){ P.money=P.dayStart.money; P.stock={...P.dayStart.stock}; P.lots=JSON.parse(JSON.stringify(P.dayStart.lots||{})); P.rep=P.dayStart.rep??P.rep; P.served=P.dayStart.served; }
   P.resume=null; saveGame(); goHome();
   if(mode==='story') startDay(); else if(mode==='endless') startEndless(); else startTutorial(); };
-$('#btnSaveHome').onclick=()=>{ if(G.play==='story'){ P.resume={day:P.day,D:{...D}}; saveGame(); toast(`Saved · Day ${P.day}, customer ${Math.min(D.done+1,D.n)}/${D.n}`); } goHome(); };
+$('#btnSaveHome').onclick=()=>{ if(G.play==='story'){ P.resume={day:P.day,D:{...D}}; saveGame(); toast(`Saved · Day ${P.day}, ${clockStr(Math.min(D.clock,DAY.CLOSE))}`); } goHome(); };
 document.addEventListener('visibilitychange',()=>{ if(document.hidden && G.mode==='service' && (G.scene==='shop'||G.scene==='kitchen')) pauseGame(); });
 
 /* =====================================================================
@@ -1593,7 +1629,7 @@ function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
   if(G.scene==='kitchen'&&G.order) kitchenFrame(dt);
   if(G.scene==='shop'&&G.mode==='home') homeFrame(dt);
   if(G.scene==='prep'&&PR.g) prepFrame(dt);
-  patienceTick(dt);
+  patienceTick(dt); clockTick(dt);
   requestAnimationFrame(loop); }
 $('#btnMute').onclick=e=>{ e.stopPropagation(); audioInit(); setMuted(!SND.muted); };
 setMuted(SND.muted);
