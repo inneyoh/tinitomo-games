@@ -130,7 +130,7 @@ function drawCircles(el, order){
   const svg=el.querySelector('.tk-ink'); if(!svg) return; const box=el.getBoundingClientRect(); if(!box.width) return;
   const sc=box.width/el.offsetWidth; let out='';   // sc ≠ 1 inside the scaled kitchen stage
   SHEET.forEach((s,ri)=>{
-    const row=el.querySelector(`.tk-row[data-k="${s.key}"]`); const spans=[...row.querySelectorAll('.tk-opts span')];
+    const row=el.querySelector(`.tk-row[data-k="${s.key}"]`); if(!row.offsetParent && getComputedStyle(row).display==='none') return; const spans=[...row.querySelectorAll('.tk-opts span')];
     const pos=order.pos[s.key]; if(s.key==='onion' && pos===2) return;   // no onion: nothing circled
     const r=i=>spans[i].getBoundingClientRect(); let cx,cy,rx,ry=8.5*sc;
     if(Number.isInteger(pos) && pos<spans.length){ const b=r(pos); cx=b.left+b.width/2; cy=b.top+b.height/2; rx=b.width/2+6*sc; }
@@ -621,7 +621,10 @@ const STATION_ART=[
     c.save(); for(let k=0;k<4;k++){ const ph=(t*.5+k*.25)%1; c.globalAlpha=(1-ph)*.45; ell(c,220+k*44+Math.sin(t+k)*6,370-ph*80,14+ph*16,10+ph*12,'#fff'); } c.restore();
     // tebo
     if(!toolBusy('tebo')){
-      if(boiling){ const wob=Math.sin(t*14)*1.5; drawTebo(c,TEBO_IN[0]+wob,TEBO_IN[1],true,0); c.save(); c.beginPath(); c.ellipse(286,392,90,10,0,0,Math.PI); c.rect(196,392,180,30); c.restore(); ell(c,286,386,30,5,'rgba(190,225,235,.85)',0); }
+      if(boiling){ const wob=Math.sin(t*14)*1.5, WL=386;   // water line: the net is under water, only the rim + handle stick out
+        c.save(); c.beginPath(); c.rect(0,0,400,WL); c.clip(); drawTebo(c,TEBO_IN[0]+wob,TEBO_IN[1]-8,true,0); c.restore();
+        c.save(); c.beginPath(); c.ellipse(286,388,90,12,0,0,Math.PI*2); c.clip(); c.fillStyle='rgba(170,215,228,.92)'; c.fillRect(196,WL,180,20); c.restore();
+        ell(c,286+wob,WL,30,5,'rgba(255,255,255,.55)',0); for(let k=0;k<4;k++){ const ph=(t*2.2+k*.25)%1; ell(c,266+k*13,WL-ph*4,1.5+ph*2,1+ph,'rgba(255,255,255,.8)',0); } }
       else if(nd.state==='lifted'){ const kick=K.teboKick*10; drawTebo(c,TEBO_UP[0],TEBO_UP[1]+kick,true,0);
         if(Math.random()<.25+nd.water*.6) K.parts.push({x:K.px0+TEBO_UP[0]-16+Math.random()*32,y:TEBO_UP[1]+22,vx:0,vy:40,r:2.5,col:'#9fd3e6',life:.6,g:900,stopY:388});
         rr(c,326,340,62,30,8); fs(c,'#fffaf0',2.5); txt(c,'Water',357,349,9,OUT,600); txt(c,Math.round(nd.water*100)+'%',357,362,12,nd.water<=CFG.WATER_OK?'#3e8e3a':'#d2322d',700); }
@@ -812,8 +815,15 @@ function floatTxt(s,x,y){ K.fx.push({s,x,y,t:0}); }
    11f. moving between steps
    --------------------------------------------------------------------- */
 function goStation(i){ i=Math.max(0,Math.min(6,i)); K.camT=i*KW; K.queue=0; if(i!==K.stn){ K.stn=i; K.hop=.6; blip(420+i*30,.06); updateHighlight(); } }
+function renderKTicket(){ const el=$('#kTicket'); el.classList.toggle('focus',!ticketMini); renderTicket(el,G.order,false);
+  if(!el.querySelector('.tk-more')) el.insertAdjacentHTML('beforeend','<div class="tk-more"></div>'); }
 function updateHighlight(){
   const el=$('#kTicket'), hl=el.querySelector('.tk-hl'); if(!hl||!G.order) return;
+  const cur=STATIONS[K.stn].rows; el.querySelectorAll('.tk-row').forEach(r=>r.classList.toggle('cur',cur.includes(r.dataset.k)));
+  const hd=el.querySelector('.tk-hd'); let st=hd.querySelector('.tk-step'); if(!st){ st=document.createElement('span'); st.className='tk-step'; hd.querySelector('.no').before(st); }
+  st.textContent=`STEP ${K.stn+1}/7 · ${STATIONS[K.stn].name}`;
+  const more=el.querySelector('.tk-more'); if(more) more.innerHTML=ticketMini?'Tap to fold ▴':`${STATIONS[K.stn].hint} · <b>tap for the full order ▾</b>`;
+  if(el.classList.contains('focus')){ hl.hidden=true; drawCircles(el,G.order); return; }
   const rows=STATIONS[K.stn].rows.map(k=>el.querySelector(`.tk-row[data-k="${k}"]`));
   const top=rows[0].offsetTop-2, bot=rows[rows.length-1].offsetTop+rows[rows.length-1].offsetHeight+1;
   hl.hidden=false; hl.style.top=top+'px'; hl.style.height=(bot-top)+'px'; hl.dataset.step='STEP '+(K.stn+1);
@@ -858,7 +868,7 @@ function kitchenFrame(dt){
   c.save(); c.translate(-K.cam,0);
   const i0=Math.max(0,Math.floor(K.cam/KW)), i1=Math.min(6,Math.floor((K.cam+KW-1)/KW));
   drawKitchenBG(c,K.cam-2,K.cam+KW+2);
-  for(let i=i0;i<=i1;i++){ c.save(); c.translate(i*KW,0); drawShelf(c,i); drawPlaque(c,i); STATION_ART[i](c,K.t); c.restore(); }
+  for(let i=i0;i<=i1;i++){ c.save(); c.translate(i*KW,0); drawShelf(c,i); if(ticketMini) drawPlaque(c,i); STATION_ART[i](c,K.t); c.restore(); }   // the step name lives on the slip while it's folded
   c.restore();
   // hint glow on the current step's tools after a moment of no input
   if(settled() && !K.hand && !K.M && (K.idle>2.5 || (G.tut && !tutStepDone()))) OBJS[K.stn].forEach(o=>{ if(o.kind==='tebo' && !(nd.state==='boiling'||nd.state==='lifted')) return; glow(c,K.px0+o.box[0]+8,o.box[1]+8,o.box[2]-16,o.box[3]-16,14,K.t); });
@@ -1084,7 +1094,7 @@ function updateHud(){
 /* the shop clock: only runs while serving in story mode (not during the tutorial bowl, not while paused) */
 function clockTick(dt){
   if(G.play!=='story' || G.mode!=='service' || G.tut) return;
-  if(!closed()){ const m0=Math.floor(D.clock); D.clock+=dt*(DAY.CLOSE-DAY.OPEN)/DAY.SECONDS;
+  if(!closed()){ const m0=Math.floor(D.clock); D.clock+=dt*(DAY.CLOSE-DAY.OPEN)/(typeof DAY.SECONDS==='function'?DAY.SECONDS(P.day):DAY.SECONDS);
     if(Math.floor(D.clock)!==m0) updateHud();
     if(closed() && !G.arriveIn){ D.over=0; toast(`Closing time! ${DAY.OVERTIME} s to finish this last bowl`); } }
   else if(G.waiting && D.over!==undefined){ D.over+=dt; if(D.over>=DAY.OVERTIME){ D.over=undefined; closingWalk(); } }
@@ -1145,8 +1155,8 @@ function hush(){ $('#custBubble').classList.add('off'); }
 function toKitchen(){
   $('#orderSheet').classList.remove('on'); hush();
   showScene('kitchen'); K.cam=K.camT=0; K.stn=0; K.hop=.6; K.hand=null; K.M=null; K.rice=null; K.queue=0; K.lastTap=null; K.parts=[]; K.fx=[]; K.idle=0; K.dirty=true;
-  ticketMini=!!G.tut; tutKey=''; $('#coach').hidden=!G.tut; $('#btnNext').classList.remove('pulse'); $('#serveHint').classList.remove('pulse');
-  requestAnimationFrame(()=>renderTicket($('#kTicket'),G.order,ticketMini));
+  ticketMini=false; tutKey=''; $('#coach').hidden=!G.tut; $('#btnNext').classList.remove('pulse'); $('#serveHint').classList.remove('pulse');
+  requestAnimationFrame(()=>renderKTicket());
 }
 function bookRecord(b,total,cust){
   const o=packOrder(b), idx=(((((o.garlic*4+o.onion)*2+o.chashu)*6+o.spice)*5+o.texture)*2+o.seaweed), id=o.dashi*19200+o.richness*3840+idx;
@@ -1589,8 +1599,8 @@ $('#boilChip').onclick=()=>goStation(NOODLE_STEP);
 $('#btnRemake').onclick=()=>{ const bt=$('#btnRemake');
   if(K.remakeArm>performance.now()){ G.bowl=newBowl(); K.dirty=true; K.M=null; K.hand=null; bt.textContent='Remake'; toast('Fresh bowl (used toppings are gone)'); return; }
   K.remakeArm=performance.now()+2200; bt.textContent='Tap again'; setTimeout(()=>{ bt.textContent='Remake'; },2200); };
-$('#kTicket').addEventListener('click',()=>{ ticketMini=!ticketMini; renderTicket($('#kTicket'),G.order,ticketMini); });
-addEventListener('resize',()=>{ layoutAll(); if(G.order&&G.scene==='kitchen') renderTicket($('#kTicket'),G.order,ticketMini); });
+$('#kTicket').addEventListener('click',()=>{ ticketMini=!ticketMini; renderKTicket(); });   // ticketMini = showing the full order
+addEventListener('resize',()=>{ layoutAll(); if(G.order&&G.scene==='kitchen') renderKTicket(); });
 function shade(hex,k){ const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255; const t=k<0?0:255,p=Math.abs(k);
   r=Math.round(r+(t-r)*p); g=Math.round(g+(t-g)*p); b=Math.round(b+(t-b)*p); return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1); }
 const LOGO_IMG=new Image(); LOGO_IMG.onload=()=>drawShopTop(); LOGO_IMG.src='assets/logo.webp';
