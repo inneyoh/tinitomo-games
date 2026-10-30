@@ -9,7 +9,7 @@ const CFG = {
   SOUP_TARGET:0.80, SOUP_TOL:0.06, SOUP_RATE:0.30,     // bowl fill ratio, per second while the tap is held
   BOIL_MAX:22.4, FIRM_CENTERS:[5.6,8.8,12,15.2,18.4], FIRM_TOL:1.6, // seconds in the water for each texture (20% faster than v1)
   FLICK_KEEP:0.55, WATER_OK:0.15,                       // each flick keeps 55% of the water; ≤15% is a clean drain
-  PRICE:1100,
+  PRICE:1000,
   SCOOP_TIME:.85,                                      // ladle trip length (1 ≈ 0.66 s); .72 lets taps ~0.5 s apart count, faster taps are ignored
 };
 
@@ -85,9 +85,10 @@ const BOOK_RATINGS={
 /* ---- STORY DAY: the shop is open on a clock; customers keep coming until closing time ---- */
 const DAY={
   OPEN:11*60, CLOSE:21*60,     // shop hours (minutes after midnight): 11:00 → 21:00
-  SECONDS:d=> d<=3 ? 210 : d<=6 ? 300 : 420,   // real seconds from OPEN to CLOSE: 3.5 min (days 1–3), 5 min (days 4–6), 7 min (day 7 on)
+  SECONDS:d=> d<=3 ? 210 : d<=6 ? 300 : 420,   // seconds of cooking from OPEN to CLOSE: 3.5 min (days 1–3), 5 min (days 4–6), 7 min (day 7 on).
+                               // The clock stops while a customer orders and while they eat — it only runs in the kitchen and between customers.
   OVERTIME:45,                 // after closing, the last customer is served for at most this many seconds, then leaves — a day never passes ~4 min
-  GAP:2,                       // seconds before the next customer walks in (always the same)
+  GAP:.8,                      // seconds before the next customer walks in (always the same)
 }
 
 /* ---- DEMAND: tomorrow's event is rolled at night (shown on the iPad) so you can stock up for it ----
@@ -156,10 +157,10 @@ const UPGRADES=[
 const ECON={
   START_MONEY:2000,
   START_STOCK:{chashu:4,green:4,white:3,nori:4,noodle:6},
-  rent:d=>Math.min(3000, 800+100*Math.max(0,d-6)),   // paid every night: ¥800 on days 1–6, then +¥100 a day from day 7, never more than ¥3,000
-  patience:d=>Math.max(90,120-(d-1)*3),   // seconds a customer waits from order to tray (120 s on day 1, −3 s a day, at least 90 s)
+  rent:d=>Math.min(3200, 800+90*Math.max(0,d-6)),   // paid every night: ¥800 on days 1–6, then +¥90 a day from day 7, never more than ¥3,200
+  patience:d=>Math.max(85,110-(d-1)*3),   // patience 1 = this many seconds × 1/PATIENCE_SLOWER (day 1: 110 s → ~129 s real; −3 s a day; floor 85 s → ~100 s)
   TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ GRADING.TIP_FROM); each customer multiplies these
-  PREP_YIELD:.75,                         // a perfect prep turns a pack into ¾ of its base portions
+  PREP_YIELD:.7,                          // a perfect prep turns a pack into 70% of its base portions
   PATIENCE_SLOWER:.85,                    // patience drains 15% slower for everyone
 };
 

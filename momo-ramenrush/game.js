@@ -1064,7 +1064,7 @@ function refreshHome(){ const endless=P.lastMode==='endless';   // the tray show
   $('#hotTray .hm:not(.hmEnd)').hidden=endless; $('#hotTray .hmEnd').hidden=!endless; $('#hmBest').textContent=(P.endlessBest||0).toLocaleString();
   $('#btnEndless').innerHTML=`Endless${P.endlessBest?` · Best ${P.endlessBest} bowl${P.endlessBest===1?'':'s'}`:''} ▶<small>Just make ramen. No rent, no stock, no rush.</small>`;
   $('#hmDay').textContent=P.day; $('#hmMoney').textContent=P.money.toLocaleString(); $('#hmRent').textContent=ECON.rent(P.day).toLocaleString(); $('#btnDay').innerHTML= P.resume&&P.resume.day===P.day ? `Continue Day ${P.day} · ${clockStr(Math.min(P.resume.D.clock||DAY.OPEN,DAY.CLOSE))} ▶<small>Pick up where you saved</small>` : `Story · Day ${P.day} ▶<small>Rent, stock, patience and night prep</small>`; $('#hotDrink').classList.toggle('locked',!P.tutorialDone); }
-function goHome(){ G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
+function goHome(){ G.clockHold=false; G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
   $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); showScene('shop'); layoutStage(false); buildHome(); refreshHome(); music('title'); }
 
 /* =====================================================================
@@ -1094,7 +1094,7 @@ function updateHud(){
 /* the shop clock: only runs while serving in story mode (not during the tutorial bowl, not while paused) */
 function clockTick(dt){
   if(G.play!=='story' || G.mode!=='service' || G.tut) return;
-  if(!closed()){ const m0=Math.floor(D.clock); D.clock+=dt*(DAY.CLOSE-DAY.OPEN)/(typeof DAY.SECONDS==='function'?DAY.SECONDS(P.day):DAY.SECONDS);
+  if(!closed() && !G.clockHold){ const m0=Math.floor(D.clock); D.clock+=dt*(DAY.CLOSE-DAY.OPEN)/(typeof DAY.SECONDS==='function'?DAY.SECONDS(P.day):DAY.SECONDS);
     if(Math.floor(D.clock)!==m0) updateHud();
     if(closed() && !G.arriveIn){ D.over=0; toast(`Closing time! ${DAY.OVERTIME} s to finish this last bowl`); } }
   else if(G.waiting && D.over!==undefined){ D.over+=dt; if(D.over>=DAY.OVERTIME){ D.over=undefined; closingWalk(); } }
@@ -1103,6 +1103,7 @@ function domArms(root,w,h,mode,deg){ if(root._arms!==mode){ root._arms=mode; pla
 function resetMomoBack(){ const m=$('#shopMomo'); m.classList.remove('front'); m.querySelector('.body').src=ASSET_SRC.momo_body; domArms(m,440,475,'torso',26); }
 function clearTrayFx(){ $('#stage').classList.remove('zoomed','shineOn','gloomOn'); $('#sparkles').innerHTML=''; }
 function nextCustomer(){
+  G.clockHold=false;
   $('#btnNextCust').hidden=true; $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); clearTrayFx(); resetMomoBack();
   if(G.play==='tutorial' && D.done>=1){ toast('Tutorial complete!'); goHome(); return; }
   if(G.play==='story' && closed()){ closeShop(); return; }
@@ -1111,6 +1112,7 @@ function nextCustomer(){
   arrive();
 }
 function arrive(){
+  G.clockHold=true;   // the clock waits while the customer orders (until 'To the kitchen')
   const id = G.firstOrder ? 'soso' : pickCustomer(G.lastCust); G.lastCust=id; G.ticketNo++;
   G.order={cust:id,no:G.ticketNo,pos:genOrder(id)}; G.bowl=newBowl(); G.result=null; K.dirty=true; G.pat=100;
   $('#shopBowl').classList.add('hidden-o'); $('#shopRice').classList.add('hidden-o');
@@ -1153,6 +1155,7 @@ function walkout(){
 function say(t){ const b=$('#custBubble'); if(b.textContent!==t) b.textContent=t; b.classList.remove('off'); }
 function hush(){ $('#custBubble').classList.add('off'); }
 function toKitchen(){
+  G.clockHold=false;
   $('#orderSheet').classList.remove('on'); hush();
   showScene('kitchen'); K.cam=K.camT=0; K.stn=0; K.hop=.6; K.hand=null; K.M=null; K.rice=null; K.queue=0; K.lastTap=null; K.parts=[]; K.fx=[]; K.idle=0; K.dirty=true;
   ticketMini=false; tutKey=''; $('#coach').hidden=!G.tut; $('#btnNext').classList.remove('pulse'); $('#serveHint').classList.remove('pulse');
@@ -1167,6 +1170,7 @@ function serve(){
   const b=G.bowl;
   if(b.tare===0 && b.soup<0.05 && b.nood.state!=='bowl'){ toast('The bowl is still empty!'); return; }
   if(b.nood.state==='boiling'||b.nood.state==='lifted'){ toast('The noodles are still in the boiler!'); return; }
+  G.clockHold=true;   // …and while they eat, until the player continues
   G.tutWas=G.tut; G.waiting=false; G.patServe=G.pat; $('#patBar').classList.add('hide'); $('#coach').hidden=true;
   G.result=score(G.order,b); P.firstDone=true; bookRecord(b,G.result.total,G.order.cust); saveGame();
   showScene('shop'); layoutStage(false);
