@@ -9,7 +9,7 @@ const CFG = {
   SOUP_TARGET:0.80, SOUP_TOL:0.06, SOUP_RATE:0.30,     // bowl fill ratio, per second while the tap is held
   BOIL_MAX:22.4, FIRM_CENTERS:[5.6,8.8,12,15.2,18.4], FIRM_TOL:1.6, // seconds in the water for each texture (20% faster than v1)
   FLICK_KEEP:0.55, WATER_OK:0.15,                       // each flick keeps 55% of the water; ≤15% is a clean drain
-  PRICE:980,
+  PRICE:900,
   SCOOP_TIME:.85,                                      // ladle trip length (1 ≈ 0.66 s); .72 lets taps ~0.5 s apart count, faster taps are ignored
 };
 
@@ -88,7 +88,7 @@ const DAY={
   SECONDS:d=> d<=6 ? 180 : d<=14 ? 210 : d<=21 ? 240 : 300,   // 3 → 3.5 → 4 → 5 min (max) as rushes get more frequent   // seconds of cooking from OPEN to CLOSE: 3.5 min (1–3), 5 min (4–6), 7 min (7–21), 8.5 min (22–34), 10 min (35 on).
                                // The clock stops while a customer orders and while they eat — it only runs in the kitchen and between customers.
   OVERTIME:45,                 // after closing, the last customer is served for at most this many seconds, then leaves — a day never passes ~4 min
-  GAP:.8,                      // seconds before the next customer walks in (always the same)
+  GAP:.7,                      // seconds before the next customer walks in (always the same)
 }
 
 /* ---- RUSH: from FROM_DAY, customers who walk in during these hours come two at a time ---- */
@@ -111,7 +111,7 @@ const EVENTS=[
 /* ---- REPUTATION (0–100, shown as ★ out of 5): a poor reputation shrinks your tips ---- */
 const REPUTATION={
   START:50,
-  CHANGE:{S:4, A:2, B:1, C:-2, D:-4, walkout:-5},   // per bowl (story mode)
+  CHANGE:{S:3, A:1, B:0, C:-2, D:-4, walkout:-5},   // per bowl (story mode)
   TIP_AT_0:.4, TIP_AT_HALF:1, TIP_AT_5:1.2,          // tips × at 0 ★, 2.5 ★ and 5 ★ (in between is blended)
 }
 
@@ -123,11 +123,11 @@ const VOL={ titleMusic:.13, titleShop:.36, dayMusic:.25, nightMusic:.27, sfx:.95
 
 /* ---- night market: price per pack, base = portions from a perfect prep ---- */
 const MARKET={   // a pack bought at night → Momo preps it → up to `base` portions (fewer if the prep is messy)
-  chashu:{name:'Chashu',      pack:'Pork belly roll',    price:850, base:3, img:'assets/pk_chashu.webp',      unit:'portions'},
-  green: {name:'Green onion', pack:'Naganegi stalks',  price:300, base:3, img:'assets/pk_green_onion.webp', unit:'portions'},
-  white: {name:'White onion', pack:'Bag of tamanegi',    price:300, base:3, img:'assets/pk_white_onion.webp', unit:'portions'},
-  nori:  {name:'Seaweed',     pack:'Raw nori sheets',    price:400, base:3, img:'assets/pk_seaweed.webp',     unit:'portions'},
-  noodle:{name:'Noodles',     pack:'Fresh noodle dough', price:600, base:5, img:'assets/pk_noodles.webp',     unit:'bundles'},
+  chashu:{name:'Chashu',      pack:'Pork belly roll',    price:800, base:3, img:'assets/pk_chashu.webp',      unit:'portions'},
+  green: {name:'Green onion', pack:'Naganegi stalks',  price:350, base:3, img:'assets/pk_green_onion.webp', unit:'portions'},
+  white: {name:'White onion', pack:'Bag of tamanegi',    price:350, base:3, img:'assets/pk_white_onion.webp', unit:'portions'},
+  nori:  {name:'Seaweed',     pack:'Raw nori sheets',    price:500, base:3, img:'assets/pk_seaweed.webp',     unit:'portions'},
+  noodle:{name:'Noodles',     pack:'Fresh noodle dough', price:700, base:4, img:'assets/pk_noodles.webp',     unit:'bundles'},
 };
 
 /* Kitchenware sold on Momo's iPad. Effect fields (the best one you own counts, bowl bonuses add up):
@@ -139,10 +139,10 @@ const MARKET={   // a pack bought at night → Momo preps it → up to `base` po
 const UPGRADE_CATS=[['all','All'],['kitchen','Kitchen Equipment'],['prep','Prep'],['store','Storefront']];
 const UPGRADES=[
   {id:'tap',    name:'Soup tap',          price:3000,  soup:1.4,  desc:'Soup pours 1.4× faster.', cat:'kitchen'},
-  {id:'tap2',   name:'Super tap',         price:6000,  soup:2,    desc:'Soup pours 2× faster.', cat:'kitchen'},
+  {id:'tap2',   name:'Super tap',         price:8000,  soup:2,    desc:'Soup pours 2× faster.', cat:'kitchen'},
   {id:'tebo',   name:'Tebo strainer',     price:1500,  flick:.8,  desc:'Each flick drains 20% better.', cat:'kitchen'},
   {id:'tebo2',  name:'Tebo Plus',         price:5000,  flick:.5,  desc:'Each flick drains 50% better.', req:'tebo', cat:'kitchen'},
-  {id:'tebo3',  name:'Ultra Tebo',        price:14000,  oneFlick:true, desc:'One flick drains it all.', req:'tebo2', cat:'kitchen'},
+  {id:'tebo3',  name:'Ultra Tebo',        price:18500,  oneFlick:true, desc:'One flick drains it all.', req:'tebo2', cat:'kitchen'},
   {id:'tebo2nd', name:'Second tebo',     price:2000,             desc:'Rushes: cook two portions of noodles at once, one tebo for each bowl.', minDay:7, cat:'kitchen'},
   {id:'bell',   name:'Timer bell',        price:1500,             desc:'Dings when the noodles reach the ordered texture.', cat:'kitchen'},
   {id:'restore',name:'Restoranator',      price:67600,            desc:"Dr Mo's time machine! “Toss noodles” becomes “Restore noodles”: boiled noodles go back in the box raw.", cat:'kitchen'},
@@ -153,10 +153,10 @@ const UPGRADES=[
   {id:'stock3', name:'Momomomore Stocks!',  price:16000, maxBuy:8, desc:'Buy up to 16 packs of each ingredient a night.', req:'stock2', minDay:12, cat:'prep'},
   {id:'inv',    name:'Inventory Up!',       price:8000,  types:4,   desc:'4 kinds of ingredients delivered each night instead of 3.', cat:'prep'},
   {id:'plush',  name:'Plush cushion',     price:3000,  pat:1.2,   desc:'Customers wait 1.2× longer.', cat:'store'},
-  {id:'fluffy', name:'Fluffy cushion',    price:7000,  pat:1.5,   desc:'Customers wait 1.7× longer.', req:'plush', cat:'store'},
+  {id:'fluffy', name:'Fluffy cushion',    price:7500,  pat:1.5,   desc:'Customers wait 1.7× longer.', req:'plush', cat:'store'},
   {id:'sofa',   name:'Sofa seats',        price:12000,  pat:2.0,   desc:'Customers wait 2.0× longer.', req:'fluffy', cat:'store'},
   {id:'lemon',  name:"Soso's lemon water",price:2000,  bonus:.03, desc:'+3% on every bowl.', cat:'store'},
-  {id:'noren',  name:'Noren curtain',     price:5500,  bonus:.05, desc:'+7% on every bowl.', cat:'store'},
+  {id:'noren',  name:'Noren curtain',     price:6000,  bonus:.05, desc:'+7% on every bowl.', cat:'store'},
   {id:'doll',   name:'Momo doll',         price:10000,  bonus:.1, desc:'+12% on every bowl.', cat:'store'},
   {id:'boil1',  name:'Strong burner',     price:2500,  boil:.9,   desc:'Noodles boil 10% faster.', cat:'kitchen'},
   {id:'boil2',  name:'Ultra burner',      price:9000,  boil:.7,   desc:'Noodles boil 30% faster.', req:'boil1', cat:'kitchen'},
@@ -167,7 +167,7 @@ const UPGRADES=[
 const ECON={
   START_MONEY:2000,
   START_STOCK:{chashu:6,green:6,white:6,nori:6,noodle:7},
-  rent:d=>Math.min(3200, 800+90*Math.max(0,d-6)),   // paid every night: ¥800 on days 1–6, then +¥90 a day from day 7, never more than ¥3,200
+  rent:d=>Math.min(5000, 800+150*Math.max(0,d-6)),   // paid every night: ¥800 on days 1–6, then +¥150 a day from day 7, never more than ¥5,000
   patience:d=>Math.max(85,110-(d-1)*3),   // patience 1 = this many seconds × 1/PATIENCE_SLOWER (day 1: 110 s → ~129 s real; −3 s a day; floor 85 s → ~100 s)
   TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ GRADING.TIP_FROM); each customer multiplies these
   PREP_YIELD:.7,                          // a perfect prep turns a pack into 70% of its base portions
