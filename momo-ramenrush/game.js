@@ -1235,10 +1235,30 @@ function walkout(){
    ① = left customer · left bowl · left tebo   ② = right
    ===================================================================== */
 const RUSH_CX=[300,655], RUSH_BX=[10,200], SLOT_COL=['#d2322d','#2e78c8'];
-function rushCount(d){ if(d<RUSH.FROM_DAY) return 0; const row=[...RUSH.SCHEDULE].reverse().find(r=>d>=r[0]); return Math.min(RUSH.MAX, row[1]+(Math.random()<row[2]?1:0)); }
-/* the clock times today's rushes start, spread evenly between opening and closing (a little jitter) */
-function planRushes(d){ const n=rushCount(d), span=DAY.CLOSE-DAY.OPEN; return [...Array(n)].map((_,k)=>Math.round(DAY.OPEN+span*(k+.5+(Math.random()-.5)*.4)/n)); }
-const rushName=t=>RUSH.NAMES.find(([upto])=>t<upto)[1];
+function rushCount(d){
+  if(d<RUSH.FROM_DAY) return 0;
+  const row=[...RUSH.SCHEDULE].reverse().find(r=>d>=r[0]);
+  let count=row[1];
+  const bonusRolls=d>=30?3:1;
+  for(let i=0;i<bonusRolls;i++) if(Math.random()<row[2]) count++;
+  return Math.min(RUSH.MAX,count);
+}
+/* Spread rushes across lunch (12–14), afternoon (17–18), and dinner (19–21) only. */
+function planRushes(d){
+  const n=rushCount(d);
+  const windows=RUSH.NAMES.map(([start,end])=>[start,end]).filter(([start,end])=>end>start);
+  const total=windows.reduce((sum,[start,end])=>sum+end-start,0);
+  if(!n||!total) return [];
+  return Array.from({length:n},(_,k)=>{
+    let offset=total*(k+.5+(Math.random()-.5)*.4)/n;
+    for(const [start,end] of windows){
+      if(offset<end-start) return Math.round(start+offset);
+      offset-=end-start;
+    }
+    return windows[windows.length-1][1]-1;
+  }).sort((a,b)=>a-b);
+}
+const rushName=t=>(RUSH.NAMES.find(([start,end])=>t>=start&&t<end)||[])[2]||'Rush hour';
 const SINGLE_S=60, RUSH_S=90;   // rough kitchen seconds for one single bowl / one rush, used to keep the 5 single orders safe
 function rushWindow(){ if(G.play!=='story' || G.tut || !D.rushAt || !D.rushAt.length || D.rushAt[0]>D.clock) return null;
   const left=(DAY.CLOSE-D.clock)*(typeof DAY.SECONDS==='function'?DAY.SECONDS(P.day):DAY.SECONDS)/(DAY.CLOSE-DAY.OPEN);   // kitchen seconds left today
