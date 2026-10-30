@@ -653,7 +653,7 @@ const STATION_ART=[
     rr(c,30,384,140,82,32); fs(c,vg(c,384,466,'#fff6ea','#efd6bf'),3);
     const ro=K.rice? Math.sin(Math.min(1,K.rice.T/RICE_T)*Math.PI) : 0;   // 0 shut → 1 open → 0 shut
     if(ro>0){ ell(c,100,392,64,14,'#fbf7ee',2.5); ell(c,100,394,52,9,'#ffffff',0); }   // rice inside
-    c.save(); c.translate(168,390); c.rotate(-ro*.85); c.translate(-168,-390);
+    c.save(); c.translate(168,390); c.rotate(ro*.85); c.translate(-168,-390);
     c.beginPath(); c.ellipse(100,390,70,28,0,Math.PI,0); c.closePath(); fs(c,vg(c,362,392,'#ffd3d6','#f3a7ae'),3);
     rr(c,86,356,28,10,5); fs(c,'#e6838e',2.5); c.restore();
     if(ro>.2){ c.save(); for(let k=0;k<4;k++){ c.globalAlpha=ro*.55; ell(c,72+k*18,366-ro*30-(k%2)*12,12+ro*6,9+ro*4,'#fff'); } c.restore(); }
