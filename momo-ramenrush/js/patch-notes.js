@@ -7,7 +7,7 @@
    ===================================================================== */
 const PATCH_NOTES = {
   SHOW: true,
-  VERSION: '2.1',
+  VERSION: '2.2',
   TITLE: "🍜 Momo-ya Small Update — Version 2.1!",
   INTRO: "The Tinitomo Arcade app has an app icon now!? Time to move to the homescreen app version- OH! What about my saved data! 😨",
   SECTIONS: [
