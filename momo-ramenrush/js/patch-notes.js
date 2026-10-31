@@ -11,6 +11,8 @@ const PATCH_NOTES = {
   TITLE: "🍜 Momo-ya Small Update — Version 2.1!",
   INTRO: "The Tinitomo Arcade app has an app icon now!? Time to move to the homescreen app version- OH! What about my saved data! 😨",
   SECTIONS: [
+      ['🔧 NEW SAVE DATA TRANSFER FEATURE!', [
+      'Press the "Transfer Save" button at the bottom right of the screen to get your saved data code for transferring!' ]],
 /*    ['🍜 NEW GIMMICK: RUSH HOUR!', [
       'Double the customers, double the chaos! Starting from Day 7, Rush Hour kicks in with two customers arriving at once!',
       'Prepare two bowls side by side and keep both customers happy!',
@@ -22,14 +24,23 @@ const PATCH_NOTES = {
     ['⭐ NEW SYSTEM: REPUTATION!', [
       'Every bowl counts! Delicious ramen earns Momo a better reputation, while customers walking out will hurt it!',
       'The better your reputation, the bigger the tips! Keep those customers smiling! 💰',
-      "Watch out for surprise daily events, spoiled ingredients and rising rent. Running a ramen shop isn't all sunshine and noodles!" ]],
-    ['🛒 NEW SHOP ITEMS: SECOND TEBO & SOFA SEATS!', []],
-    ['🍜 Second Tebo — Double Noodle Cooker', [
-      'Cook two servings of noodles at once! 🍜🍜',
-      "Sounds convenient? There's a catch! Managing two servings takes a little practice, so get those noodle-cooking skills ready!" ], 'sub'],
-    ['🛋️ Sofa Seats — Extra Patient Customers', [
-      'A little comfort goes a long way! Customers can now wait twice as long before losing their patience!' ], 'sub'],
-    ['🧸 SYSTEM UPDATE: NEW CUSTOMERS & A WHOLE NEW CUSTOMER BOOK!', [
+      "Watch out for surprise daily events, spoiled ingredients and rising rent. Running a ramen shop isn't all sunshine and noodles!" ]],  */
+    ['🛒 NEW SHOP ITEMS', []],
+    ["🍜 Dr Mo's Prototype Tebo — An automatic Tebo!?", [
+      'What sorcery! This prototype Tebo lifts up noodles by themselves the moment they reach the firmness the order asked for.',
+      "But Momo says it is a prototype so it is only used for the second Tebo..." ], 'sub'],
+     ["🍜 Dr Mo's Double Tebo!? — TWO automatic Tebo!?", [
+      "She did it! You don't even need to watch your ramen cooker anymore! But of course, everything comes at a price.",
+      "(Are you even needed in the shop Momo...?)" ], 'sub'],
+    ["🛒 Here’s some extra! — More stocks given to you at each purchase.", [
+      'Networking brings you a long way, thank Dr. Mo for her charms as the vendors gives her some extras when purchasing stocks!' ], 'sub'],
+     ["🛒 Here’s some discount! — Chances for 1 stock item to go on sales.", [
+      "Momo got the taste of how far networking can bring you and she charmed the vendor more! Get the stocks at a discounted price!" ], 'sub'],
+     ["🛒 You’re THE Dr. Mo!? — Chances for 2 stock items to go on sales.", [
+      'With the amount of stock Momo is buying and her charms, it was only in due course the vendor will find out her identity!' ], 'sub'],
+     ["🍮 Nono's Pudding — A sweet treat not to be missed!", [
+      "Nono sees that Momo's struggling with work and decided to chip in by serving some pudding for more earnings!" ], 'sub'],
+  /*  ['🧸 SYSTEM UPDATE: NEW CUSTOMERS & A WHOLE NEW CUSTOMER BOOK!', [
       'New faces in town! Say hello to Kuma, Bun, Piyo & Gwoof!',
       'New customer appearance rates! Some familiar faces might show up more often, while others are harder to catch. Keep an eye out for Popo!',
       'Everyone has a favourite ramen order. Get it right for a special reaction!',
@@ -38,8 +49,6 @@ const PATCH_NOTES = {
       'Getting an S just got harder! The new S / A / B / C / D grading system is much stricter!',
       "Customers have higher expectations! Anything C or below? Don't expect a happy face! 💢",
       "No noodles?! That's not ramen! 🍜 Even if everything else is perfect, a bowl without noodles gets a B at best!" ]], */
-    ['🔧 NEW SAVE DATA TRANSFER FEATURE!', [
-      'Press the "Transfer Save" button at the bottom right of the screen to get your saved data code for transferring!' ]],
      ['🔧 OTHER GAME OPTIMISATION AND SOME TWEAKS!', [
       'Game was too easy! Changes were made to the stocks base amount, upgrades pricing, rent calculation and patience timer for the customers.',
       'Players will be prompted to purchase all of their upgrades again, think carefully before making your purchase!']]
