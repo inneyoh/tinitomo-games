@@ -123,11 +123,11 @@ const VOL={ titleMusic:.13, titleShop:.36, dayMusic:.25, nightMusic:.27, sfx:.95
 
 /* ---- night market: price per pack, base = portions from a perfect prep ---- */
 const MARKET={   // a pack bought at night → Momo preps it → up to `base` portions (fewer if the prep is messy)
-  chashu:{name:'Chashu',      pack:'Pork belly roll',    price:850, base:2, img:'assets/pk_chashu.webp',      unit:'portions'},
-  green: {name:'Green onion', pack:'Naganegi stalks',  price:350, base:2, img:'assets/pk_green_onion.webp', unit:'portions'},
-  white: {name:'White onion', pack:'Bag of tamanegi',    price:350, base:2, img:'assets/pk_white_onion.webp', unit:'portions'},
+  chashu:{name:'Chashu',      pack:'Pork belly roll',    price:800, base:2, img:'assets/pk_chashu.webp',      unit:'portions'},
+  green: {name:'Green onion', pack:'Naganegi stalks',  price:300, base:2, img:'assets/pk_green_onion.webp', unit:'portions'},
+  white: {name:'White onion', pack:'Bag of tamanegi',    price:300, base:2, img:'assets/pk_white_onion.webp', unit:'portions'},
   nori:  {name:'Seaweed',     pack:'Raw nori sheets',    price:500, base:2, img:'assets/pk_seaweed.webp',     unit:'portions'},
-  noodle:{name:'Noodles',     pack:'Fresh noodle dough', price:700, base:3, img:'assets/pk_noodles.webp',     unit:'bundles'},
+  noodle:{name:'Noodles',     pack:'Fresh noodle dough', price:600, base:3, img:'assets/pk_noodles.webp',     unit:'bundles'},
 };
 
 /* Kitchenware sold on Momo's iPad. Effect fields (the best one you own counts, bowl bonuses add up):
