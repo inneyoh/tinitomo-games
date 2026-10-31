@@ -1286,11 +1286,11 @@ function planRushes(d){
   }).sort((a,b)=>a-b);
 }
 const rushName=t=>(RUSH.NAMES.find(([start,end])=>t>=start&&t<end)||[])[2]||'Rush hour';
-const SINGLE_S=60, RUSH_S=90;   // rough kitchen seconds for one single bowl / one rush, used to keep the 5 single orders safe
+const SINGLE_S=()=>RUSH.SINGLE_S??35, RUSH_S=()=>RUSH.RUSH_S??50;   // rough kitchen seconds for one single bowl / one rush (RUSH in config.js)
 function rushWindow(){ if(G.play!=='story' || G.tut || !D.rushAt || !D.rushAt.length || D.rushAt[0]>D.clock) return null;
   const left=(DAY.CLOSE-D.clock)*(typeof DAY.SECONDS==='function'?DAY.SECONDS(P.day):DAY.SECONDS)/(DAY.CLOSE-DAY.OPEN);   // kitchen seconds left today
-  const need=Math.max(0,RUSH.SINGLES-(D.singles||0))*SINGLE_S;
-  if(left < need+RUSH_S){ D.rushAt.shift(); return null; }   // running behind: skip this rush so the single orders still fit
+  const need=Math.max(0,RUSH.SINGLES-(D.singles||0))*SINGLE_S();
+  if(left+DAY.OVERTIME < need+RUSH_S()){ D.rushAt.shift(); return null; }   // running behind: skip this rush so the single orders still fit
   const t=D.rushAt.shift(); return [t,t,rushName(t)]; }
 const slotEl=i=>i?$('#cust2'):$('#cust'), slotBar=i=>i?$('#patBar2'):$('#patBar'), slotBubble=i=>i?$('#custBubble2'):$('#custBubble');
 const live=()=> G.rush ? G.rush.slots.filter(s=>!s.gone&&!s.served) : [];
@@ -1330,21 +1330,21 @@ function renderRushTabs(sel){ const T=$('#rushTabs'); T.hidden=false;
   const s=G.rush.slots[sel]; renderTicket($('#shopTicket'),s.order); G.rush.tab=sel; }
 /* rush tutorial: 4 picture cards */
 const RUSH_CARDS=[
-  {cap:'Two customers at once! <b class="n1">1</b> is on the left, <b class="n2">2</b> on the right.', draw:(c)=>{
+  {cap:()=>RUSH_TUTORIAL.CARDS[0], draw:(c)=>{
     const table=()=>{ rr(c,0,262,600,58,0); fs(c,vg(c,262,320,'#b0221b','#7b0000'),0); };
     [['kuma',170],['bun',430]].forEach(([id,x],i)=>{ const im=new Image(); im.src=CUST_IMG[id]; const go=()=>{ const w=180*csize(id), h=w*im.height/im.width; c.drawImage(im,x-w/2,300-h,w,h); table(); riBadge(c,170,70,0); riBadge(c,500,70,1); }; im.complete?go():im.onload=go; });
     table(); } },
-  {cap:'<b>Tap a bowl</b> to work on it — it glows.', draw:(c)=>{
+  {cap:()=>RUSH_TUTORIAL.CARDS[1], draw:(c)=>{
     [150,450].forEach((x,i)=>{ if(i===0){ c.save(); c.shadowColor='rgba(255,200,60,1)'; c.shadowBlur=18; c.filter='brightness(0) invert(1) sepia(1) saturate(6) hue-rotate(-10deg) brightness(1.05)'; drawSprite(c,IMG.bowl,x,190,250,0); c.restore(); }
       drawSprite(c,IMG.bowl,x,190,230,0); riBadge(c,x+(i?110:-110),120,i); });
     riFinger(c,150,205); } },
-  {cap:'Noodles go to <b class="n1">1</b> first — <b>one tap</b> lifts tebo <b class="n1">1</b> before <b class="n2">2</b>.', draw:(c)=>{
+  {cap:()=>RUSH_TUTORIAL.CARDS[2], draw:(c)=>{
     c.save(); c.translate(-243,-600); c.scale(1.9,1.9);
     rr(c,188,384,196,82,12); fs(c,steel(c,188,384),3); ell(c,286,388,90,12,vg(c,376,400,'#cfe9f1','#9fcbd9'),3);
     c.save(); mirrorAt(c,226,true); drawTebo(c,226,346,true,0); c.restore();
     c.save(); c.beginPath(); c.rect(0,0,600,386); c.clip(); drawTebo(c,346,396,true,0); c.restore();
     c.restore(); riBadge(c,110,60,0); riBadge(c,470,150,1); riFinger(c,250,230); txt(c,'1 tap',250,282,20,'#d2322d',700); } },
-  {cap:'<b>Tap Momo</b> to serve, then tap a bowl — or tap Momo again for <b>both</b>.', draw:(c)=>{
+  {cap:()=>RUSH_TUTORIAL.CARDS[3], draw:(c)=>{
     drawSprite(c,IMG.bowl,120,170,190,0); drawSprite(c,IMG.bowl,480,170,190,0); riBadge(c,40,110,0); riBadge(c,560,110,1);
     if(ok(IMG.momo_body)){ const w=200, h=w*IMG.momo_body.height/IMG.momo_body.width; c.drawImage(IMG.momo_body,300-w/2,330-h*.72,w,h); }
     riFinger(c,330,250); } },
@@ -1352,8 +1352,8 @@ const RUSH_CARDS=[
 function riBadge(c,x,y,i){ ell(c,x,y,26,26,SLOT_COL[i],5,'#fff'); txt(c,String(i+1),x,y+2,26,'#fff',700); }
 function riFinger(c,x,y){ c.save(); c.globalAlpha=.9; ell(c,x,y,22,22,'rgba(255,255,255,.55)',4,'#e0a800'); ell(c,x,y,8,8,'#e0a800',0); c.restore(); }
 function riShow(k){ const cv=$('#riCanvas'), c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,600,320); RUSH_CARDS[k].draw(c);
-  $('#riCap').innerHTML=RUSH_CARDS[k].cap; $('#riDots').innerHTML=RUSH_CARDS.map((_,i)=>`<i class="${i===k?'on':''}"></i>`).join('');
-  $('#btnRushGo').textContent= k===RUSH_CARDS.length-1 ? "Let's go! ▶" : 'Next ▶'; }
+  $('#riCap').innerHTML=RUSH_CARDS[k].cap(); $('#riDots').innerHTML=RUSH_CARDS.map((_,i)=>`<i class="${i===k?'on':''}"></i>`).join('');
+  $('#btnRushGo').textContent= k===RUSH_CARDS.length-1 ? RUSH_TUTORIAL.GO : RUSH_TUTORIAL.NEXT; $('#btnRushSkip').textContent=RUSH_TUTORIAL.SKIP; }
 function showRushIntro(go){ G.paused=true; $('#riTitle').textContent=`${G.rush.name}!`; $('#rushIntro').hidden=false; let k=0; riShow(0);
   const done=()=>{ P.seen.rush=true; saveGame(); $('#rushIntro').hidden=true; G.paused=false; last=performance.now(); go(); };
   $('#btnRushGo').onclick=()=>{ blip(600,.04); if(k<RUSH_CARDS.length-1) riShow(++k); else done(); };
