@@ -63,7 +63,7 @@
     </div>
     <div id="vignette"></div>
     <!-- Fixed to the visible shop viewport, not the scaled 900px game stage. -->
-      <button id="homeTransferSave" type="button" aria-label="Transfer Save" ><span class="transferCloud" aria-hidden="true">☁<small>⇧⇧</small></span><span>Transfer Save</span></button>
+      <button id="homeTransferSave" type="button" onclick="document.getElementById('transferPanel').hidden=false;document.getElementById('transferStatus').textContent='Ready to transfer.';" aria-label="Transfer Save" ><span class="transferCloud" aria-hidden="true">☁<small>⇧⇧</small></span><span>Transfer Save</span></button>
     <div id="boardHud"><div class="svc"><span id="hudDay">Day 1</span><b id="hudCoins">¥0</b></div></div>
 
     <button class="btn round" id="btnMute" aria-label="Turn sound off">♪</button>
@@ -210,6 +210,6 @@
 <script src="patch-notes.js?v=202610301548"></script>
 <script src="config.js?v=202610302030"></script>
 <script src="game.js?v=202610301548"></script>
-<script src="save-transfer.js?v=20261031cloudflare4"></script>
+<script src="save-transfer.js?v=20261031cloudflare5"></script>
 </body>
 </html>
