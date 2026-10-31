@@ -524,3 +524,10 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #patchList h4.sub+ul{padding-left:26px}
 #patchList .pOutro{margin:10px 0 2px;font-weight:700;text-align:center}
 #patch h2{font-size:19px}
+
+/* Home-screen save transfer plaque: positioned in the lower-right floor area. */
+#homeTransferSave{position:absolute;left:490px;top:1500px;width:355px;height:108px;z-index:5;display:flex;align-items:center;justify-content:center;gap:14px;border:7px solid #59321b;border-radius:27px;background:linear-gradient(#f6d9a5,#dfb779);box-shadow:0 9px 0 #392115,0 13px 18px #321b1280,inset 0 0 0 3px #a87541;color:#482717;font:700 29px Fredoka,sans-serif;white-space:nowrap;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+#homeTransferSave:active{transform:translateY(5px);box-shadow:0 4px 0 #392115,0 6px 10px #321b1280,inset 0 0 0 3px #a87541;}
+#homeTransferSave .transferCloud{position:relative;display:inline-flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-size:60px;line-height:1;color:#fffdf8;-webkit-text-stroke:2px #5b3b2b;text-shadow:1px 3px 0 #5b3b2b;}
+#homeTransferSave .transferCloud small{position:absolute;top:22px;left:17px;font:900 25px Arial,sans-serif;color:#7a7775;-webkit-text-stroke:0;text-shadow:0 1px #fff;letter-spacing:-6px;}
+#shop:not(.home) #homeTransferSave{display:none;}
