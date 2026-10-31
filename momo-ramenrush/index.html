@@ -17,7 +17,7 @@
 <title>Momo-ya</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Yuji+Syuku&display=swap">
-<link rel="stylesheet" href="style.css?v=20261031transfer2">
+<link rel="stylesheet" href="style.css?v=20261031transfer4">
 </head>
 <body>
 <div id="app">
@@ -63,7 +63,7 @@
     </div>
     <div id="vignette"></div>
     <!-- Fixed to the visible shop viewport, not the scaled 900px game stage. -->
-      <button id="homeTransferSave" type="button" aria-label="Transfer Save" onclick="alert('Save transfer is not enabled yet. Your current progress has not been changed.')"><span class="transferCloud" aria-hidden="true">☁<small>⇧⇧</small></span><span>Transfer Save</span></button>
+      <button id="homeTransferSave" type="button" aria-label="Transfer Save" ><span class="transferCloud" aria-hidden="true">☁<small>⇧⇧</small></span><span>Transfer Save</span></button>
     <div id="boardHud"><div class="svc"><span id="hudDay">Day 1</span><b id="hudCoins">¥0</b></div></div>
 
     <button class="btn round" id="btnMute" aria-label="Turn sound off">♪</button>
@@ -191,11 +191,13 @@
       <div class="row"><button class="btn red" id="btnPatch">Let's cook! ▶</button></div>
     </div>
   </div>
+  <div id="transferPanel" hidden role="dialog" aria-modal="true"><div class="transferCard"><h2>Transfer Momo-ya Save</h2><p>Copy your progress between Safari and the Home Screen app. Your original save stays intact.</p><button id="transferSend">1. Send this save</button><p>Copy the transfer code from the JSON response in the new tab. Expires in 30 minutes.</p><input id="transferCode" placeholder="Paste transfer code"><button id="transferFetch">2. Open received save</button><p>Copy the full JSON response from the new tab, then paste it below.</p><textarea id="transferJson" rows="3" placeholder="Paste JSON response"></textarea><button id="transferImport">3. Import received save</button><p id="transferStatus" role="status"></p><button id="transferClose">Close</button></div></div>
   <div id="toast"></div>
 </div>
 
 <script src="patch-notes.js?v=202610301548"></script>
 <script src="config.js?v=202610302030"></script>
 <script src="game.js?v=202610301548"></script>
+<script src="save-transfer.js?v=20261031b"></script>
 </body>
 </html>
