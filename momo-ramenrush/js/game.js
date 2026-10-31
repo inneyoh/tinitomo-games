@@ -899,7 +899,8 @@ function kitchenFrame(dt){
   // boil chip when the noodles are cooking out of sight
   const chip=$('#boilChip');
   if(K.rise) K.rise=K.rise.map(r=>Math.max(0,r-dt*1.1));
-  if(has('drmo')) NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling'||!ord) return;   // Dr Mo's Tebo: lifts itself at the ordered firmness
+  if(has('drmo')||has('drmo2')) NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling'||!ord) return;
+    if(!has('drmo2') && !(twoTebo() && s.i===1)) return;   // prototype: only the 2nd tebo in a rush; Double Tebo: every tebo   // Dr Mo's Tebo: lifts itself at the ordered firmness
     const t=boilT(n), w=want(ord.pos).noodle; if(t>=CFG.FIRM_CENTERS[w]){ n.state='lifted'; n.time=t; n.water=1; blip(880,.12); floatTxt((G.rush?`${s.i+1} · `:'')+'Dr Mo! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
   NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling' || !has('bell') || !ord) return; const t=boilT(n), w=want(ord.pos).noodle;
     if(!n.rang && Math.abs(t-CFG.FIRM_CENTERS[w])<=CFG.FIRM_TOL*.6){ n.rang=true; blip(1320,.25,'sine',.12); setTimeout(()=>blip(1760,.3,'sine',.1),120); floatTxt((G.rush?`${s.i+1} · `:'')+'Ding! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
@@ -1621,7 +1622,7 @@ function drawIcon(cv){ const c=cv.getContext('2d'); c.scale(2,2); const id=cv.da
     txt(c,['4','8','16'][n-1],40,12,11,'#d2322d',700,'center',3,'#fff'); }
   else if(id==='inv'){ [['#e9645f',8],['#6aa84f',20],['#4f86c6',32],['#e0a800',44]].forEach(([col,x],k)=>{ rr(c,x-5,14+(k%2)*4,10,26,4); fs(c,col,1.8); }); rr(c,3,40,46,6,2); fs(c,'#8b5a33',1.5); txt(c,'+1',44,10,10,'#3e8e3a',700,'center',3,'#fff'); }
   else if(id==='extra'){ [[10,30],[24,24],[38,30]].forEach(([x,y])=>{ rr(c,x-8,y-6,16,18,3); fs(c,vg(c,y-6,y+12,'#e2b27a','#b98249'),1.8); }); txt(c,'×1.5',26,12,11,'#3e8e3a',700,'center',3,'#fff'); }
-  else if(id==='drmo'){ drawTebo(c,22,34,true,0); c.strokeStyle='#7fe3ff'; c.lineWidth=2.5; c.beginPath(); c.moveTo(42,40); c.lineTo(42,12); c.moveTo(36,18); c.lineTo(42,10); c.lineTo(48,18); c.stroke(); }
+  else if(id==='drmo'||id==='drmo2'){ if(id==='drmo2'){ c.save(); c.translate(4,0); drawTebo(c,16,34,true,0); c.restore(); } drawTebo(c,22,34,true,0); c.strokeStyle='#7fe3ff'; c.lineWidth=2.5; c.beginPath(); c.moveTo(42,40); c.lineTo(42,12); c.moveTo(36,18); c.lineTo(42,10); c.lineTo(48,18); c.stroke(); }
   else if(id==='pudding'){ c.beginPath(); c.moveTo(12,42); c.lineTo(16,18); c.lineTo(36,18); c.lineTo(40,42); c.closePath(); fs(c,vg(c,18,42,'#ffe39a','#f2b94a'),2); ell(c,26,18,10,4,'#7a3b12',2); ell(c,26,44,16,4,'#fffaf0',2); }
   else if(id==='disc1'||id==='disc2'){ c.beginPath(); c.moveTo(6,26); c.lineTo(22,8); c.lineTo(46,8); c.lineTo(46,44); c.lineTo(22,44); c.closePath(); fs(c,id==='disc2'?'#e0a800':'#d2322d',2); ell(c,16,26,3,3,'#fff',1.5); txt(c,id==='disc2'?'%%':'%',33,27,id==='disc2'?13:16,'#fff',700); }
   else if(id==='mold'){ c.beginPath(); c.moveTo(8,20); c.lineTo(44,20); c.lineTo(38,42); c.lineTo(14,42); c.closePath(); fs(c,steel(c,8,44),2); ell(c,26,20,18,4,'#2d3a2b',2); txt(c,'140g',26,32,9,OUT,700); }
