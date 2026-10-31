@@ -168,7 +168,7 @@ const ECON={
   START_MONEY:2000,
   START_STOCK:{chashu:6,green:6,white:6,nori:6,noodle:7},
   rent:d=>Math.min(9000, 1200+300*Math.max(0,d-6)),   // paid every night: ¥1200 on days 1–6, then +¥300 a day from day 7, never more than ¥9,000
-  patience:d=>Math.max(50,100-(d-1)*5),   // patience 1 = this many seconds × 1/PATIENCE_SLOWER (day 1: 110 s → ~129 s real; −3 s a day; floor 85 s → ~100 s)
+  patience:d=>Math.max(40,100-(d-1)*5),   // patience 1 = this many seconds × 1/PATIENCE_SLOWER (day 1: 110 s → ~129 s real; −3 s a day; floor 85 s → ~100 s)
   TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ GRADING.TIP_FROM); each customer multiplies these
   PREP_YIELD:.7,                          // a perfect prep turns a pack into 70% of its base portions
   PATIENCE_SLOWER:.85,                    // patience drains 15% slower for everyone
