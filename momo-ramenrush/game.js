@@ -984,8 +984,36 @@ function score(order,b){
 const $=s=>document.querySelector(s);
 const SAVE_KEY='momo-ramen-shop.v1';
 const STOCK_KEYS=['chashu','green','white','nori','noodle'];
-const freshSave=(book,tut,seen)=>({day:1,money:ECON.START_MONEY,stock:{...ECON.START_STOCK},upgrades:{},book:book||{},served:0,firstDone:false,tutorialDone:!!tut,seen:seen||{}});
-function loadSave(){ try{ const s=localStorage.getItem(SAVE_KEY); if(!s) return null; const o=JSON.parse(s), f=freshSave(); return {...f,...o,stock:{...f.stock,...(o.stock||{})}}; }catch(e){ return null; } }
+/* Fixed first-sale refund prices provided by the game creator, not current store prices.
+   The migration marker is saved with progress and travels with transfer codes. */
+const UPGRADE_RESET_ID='upgradeReset20261031';
+const FIRST_UPGRADE_PRICES={"tap":1200,"tap2":5000,"tebo":900,"tebo2":3500,"tebo3":8000,"tebo2nd":2000,"bell":1500,"restore":33300,"knife":1000,"mold":2000,"stock1":4000,"stock2":8000,"stock3":15000,"inv":6000,"plush":2000,"fluffy":7000,"sofa":9000,"lemon":2000,"noren":2500,"doll":8000,"boil1":1200,"boil2":2800,"boil3":15000};
+let upgradeResetNotice=null;
+const freshSave=(book,tut,seen)=>({day:1,money:ECON.START_MONEY,stock:{...ECON.START_STOCK},upgrades:{},[UPGRADE_RESET_ID]:true,book:book||{},served:0,firstDone:false,tutorialDone:!!tut,seen:seen||{}});
+function loadSave(){
+  const raw=localStorage.getItem(SAVE_KEY);
+  if(!raw)return null;
+  const old=JSON.parse(raw);
+  if(!old||typeof old!=='object'||Array.isArray(old))throw Error('Invalid save format');
+  const f=freshSave();
+  const save={...f,...old,stock:{...f.stock,...(old.stock||{})}};
+  if(old[UPGRADE_RESET_ID]!==true){
+    const purchased=old.upgrades&&typeof old.upgrades==='object'&&!Array.isArray(old.upgrades)?old.upgrades:{};
+    const refund=Object.entries(FIRST_UPGRADE_PRICES).reduce((sum,[id,price])=>sum+(purchased[id]===true?price:0),0);
+    if(!Number.isSafeInteger(save.money)||save.money<0||!Number.isSafeInteger(save.money+refund))throw Error('Invalid save balance');
+    save.money+=refund;
+    save.upgrades={};
+    save[UPGRADE_RESET_ID]=true;
+    save.upgradeResetRefund=refund;
+    const backupKey='momo-ramen-shop.pre-upgrade-reset.'+Date.now();
+    localStorage.setItem(backupKey,raw);
+    if(localStorage.getItem(backupKey)!==raw)throw Error('Save backup verification failed');
+    localStorage.setItem(SAVE_KEY,JSON.stringify(save));
+    if(localStorage.getItem(SAVE_KEY)!==JSON.stringify(save))throw Error('Migrated save verification failed');
+    upgradeResetNotice=refund;
+  }
+  return save;
+}
 function saveGame(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(P)); }catch(e){} }
 let P=loadSave()||freshSave();
 const has=id=>!!P.upgrades[id];
@@ -1936,3 +1964,11 @@ function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
 $('#btnMute').onclick=e=>{ e.stopPropagation(); audioInit(); setMuted(!SND.muted); };
 setMuted(SND.muted);
 goHome(); showPatch(); requestAnimationFrame(loop);
+if(upgradeResetNotice!==null){
+  const panel=document.getElementById('upgradeResetPanel');
+  if(panel){
+    document.getElementById('upgradeResetAmount').textContent=yen(upgradeResetNotice);
+    panel.hidden=false;
+    document.getElementById('upgradeResetClose').onclick=()=>{panel.hidden=true;};
+  }
+}
