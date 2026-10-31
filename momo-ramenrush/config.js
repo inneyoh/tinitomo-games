@@ -148,19 +148,19 @@ const UPGRADES=[
   {id:'restore',name:'Restoranator',      price:67600,            desc:"Dr Mo's time machine! “Toss noodles” becomes “Restore noodles”: boiled noodles go back in the box raw.", cat:'kitchen'},
   {id:'knife',  name:'Chashu knife',      price:2000,             desc:'Wider timing when slicing chashu at night.', cat:'prep'},
   {id:'mold',   name:'Ramen mold',        price:2000,             desc:'When bundling noodles at night, the scale slows down 80% near 140 g.', cat:'prep'},
-  {id:'stock1', name:'More Stocks!',        price:5000,  maxBuy:4,  desc:'Buy up to 4 packs of each ingredient a night.', cat:'prep'},
-  {id:'stock2', name:'More More Stocks!',   price:9000,  maxBuy:5,  desc:'Buy up to 8 packs of each ingredient a night.', req:'stock1', minDay:6, cat:'prep'},
+  {id:'stock1', name:'More Stocks!',        price:3000,  maxBuy:4,  desc:'Buy up to 4 packs of each ingredient a night.', cat:'prep'},
+  {id:'stock2', name:'More More Stocks!',   price:8000,  maxBuy:6,  desc:'Buy up to 8 packs of each ingredient a night.', req:'stock1', minDay:6, cat:'prep'},
   {id:'stock3', name:'Momomomore Stocks!',  price:16000, maxBuy:8, desc:'Buy up to 16 packs of each ingredient a night.', req:'stock2', minDay:12, cat:'prep'},
   {id:'inv',    name:'Inventory Up!',       price:8000,  types:4,   desc:'4 kinds of ingredients delivered each night instead of 3.', cat:'prep'},
-  {id:'plush',  name:'Plush cushion',     price:3000,  pat:1.2,   desc:'Customers wait 1.2× longer.', cat:'store'},
-  {id:'fluffy', name:'Fluffy cushion',    price:7500,  pat:1.5,   desc:'Customers wait 1.7× longer.', req:'plush', cat:'store'},
+  {id:'plush',  name:'Plush cushion',     price:2000,  pat:1.2,   desc:'Customers wait 1.2× longer.', cat:'store'},
+  {id:'fluffy', name:'Fluffy cushion',    price:8000,  pat:1.5,   desc:'Customers wait 1.7× longer.', req:'plush', cat:'store'},
   {id:'sofa',   name:'Sofa seats',        price:12000,  pat:2.0,   desc:'Customers wait 2.0× longer.', req:'fluffy', cat:'store'},
   {id:'lemon',  name:"Soso's lemon water",price:2000,  bonus:.03, desc:'+3% on every bowl.', cat:'store'},
   {id:'noren',  name:'Noren curtain',     price:6000,  bonus:.05, desc:'+7% on every bowl.', cat:'store'},
   {id:'doll',   name:'Momo doll',         price:10000,  bonus:.1, desc:'+12% on every bowl.', cat:'store'},
-  {id:'boil1',  name:'Strong burner',     price:2500,  boil:.9,   desc:'Noodles boil 10% faster.', cat:'kitchen'},
+  {id:'boil1',  name:'Strong burner',     price:2500,  boil:.85,   desc:'Noodles boil 15% faster.', cat:'kitchen'},
   {id:'boil2',  name:'Ultra burner',      price:9000,  boil:.7,   desc:'Noodles boil 30% faster.', req:'boil1', cat:'kitchen'},
-  {id:'boil3',  name:'Turbo burner',      price:21000, boil:.5,   desc:'Noodles boil 50% faster.', req:'boil2', cat:'kitchen'},
+  {id:'boil3',  name:'Turbo burner',      price:21000, boil:.4,   desc:'Noodles boil 60% faster.', req:'boil2', cat:'kitchen'},
 ];
 
 /* ---- story economy ---- */
@@ -168,7 +168,7 @@ const ECON={
   START_MONEY:2000,
   START_STOCK:{chashu:6,green:6,white:6,nori:6,noodle:7},
   rent:d=>Math.min(9000, 1200+300*Math.max(0,d-6)),   // paid every night: ¥1200 on days 1–6, then +¥300 a day from day 7, never more than ¥9,000
-  patience:d=>Math.max(85,110-(d-1)*3),   // patience 1 = this many seconds × 1/PATIENCE_SLOWER (day 1: 110 s → ~129 s real; −3 s a day; floor 85 s → ~100 s)
+  patience:d=>Math.max(50,100-(d-1)*5),   // patience 1 = this many seconds × 1/PATIENCE_SLOWER (day 1: 110 s → ~129 s real; −3 s a day; floor 85 s → ~100 s)
   TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ GRADING.TIP_FROM); each customer multiplies these
   PREP_YIELD:.7,                          // a perfect prep turns a pack into 70% of its base portions
   PATIENCE_SLOWER:.85,                    // patience drains 15% slower for everyone
