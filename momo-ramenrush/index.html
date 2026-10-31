@@ -195,11 +195,13 @@
   <div id="upgradeResetPanel" hidden role="dialog" aria-modal="true" aria-labelledby="upgradeResetTitle" style="position:fixed;inset:0;z-index:99999;background:rgba(20,14,8,.72);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box" >
     <div style="width:min(420px,100%);max-height:90vh;overflow:auto;background:#fff4df;border:4px solid #704528;border-radius:20px;padding:22px;color:#56341e;box-sizing:border-box;text-align:center;box-shadow:0 12px 36px #0005">
       <h2 id="upgradeResetTitle" style="margin:0 0 12px">🛠️ Store Upgrade Rebalance!</h2>
-      <p>Store prices and upgrades have been updated. All your previously purchased upgrades have been reset and refunded at their original first-sale prices.</p>
-      <p style="margin:18px 0 4px">Your total refund</p>
-      <p id="upgradeResetAmount" style="font-size:2em;font-weight:bold;color:#4e823d;margin:0 0 14px">¥0</p>
-      <p>Your day, inventory, reputation, customer records and other progress are preserved. A backup of your previous save was created.</p>
-      <button id="upgradeResetClose" type="button" class="btn red" style="margin-top:12px;width:100%">Got it! Let's cook! ▶</button>
+      <p>Store prices and upgrades have been updated! Everything you bought has been reset and refunded at its original price, so you can rebuy with the new lineup.</p>
+      <div id="urList" style="display:grid;grid-template-columns:1fr auto;gap:4px 12px;text-align:left;font-size:14px;margin:10px 0;padding:8px 10px;background:#fffaf0;border:2px solid #e3d4b9;border-radius:12px"></div>
+      <p style="margin:12px 0 4px">Your total refund</p>
+      <p id="upgradeResetAmount" style="font-size:2em;font-weight:bold;color:#4e823d;margin:0 0 10px">¥0</p>
+      <p style="margin:0 0 6px"><b>🎁 Sorry for the trouble!</b> Tonight's ingredients are <b>100% off</b>.</p>
+      <p style="font-size:13px;opacity:.8">Your day, stock, reputation and Customer Book are kept. A backup of your old save was made.</p>
+      <button id="upgradeResetClose" type="button" class="btn red" style="margin-top:12px;width:100%">Thanks! To the iPad ▶</button>
     </div>
   </div>
   <div id="transferPanel" hidden role="dialog" aria-modal="true"><div class="transferCard">

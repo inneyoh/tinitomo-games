@@ -986,10 +986,9 @@ const SAVE_KEY='momo-ramen-shop.v1';
 const STOCK_KEYS=['chashu','green','white','nori','noodle'];
 /* Fixed first-sale refund prices provided by the game creator, not current store prices.
    The migration marker is saved with progress and travels with transfer codes. */
-const UPGRADE_RESET_ID='upgradeReset20261031';
+const UPGRADE_RESET_ID='upgradeReset20261031', UPGRADE_RESET_NIGHT='upgradeResetNight20261031';
 const FIRST_UPGRADE_PRICES={"tap":1200,"tap2":5000,"tebo":900,"tebo2":3500,"tebo3":8000,"tebo2nd":2000,"bell":1500,"restore":33300,"knife":1000,"mold":2000,"stock1":4000,"stock2":8000,"stock3":15000,"inv":6000,"plush":2000,"fluffy":7000,"sofa":9000,"lemon":2000,"noren":2500,"doll":8000,"boil1":1200,"boil2":2800,"boil3":15000};
-let upgradeResetNotice=null;
-const freshSave=(book,tut,seen)=>({day:1,money:ECON.START_MONEY,stock:{...ECON.START_STOCK},upgrades:{},[UPGRADE_RESET_ID]:true,book:book||{},served:0,firstDone:false,tutorialDone:!!tut,seen:seen||{}});
+const freshSave=(book,tut,seen)=>({day:1,money:ECON.START_MONEY,stock:{...ECON.START_STOCK},upgrades:{},[UPGRADE_RESET_ID]:true,[UPGRADE_RESET_NIGHT]:true,book:book||{},served:0,firstDone:false,tutorialDone:!!tut,seen:seen||{}});
 function loadSave(){
   const raw=localStorage.getItem(SAVE_KEY);
   if(!raw)return null;
@@ -997,20 +996,20 @@ function loadSave(){
   if(!old||typeof old!=='object'||Array.isArray(old))throw Error('Invalid save format');
   const f=freshSave();
   const save={...f,...old,stock:{...f.stock,...(old.stock||{})}};
-  if(old[UPGRADE_RESET_ID]!==true){
-    const purchased=old.upgrades&&typeof old.upgrades==='object'&&!Array.isArray(old.upgrades)?old.upgrades:{};
-    const refund=Object.entries(FIRST_UPGRADE_PRICES).reduce((sum,[id,price])=>sum+(purchased[id]===true?price:0),0);
-    if(!Number.isSafeInteger(save.money)||save.money<0||!Number.isSafeInteger(save.money+refund))throw Error('Invalid save balance');
-    save.money+=refund;
-    save.upgrades={};
-    save[UPGRADE_RESET_ID]=true;
-    save.upgradeResetRefund=refund;
-    const backupKey='momo-ramen-shop.pre-upgrade-reset.'+Date.now();
-    localStorage.setItem(backupKey,raw);
-    if(localStorage.getItem(backupKey)!==raw)throw Error('Save backup verification failed');
-    localStorage.setItem(SAVE_KEY,JSON.stringify(save));
-    if(localStorage.getItem(SAVE_KEY)!==JSON.stringify(save))throw Error('Migrated save verification failed');
-    upgradeResetNotice=refund;
+  /* Upgrade rebalance: list what was bought (at the creator's first-sale prices), then refund + reset at the start of
+     the next night, with that night's ingredients free. Nothing is taken away before the night pop-up shows. */
+  const list=up=>Object.entries(FIRST_UPGRADE_PRICES).filter(([id])=>up&&up[id]===true).map(([id,price])=>[id,price]);
+  if(old[UPGRADE_RESET_NIGHT]!==true){
+    let pending=null;
+    if(old[UPGRADE_RESET_ID]!==true){                                   // not migrated yet: refund happens at night
+      const items=list(old.upgrades); if(items.length) pending={items,total:items.reduce((a,[,p])=>a+p,0),paid:false};
+    } else if((old.upgradeResetRefund||0)>0){                           // already refunded by the earlier startup version: still show the list + free stock
+      let items=[]; try{ const k=Object.keys(localStorage).filter(k=>k.startsWith('momo-ramen-shop.pre-upgrade-reset.')).sort().pop(); if(k) items=list(JSON.parse(localStorage.getItem(k)).upgrades); }catch(e){}
+      pending={items,total:old.upgradeResetRefund,paid:true};
+    }
+    if(pending){ const backupKey='momo-ramen-shop.pre-upgrade-reset.'+Date.now(); try{ localStorage.setItem(backupKey,raw); }catch(e){} save.upgradeResetPending=pending; }
+    save[UPGRADE_RESET_ID]=true; save[UPGRADE_RESET_NIGHT]=true;
+    try{ localStorage.setItem(SAVE_KEY,JSON.stringify(save)); }catch(e){}
   }
   return save;
 }
@@ -1536,7 +1535,14 @@ function closeShop(){ G.waiting=false; P.resume=null; saveGame(); toast('Closing
    ===================================================================== */
 const N={market:[],qty:{},tab:'market',cat:'all',queue:[],results:[]};
 function shuffled(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function applyUpgradeReset(){ const R=P.upgradeResetPending; if(!R || G.debug) return;
+  if(!R.paid){ P.money+=R.total; P.upgrades={}; } P.freeStockDay=P.day; delete P.upgradeResetPending; saveGame();
+  const nm=id=>(UPGRADES.find(u=>u.id===id)||{name:id}).name;
+  $('#urList').innerHTML = R.items.length ? R.items.map(([id,p])=>`<span>${nm(id)}</span><span>${yen(p)}</span>`).join('') : '<span>Your upgrades</span><span></span>';
+  $('#upgradeResetAmount').textContent=yen(R.total); $('#upgradeResetPanel').hidden=false; sfx('pay');
+  $('#upgradeResetClose').onclick=()=>{ $('#upgradeResetPanel').hidden=true; blip(700,.06); }; }
 function showNight(){
+  applyUpgradeReset();
   const rent=ECON.rent(P.day), after=P.money-rent;
   showScene('night'); music('night'); sfx('eod'); $('#report').hidden=false; $('#ipad').hidden=true; $('#sleep').hidden=true;
   $('#rpTitle').textContent=`Day ${P.day} closed`;
@@ -1548,7 +1554,8 @@ function showNight(){
   else { bt.textContent='Pay rent & open iPad ▶'; bt.onclick=()=>{ P.money=after; N.market=shuffled(STOCK_KEYS).slice(0,UP.types()); saveGame(); openIpad(); }; }
 }
 function openIpad(){ $('#report').hidden=true; $('#ipad').hidden=false; N.qty={}; N.market.forEach(k=>N.qty[k]=1); N.tab='market'; renderIpad(); }
-const marketCost=()=>N.market.reduce((s,k)=>s+(N.qty[k]||0)*MARKET[k].price,0);
+const freeTonight=()=>P.freeStockDay===P.day;   // apology night after the upgrade rebalance: ingredients are 100% off
+const marketCost=()=>freeTonight()?0:N.market.reduce((s,k)=>s+(N.qty[k]||0)*MARKET[k].price,0);
 function renderIpad(){
   $('#ipDay').textContent=P.day; $('#ipMoney').textContent=yen(P.money);
   $('#tabMarket').classList.toggle('on',N.tab==='market'); $('#tabWare').classList.toggle('on',N.tab==='ware');
@@ -1561,10 +1568,10 @@ function renderIpad(){
   const L=$('#ipList');
   if(N.tab==='market'){
     const tm=EVENTS.find(e=>e.id===P.nextEvent)||EVENTS[0];
-    L.innerHTML=`<div class="ipEvent"><b>Tomorrow: ${tm.name}</b><br>${tm.desc}</div><div style="font-size:12px;opacity:.8;line-height:1.4">Tonight's delivery: <b>${N.market.map(k=>MARKET[k].name).join(', ')}</b>. Everything you buy, Momo preps tonight — neat prep keeps every portion.</div>`+
+    L.innerHTML=(freeTonight()?`<div class="ipEvent" style="background:#e5f6dc;border-color:#3e8e3a"><b>🎁 Tonight's ingredients are 100% off!</b><br>Our apology for the upgrade reset — stock up for free.</div>`:'')+`<div class="ipEvent"><b>Tomorrow: ${tm.name}</b><br>${tm.desc}</div><div style="font-size:12px;opacity:.8;line-height:1.4">Tonight's delivery: <b>${N.market.map(k=>MARKET[k].name).join(', ')}</b>. Everything you buy, Momo preps tonight — neat prep keeps every portion.</div>`+
       STOCK_KEYS.map(k=>{ const m=MARKET[k], on=N.market.includes(k), q=N.qty[k]||0;
         return `<div class="ipItem ${on?'tonight':'off'}"><div class="ic"><img src="${m.img}" alt=""></div>
-          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}${spoilsSoon(k)?` <span style="color:var(--marker)">· ${spoilsSoon(k)} spoil after tomorrow</span>`:''}<br>${on?`${m.pack} · ${yen(m.price)} → up to +${Math.round(m.base*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
+          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}${spoilsSoon(k)?` <span style="color:var(--marker)">· ${spoilsSoon(k)} spoil after tomorrow</span>`:''}<br>${on?`${m.pack} · ${freeTonight()?'<b style="color:#3e8e3a">FREE</b> <s>'+yen(m.price)+'</s>':yen(m.price)} → up to +${Math.round(m.base*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
           ${on?`<div class="step"><button data-k="${k}" data-d="-1" aria-label="Fewer">−</button><span>${q}</span><button data-k="${k}" data-d="1" aria-label="More">+</button></div>`:'<span></span>'}</div>`; }).join('');
     L.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; N.qty[k]=Math.max(0,Math.min(UP.maxBuy(),(N.qty[k]||0)+ +b.dataset.d)); blip(600,.04); renderIpad(); });
   } else {
@@ -1582,7 +1589,7 @@ function renderIpad(){
       saveGame(); sfx('pay'); toast(`${u.name} installed!`); renderIpad(); });
   }
   const cost=marketCost(); $('#ipSum').innerHTML=`Ingredients <b>${yen(cost)}</b>${cost>P.money?' <span style="color:var(--marker)">· not enough money</span>':''}`;
-  $('#btnPrep').disabled=cost>P.money; $('#btnPrep').innerHTML=cost>0?'Buy &amp; prep ▶':'Skip to sleep ▶';
+  $('#btnPrep').disabled=cost>P.money; const any=N.market.some(k=>(N.qty[k]||0)>0); $('#btnPrep').innerHTML=cost>0?'Buy &amp; prep ▶':any?'Prep for free ▶':'Skip to sleep ▶';
 }
 function drawIcon(cv){ const c=cv.getContext('2d'); c.scale(2,2); const id=cv.dataset.icon;
   if(id==='tap'){ rr(c,8,8,22,36,6); fs(c,steel(c,8,30),2); rr(c,26,20,16,7,3); fs(c,'#c9cfd5',2); c.fillStyle='#e8a33a'; rr(c,35,28,4,16,2); c.fill(); }
@@ -1964,11 +1971,3 @@ function loop(now){ const dt=Math.min(.05,(now-last)/1000); last=now;
 $('#btnMute').onclick=e=>{ e.stopPropagation(); audioInit(); setMuted(!SND.muted); };
 setMuted(SND.muted);
 goHome(); showPatch(); requestAnimationFrame(loop);
-if(upgradeResetNotice!==null){
-  const panel=document.getElementById('upgradeResetPanel');
-  if(panel){
-    document.getElementById('upgradeResetAmount').textContent=yen(upgradeResetNotice);
-    panel.hidden=false;
-    document.getElementById('upgradeResetClose').onclick=()=>{panel.hidden=true;};
-  }
-}
