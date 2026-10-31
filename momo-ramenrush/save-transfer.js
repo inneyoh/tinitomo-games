@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const API_URL=''; // Set to your deployed Cloudflare Worker URL, e.g. https://name.account.workers.dev
+const API_URL='https://tinitomo-save-transfer.yennihoyunxian.workers.dev'; // Set to your deployed Cloudflare Worker URL, e.g. https://name.account.workers.dev
 const SAVE_KEY='momo-ramen-shop.v1';
 const $=id=>document.getElementById(id);
 const status=s=>{$('transferStatus').textContent=s;};
