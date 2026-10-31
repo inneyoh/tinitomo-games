@@ -149,7 +149,7 @@ const MARKET={   // a pack bought at night → Momo preps it → up to `base` po
    pat   = customers wait × longer    bonus = + share of every bowl's price            boil  = boil time × (lower = faster)
    maxBuy = packs of one ingredient you can buy a night (default 3)   types = kinds of ingredients delivered a night (default 3)
    baseMul = ingredient portions per pack ×   perfectBonus = + share on the perfect-bowl bonus tip   autoLift = tebos lift themselves at the ordered firmness
-   req   = id of the upgrade you must own first      minDay = shows up from that night on (e.g. 4 = after Day 4)
+   req   = id of the upgrade you must own first (or a list, e.g. ['bell','tebo2nd'] = needs both)      minDay = shows up from that night on (e.g. 4 = after Day 4)
    cat   = iPad filter: 'kitchen' (Kitchen Equipment) · 'prep' (Prep) · 'store' (Storefront) */
 const UPGRADE_CATS=[['all','All'],['kitchen','Kitchen Equipment'],['prep','Prep'],['store','Storefront']];
 const UPGRADES=[
@@ -159,7 +159,7 @@ const UPGRADES=[
   {id:'tebo2',  name:'Tebo Plus',         price:5000,  flick:.5,  desc:'Each flick drains 50% better.', req:'tebo', cat:'kitchen'},
   {id:'tebo3',  name:'Ultra Tebo',        price:16000,  oneFlick:true, desc:'One flick drains it all.', req:'tebo2', cat:'kitchen'},
   {id:'tebo2nd', name:'Second tebo',     price:2000,             desc:'Rushes: cook two portions of noodles at once, one tebo for each bowl.', minDay:7, cat:'kitchen'},
-  {id:'drmo',   name:"Dr Mo's Prototype Tebo", price:7000, autoLift:'second', desc:"Rushes: the 2nd Tebo rises up by itself when cooked to the correct firmness for the 2nd order... why not the 1st Tebo? ...Good question!", req:'bell', minDay:7, cat:'kitchen'},
+  {id:'drmo',   name:"Dr Mo's Prototype Tebo", price:7000, autoLift:'second', desc:"Rushes: the 2nd Tebo rises up by itself when cooked to the correct firmness for the 2nd order... why not the 1st Tebo? ...Good question!", req:['bell','tebo2nd'], minDay:7, cat:'kitchen'},
   {id:'drmo2',  name:"Dr Mo's Double Tebo!?",  price:22000, autoLift:'all', desc:"Dr Mo finished the prototype! Every Tebo — single or double — now rises up by itself at the correct firmness.", req:'drmo', minDay:7, cat:'kitchen'},
   {id:'bell',   name:'Timer bell',        price:1500,             desc:'Dings when the noodles reach the ordered texture.', cat:'kitchen'},
   {id:'restore',name:'Restoranator',      price:67600,            desc:"Dr Mo's time machine! “Toss noodles” becomes “Restore noodles”: boiled noodles go back in the box raw.", cat:'kitchen'},

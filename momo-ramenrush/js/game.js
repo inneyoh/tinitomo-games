@@ -1584,7 +1584,8 @@ function renderIpad(){
           ${on?`<div class="step"><button data-k="${k}" data-d="-1" aria-label="Fewer">−</button><span>${q}</span><button data-k="${k}" data-d="1" aria-label="More">+</button></div>`:'<span></span>'}</div>`; }).join('');
     L.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; N.qty[k]=Math.max(0,Math.min(UP.maxBuy(),(N.qty[k]||0)+ +b.dataset.d)); blip(600,.04); renderIpad(); });
   } else {
-    const why=u=> u.req&&!has(u.req) ? `Needs ${UPGRADES.find(x=>x.id===u.req).name} first` : u.minDay&&P.day<u.minDay ? `Unlocks after Day ${u.minDay}` : '';
+    const missing=u=>[].concat(u.req||[]).filter(id=>!has(id)).map(id=>UPGRADES.find(x=>x.id===id).name);   // req can be one id or a list
+    const why=u=> missing(u).length ? `Needs ${missing(u).join(' + ')} first` : u.minDay&&P.day<u.minDay ? `Unlocks after Day ${u.minDay}` : '';
     const list=UPGRADES.filter(u=>N.cat==='all'||u.cat===N.cat);
     L.innerHTML=`<div class="ipCats">${UPGRADE_CATS.map(([k,t])=>`<button data-c="${k}" class="${N.cat===k?'on':''}">${t}</button>`).join('')}</div>`+
       list.map(u=>{ const own=has(u.id), lock=own?'':why(u);
