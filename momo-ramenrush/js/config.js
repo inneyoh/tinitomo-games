@@ -39,7 +39,8 @@ const CUSTOMERS = {
   popo:{name:'Popo', rate:0.5, size:1.1, pat:0.75, tip:2, perfect:500, hi:"How is the shop doing?",
     react:{S:"Not bad, quite well done actually.",A:"Not too shabby, can be better.",B:"Hmm… Read my recipe book again.",C:"Popo…"},
     profile:"The actual owner of the store and the (2nd) best cook in town. Loves her ribbons.", likes:"A perfect bowl",
-    fav:{score:95, line:"A perfect bowl. I'm proud of you, Momo."}},
+    fav:{score:95, line:"A perfect bowl. I'm proud of you, Momo."},
+    rentCut:{perfect:.5, served:.2}},   // Popo owns the shop: serve her and tonight's rent is cut — 50% for a perfect (S) bowl, 20% for any other bowl
 
   // ---- Dollyworld regulars (general customers)
   kuma:{name:'Kuma', rate:1, size:1, pat:1, tip:1, perfect:200, hi:"Hello! One bowl of Ramen please!",

@@ -1180,7 +1180,7 @@ function enterService(){ G.order=null; $('#modeSheet').classList.remove('on'); G
   resetMomoBack(); updateHud(); layoutStage(false); music('day',true); later(nextCustomer,400); }
 function startDay(){ P.lastMode='story'; G.play='story'; G.tut=!P.tutorialDone; G.firstOrder=!P.firstDone||G.tut;
   STOCK_KEYS.forEach(lotsOf);
-  Object.assign(D,{n:Infinity,rushAt:planRushes(P.day),clock:DAY.OPEN,over:undefined,done:0,sales:0,tips:0,walk:0,rep0:repOf(),event:P.day>1?(P.nextEvent||'normal'):'normal'});
+  Object.assign(D,{n:Infinity,rentCut:0,rushAt:planRushes(P.day),clock:DAY.OPEN,over:undefined,done:0,sales:0,tips:0,walk:0,rep0:repOf(),event:P.day>1?(P.nextEvent||'normal'):'normal'});
   if(P.resume && P.resume.day===P.day) Object.assign(D,P.resume.D);                          // continue a saved day
   else P.dayStart={day:P.day,money:P.money,stock:{...P.stock},lots:JSON.parse(JSON.stringify(P.lots||{})),rep:repOf(),served:P.served};   // for "Restart the day"
   P.resume=null; saveGame(); enterService();
@@ -1440,7 +1440,7 @@ function eatBoth(){ const R=G.rush; $('#scoreSheet').classList.remove('on','duo'
       G.order=s.order; const fv=favHit(id,r); el.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); sayAt(i, fv?C.fav.line:(C.react[r.grade]||C.react.C));
       const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
       const tip = r.total>=GRADING.TIP_FROM ? Math.round((s.pat>66?ECON.TIP_HIGH:s.pat>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?Math.round(C.perfect*UP.perfect()):0;
-      P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; D.done++; total+=r.total; return [base+tip+bonus,tip+bonus]; });
+      P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; D.done++; total+=r.total; rentCutFor(id,r); return [base+tip+bonus,tip+bonus]; });
     saveGame(); updateHud();
     const f=faceFor(Math.round(total/2)), m=$('#shopMomo');
     later(()=>ppFlip(m.querySelector('.flip'),()=>{ m.classList.add('front'); m.querySelector('.body').src=f.img; }).then(()=>{
@@ -1513,7 +1513,7 @@ function eat(){
   later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; sayC(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
     const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?Math.round(C.perfect*UP.perfect()):0;
-    if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
+    if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; rentCutFor(id,r); }
     else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++;
       if(E.served>(P.endlessBest||0)){ if(P.endlessBest && !E.newBest){ E.newBest=true; later(()=>toast(`New best: ${E.served} bowls!`),1400); } P.endlessBest=E.served; saveGame(); } }
     D.done++;
@@ -1544,14 +1544,17 @@ function applyUpgradeReset(){ const R=P.upgradeResetPending; if(!R || G.debug) r
   $('#urList').innerHTML = R.items.length ? R.items.map(([id,p])=>`<span>${nm(id)}</span><span>${yen(p)}</span>`).join('') : '<span>Your upgrades</span><span></span>';
   $('#upgradeResetAmount').textContent=yen(R.total); $('#upgradeResetPanel').hidden=false; sfx('pay');
   $('#upgradeResetClose').onclick=()=>{ $('#upgradeResetPanel').hidden=true; blip(700,.06); }; }
+/* customers with rentCut (Popo): serving them cuts tonight's rent — the best cut of the day counts, a walk-out gives none */
+function rentCutFor(id,r){ const rc=CUSTOMERS[id].rentCut; if(!rc || G.play!=='story' || G.tut) return;
+  const cut=r.total>=GRADING.PERFECT_FROM ? rc.perfect : rc.served; if(cut>(D.rentCut||0)){ D.rentCut=cut; later(()=>toast(`${CUSTOMERS[id].name} is pleased — tonight's rent −${Math.round(cut*100)}%!`),2600); } }
 function showNight(){
   applyUpgradeReset();
-  const rent=ECON.rent(P.day), after=P.money-rent;
+  const fullRent=ECON.rent(P.day), cut=D.rentCut||0, rent=Math.round(fullRent*(1-cut)), after=P.money-rent;
   showScene('night'); music('night'); sfx('eod'); $('#report').hidden=false; $('#ipad').hidden=true; $('#sleep').hidden=true;
   $('#rpTitle').textContent=`Day ${P.day} closed`;
   const gone=spoilStock(), dr=repOf()-(D.rep0??repOf()); P.nextEvent=rollEvent(); saveGame();
   $('#rpSub').textContent=`${D.done-D.walk} served · ${D.walk} walked out · ★${repStars(repOf())} reputation (${dr>=0?'+':''}${dr})`;
-  $('#rpLedger').innerHTML=`<span>Sales</span><span class="pos">+${yen(D.sales)}</span><span>Tips</span><span class="pos">+${yen(D.tips)}</span><span>Rent</span><span class="neg">−${yen(rent)}</span>${Object.keys(gone).length?`<span>Spoiled</span><span class="neg">${Object.entries(gone).map(([k,n])=>`${n} ${MARKET[k].name.toLowerCase()}`).join(', ')}</span>`:''}<span class="tot">Money left</span><span class="tot ${after<0?'neg':''}">${yen(after)}</span>`;
+  $('#rpLedger').innerHTML=`<span>Sales</span><span class="pos">+${yen(D.sales)}</span><span>Tips</span><span class="pos">+${yen(D.tips)}</span><span>Rent${cut?` <small>(Popo −${Math.round(cut*100)}%, was ${yen(fullRent)})</small>`:''}</span><span class="neg">−${yen(rent)}</span>${Object.keys(gone).length?`<span>Spoiled</span><span class="neg">${Object.entries(gone).map(([k,n])=>`${n} ${MARKET[k].name.toLowerCase()}`).join(', ')}</span>`:''}<span class="tot">Money left</span><span class="tot ${after<0?'neg':''}">${yen(after)}</span>`;
   const bt=$('#btnIpad');
   if(after<0){ bt.textContent="Can't pay rent…"; bt.onclick=gameOver; }
   else { bt.textContent='Pay rent & open iPad ▶'; bt.onclick=()=>{ P.money=after; N.market=shuffled(STOCK_KEYS).slice(0,UP.types()); rollDiscounts(); saveGame(); openIpad(); }; }
