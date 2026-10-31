@@ -7,11 +7,11 @@
    ===================================================================== */
 const PATCH_NOTES = {
   SHOW: true,
-  VERSION: '2.0',
-  TITLE: "🍜 Momo-ya's FIRST Big Update — Version 2.0!",
-  INTRO: "Momo's little ramen shop is getting BUSY! More customers, bigger rushes, and a whole lot more ramen chaos! 🍥",
+  VERSION: '2.1',
+  TITLE: "🍜 Momo-ya Small Update — Version 2.1!",
+  INTRO: "The Tinitomo Arcade app has an app icon now!? Time to move to the homescreen app version- OH! What about my saved data! 😨",
   SECTIONS: [
-    ['🍜 NEW GIMMICK: RUSH HOUR!', [
+/*    ['🍜 NEW GIMMICK: RUSH HOUR!', [
       'Double the customers, double the chaos! Starting from Day 7, Rush Hour kicks in with two customers arriving at once!',
       'Prepare two bowls side by side and keep both customers happy!',
       'As the days go by, Rush Hour happens more often. Can Momo keep up?!' ]],
@@ -37,10 +37,10 @@ const PATCH_NOTES = {
     ['⭐ SYSTEM UPDATE: NEW GRADING SCALE!', [
       'Getting an S just got harder! The new S / A / B / C / D grading system is much stricter!',
       "Customers have higher expectations! Anything C or below? Don't expect a happy face! 💢",
-      "No noodles?! That's not ramen! 🍜 Even if everything else is perfect, a bowl without noodles gets a B at best!" ]],
-    ['🔧 BUG FIXES & OPTIMISATION!', [
-      'Various bug fixes and optimisations for a smoother gameplay experience! ✨' ]],
+      "No noodles?! That's not ramen! 🍜 Even if everything else is perfect, a bowl without noodles gets a B at best!" ]], */
+    ['🔧 NEW SAVE DATA TRANSFER FEATURE!', [
+      'Press the "Transfer Save" button at the bottom right of the screen to get your saved data code for transferring!' ]],
   ],
-  OUTRO: '🍥 Can Momo survive the lunch rush AND pay her rent?<br>Only one way to find out. Get cooking! 🍜',
+  OUTRO: 'Phew! No worries for data loss anymore. <br>Time to move to the new Tinitomo Arcade homescreen app!',
   BUTTON: "Get cooking! ▶",
 };
