@@ -899,6 +899,8 @@ function kitchenFrame(dt){
   // boil chip when the noodles are cooking out of sight
   const chip=$('#boilChip');
   if(K.rise) K.rise=K.rise.map(r=>Math.max(0,r-dt*1.1));
+  if(has('drmo')) NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling'||!ord) return;   // Dr Mo's Tebo: lifts itself at the ordered firmness
+    const t=boilT(n), w=want(ord.pos).noodle; if(t>=CFG.FIRM_CENTERS[w]){ n.state='lifted'; n.time=t; n.water=1; blip(880,.12); floatTxt((G.rush?`${s.i+1} · `:'')+'Dr Mo! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
   NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling' || !has('bell') || !ord) return; const t=boilT(n), w=want(ord.pos).noodle;
     if(!n.rang && Math.abs(t-CFG.FIRM_CENTERS[w])<=CFG.FIRM_TOL*.6){ n.rang=true; blip(1320,.25,'sine',.12); setTimeout(()=>blip(1760,.3,'sine',.1),120); floatTxt((G.rush?`${s.i+1} · `:'')+'Ding! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
   const boilingNow=NSL().filter(s=>s.bowl.nood.state==='boiling');
@@ -1017,7 +1019,7 @@ function saveGame(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(P)); }cat
 let P=loadSave()||freshSave();
 const has=id=>!!P.upgrades[id];
 const owned=k=>UPGRADES.filter(u=>has(u.id) && u[k]!==undefined).map(u=>u[k]);
-const UP={ soup:()=>Math.max(1,...owned('soup')), flick:()=>Math.min(1,...owned('flick')), oneFlick:()=>owned('oneFlick').length>0,
+const UP={ baseMul:()=>Math.max(1,...owned('baseMul')), perfect:()=>1+owned('perfectBonus').reduce((a,b)=>a+b,0), soup:()=>Math.max(1,...owned('soup')), flick:()=>Math.min(1,...owned('flick')), oneFlick:()=>owned('oneFlick').length>0,
   pat:()=>Math.max(1,...owned('pat')), maxBuy:()=>Math.max(3,...owned('maxBuy')), types:()=>Math.min(STOCK_KEYS.length,Math.max(3,...owned('types'))), bonus:()=>owned('bonus').reduce((a,b)=>a+b,0), boil:()=>Math.min(1,...owned('boil')) };
 /* noodle cooking speed: default is 15% faster than v8, burners make it 10% / 30% faster again */
 const boilSpeed=()=>(1/0.85)/UP.boil();
@@ -1436,7 +1438,7 @@ function eatBoth(){ const R=G.rush; $('#scoreSheet').classList.remove('on','duo'
   later(()=>{ let total=0; const pays=R.slots.map((s,i)=>{ const r=R.res[i], id=s.cust, C=CUSTOMERS[id], el=slotEl(i); el.classList.remove('eat');
       G.order=s.order; const fv=favHit(id,r); el.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); sayAt(i, fv?C.fav.line:(C.react[r.grade]||C.react.C));
       const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
-      const tip = r.total>=GRADING.TIP_FROM ? Math.round((s.pat>66?ECON.TIP_HIGH:s.pat>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
+      const tip = r.total>=GRADING.TIP_FROM ? Math.round((s.pat>66?ECON.TIP_HIGH:s.pat>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?Math.round(C.perfect*UP.perfect()):0;
       P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; D.done++; total+=r.total; return [base+tip+bonus,tip+bonus]; });
     saveGame(); updateHud();
     const f=faceFor(Math.round(total/2)), m=$('#shopMomo');
@@ -1509,7 +1511,7 @@ function eat(){
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
   later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; sayC(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
     const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
-    const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?C.perfect:0;
+    const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?Math.round(C.perfect*UP.perfect()):0;
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; }
     else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++;
       if(E.served>(P.endlessBest||0)){ if(P.endlessBest && !E.newBest){ E.newBest=true; later(()=>toast(`New best: ${E.served} bowls!`),1400); } P.endlessBest=E.served; saveGame(); } }
@@ -1571,7 +1573,7 @@ function renderIpad(){
     L.innerHTML=(freeTonight()?`<div class="ipEvent" style="background:#e5f6dc;border-color:#3e8e3a"><b>🎁 Tonight's ingredients are 100% off!</b><br>Our apology for the upgrade reset — stock up for free.</div>`:'')+`<div class="ipEvent"><b>Tomorrow: ${tm.name}</b><br>${tm.desc}</div><div style="font-size:12px;opacity:.8;line-height:1.4">Tonight's delivery: <b>${N.market.map(k=>MARKET[k].name).join(', ')}</b>. Everything you buy, Momo preps tonight — neat prep keeps every portion.</div>`+
       STOCK_KEYS.map(k=>{ const m=MARKET[k], on=N.market.includes(k), q=N.qty[k]||0;
         return `<div class="ipItem ${on?'tonight':'off'}"><div class="ic"><img src="${m.img}" alt=""></div>
-          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}${spoilsSoon(k)?` <span style="color:var(--marker)">· ${spoilsSoon(k)} spoil after tomorrow</span>`:''}<br>${on?`${m.pack} · ${freeTonight()?'<b style="color:#3e8e3a">FREE</b> <s>'+yen(m.price)+'</s>':yen(m.price)} → up to +${Math.round(m.base*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
+          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}${spoilsSoon(k)?` <span style="color:var(--marker)">· ${spoilsSoon(k)} spoil after tomorrow</span>`:''}<br>${on?`${m.pack} · ${freeTonight()?'<b style="color:#3e8e3a">FREE</b> <s>'+yen(m.price)+'</s>':yen(m.price)} → up to +${Math.round(m.base*UP.baseMul()*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
           ${on?`<div class="step"><button data-k="${k}" data-d="-1" aria-label="Fewer">−</button><span>${q}</span><button data-k="${k}" data-d="1" aria-label="More">+</button></div>`:'<span></span>'}</div>`; }).join('');
     L.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; N.qty[k]=Math.max(0,Math.min(UP.maxBuy(),(N.qty[k]||0)+ +b.dataset.d)); blip(600,.04); renderIpad(); });
   } else {
@@ -1612,6 +1614,9 @@ function drawIcon(cv){ const c=cv.getContext('2d'); c.scale(2,2); const id=cv.da
     for(let k=0;k<n;k++){ const y=38-k*11, x=10+k*3; rr(c,x,y,32,12,2); fs(c,vg(c,y,y+12,'#e2b27a','#b98249'),1.8); c.strokeStyle='rgba(91,58,46,.45)'; c.lineWidth=1.2; c.beginPath(); c.moveTo(x+16,y); c.lineTo(x+16,y+12); c.stroke(); }
     txt(c,['4','8','16'][n-1],40,12,11,'#d2322d',700,'center',3,'#fff'); }
   else if(id==='inv'){ [['#e9645f',8],['#6aa84f',20],['#4f86c6',32],['#e0a800',44]].forEach(([col,x],k)=>{ rr(c,x-5,14+(k%2)*4,10,26,4); fs(c,col,1.8); }); rr(c,3,40,46,6,2); fs(c,'#8b5a33',1.5); txt(c,'+1',44,10,10,'#3e8e3a',700,'center',3,'#fff'); }
+  else if(id==='extra'){ [[10,30],[24,24],[38,30]].forEach(([x,y])=>{ rr(c,x-8,y-6,16,18,3); fs(c,vg(c,y-6,y+12,'#e2b27a','#b98249'),1.8); }); txt(c,'×1.5',26,12,11,'#3e8e3a',700,'center',3,'#fff'); }
+  else if(id==='drmo'){ drawTebo(c,22,34,true,0); c.strokeStyle='#7fe3ff'; c.lineWidth=2.5; c.beginPath(); c.moveTo(42,40); c.lineTo(42,12); c.moveTo(36,18); c.lineTo(42,10); c.lineTo(48,18); c.stroke(); }
+  else if(id==='pudding'){ c.beginPath(); c.moveTo(12,42); c.lineTo(16,18); c.lineTo(36,18); c.lineTo(40,42); c.closePath(); fs(c,vg(c,18,42,'#ffe39a','#f2b94a'),2); ell(c,26,18,10,4,'#7a3b12',2); ell(c,26,44,16,4,'#fffaf0',2); }
   else if(id==='mold'){ c.beginPath(); c.moveTo(8,20); c.lineTo(44,20); c.lineTo(38,42); c.lineTo(14,42); c.closePath(); fs(c,steel(c,8,44),2); ell(c,26,20,18,4,'#2d3a2b',2); txt(c,'140g',26,32,9,OUT,700); }
   else if(id==='boil1'||id==='boil2'||id==='boil3'){ rr(c,6,34,40,10,3); fs(c,'#5d646b',2); const n=id==='boil3'?4:id==='boil2'?3:2;
     for(let k=0;k<n;k++){ const x=26+(k-(n-1)/2)*12; c.beginPath(); c.moveTo(x-6,34); c.quadraticCurveTo(x-6,20,x,10); c.quadraticCurveTo(x+6,20,x+6,34); c.closePath(); fs(c,vg(c,10,34,'#ffd257','#e8582a'),1.5); } }
@@ -1785,7 +1790,7 @@ function prepFrame(dt){
   drawMomoAt(c,{cx:200,top:566-Math.abs(Math.sin(PR.t*4.4))*5,w:300,t:PR.t,work:PR.work});
 }
 function finishPrep(){
-  const key=PR.key, p=Math.max(0,Math.min(1,PREP[key].score(PR.g))), q=N.qty[key], gain=Math.round(MARKET[key].base*q*(0.5+0.5*p)*ECON.PREP_YIELD);
+  const key=PR.key, p=Math.max(0,Math.min(1,PREP[key].score(PR.g))), q=N.qty[key], gain=Math.round(MARKET[key].base*UP.baseMul()*q*(0.5+0.5*p)*ECON.PREP_YIELD);
   addStock(key,gain); N.results.push({key,gain,p}); saveGame();
   $('#pdTitle').textContent=`+${gain} ${MARKET[key].name.toLowerCase()} ${MARKET[key].unit}`;
   $('#pdSub').textContent= p>=.9?'Perfect prep, nothing wasted.': p>=.6?'Nice work. A little went to waste.':'Messy… quite a bit went to waste.';

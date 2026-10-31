@@ -148,6 +148,7 @@ const MARKET={   // a pack bought at night → Momo preps it → up to `base` po
    soup  = soup pours × faster        flick = water kept per flick × (lower = better)   oneFlick = a single flick drains it all
    pat   = customers wait × longer    bonus = + share of every bowl's price            boil  = boil time × (lower = faster)
    maxBuy = packs of one ingredient you can buy a night (default 3)   types = kinds of ingredients delivered a night (default 3)
+   baseMul = ingredient portions per pack ×   perfectBonus = + share on the perfect-bowl bonus tip   autoLift = tebos lift themselves at the ordered firmness
    req   = id of the upgrade you must own first      minDay = shows up from that night on (e.g. 4 = after Day 4)
    cat   = iPad filter: 'kitchen' (Kitchen Equipment) · 'prep' (Prep) · 'store' (Storefront) */
 const UPGRADE_CATS=[['all','All'],['kitchen','Kitchen Equipment'],['prep','Prep'],['store','Storefront']];
@@ -158,10 +159,12 @@ const UPGRADES=[
   {id:'tebo2',  name:'Tebo Plus',         price:5000,  flick:.5,  desc:'Each flick drains 50% better.', req:'tebo', cat:'kitchen'},
   {id:'tebo3',  name:'Ultra Tebo',        price:16000,  oneFlick:true, desc:'One flick drains it all.', req:'tebo2', cat:'kitchen'},
   {id:'tebo2nd', name:'Second tebo',     price:2000,             desc:'Rushes: cook two portions of noodles at once, one tebo for each bowl.', minDay:7, cat:'kitchen'},
+  {id:'drmo',   name:"Dr Mo's Tebo",      price:18000,            autoLift:true, desc:"2nd Tebo now rises up by itself when cooked to the correct firmness for 2nd order... why not make it available for 1st Tebo? ...Good question!", minDay:7, cat:'kitchen'},
   {id:'bell',   name:'Timer bell',        price:1500,             desc:'Dings when the noodles reach the ordered texture.', cat:'kitchen'},
   {id:'restore',name:'Restoranator',      price:67600,            desc:"Dr Mo's time machine! “Toss noodles” becomes “Restore noodles”: boiled noodles go back in the box raw.", cat:'kitchen'},
   {id:'knife',  name:'Chashu knife',      price:2000,             desc:'Wider timing when slicing chashu at night.', cat:'prep'},
   {id:'mold',   name:'Ramen mold',        price:2000,             desc:'When bundling noodles at night, the scale slows down 80% near 140 g.', cat:'prep'},
+  {id:'extra',  name:"Here's some extra!", price:6000, baseMul:1.5, desc:"Increases base stock amount by 1.5 times, thank Momo's networking!", minDay:7, cat:'prep'},
   {id:'stock1', name:'More Stocks!',        price:3000,  maxBuy:4,  desc:'Buy up to 4 packs of each ingredient a night.', cat:'prep'},
   {id:'stock2', name:'More More Stocks!',   price:8000,  maxBuy:6,  desc:'Buy up to 6 packs of each ingredient a night.', req:'stock1', minDay:6, cat:'prep'},
   {id:'stock3', name:'Momomomore Stocks!',  price:16000, maxBuy:8, desc:'Buy up to 8 packs of each ingredient a night.', req:'stock2', minDay:12, cat:'prep'},
@@ -169,9 +172,10 @@ const UPGRADES=[
   {id:'plush',  name:'Plush cushion',     price:2000,  pat:1.3,   desc:'Customers wait 1.3× longer.', cat:'store'},
   {id:'fluffy', name:'Fluffy cushion',    price:8000,  pat:1.5,   desc:'Customers wait 1.5× longer.', req:'plush', cat:'store'},
   {id:'sofa',   name:'Sofa seats',        price:12000,  pat:2.1,   desc:'Customers wait 2.1× longer.', req:'fluffy', cat:'store'},
+  {id:'pudding',name:"Nono's Pudding",     price:4000,  perfectBonus:.15, desc:'Increases bonus tip by 15%.', minDay:7, cat:'store'},
   {id:'lemon',  name:"Soso's lemon water",price:2000,  bonus:.03, desc:'+3% on cost of every bowl.', cat:'store'},
   {id:'noren',  name:'Noren curtain',     price:6000,  bonus:.05, desc:'+5% on cost of every bowl.', cat:'store'},
-  {id:'doll',   name:'Momo doll',         price:10000,  bonus:.1, desc:'+10% on cost of every bowl.', cat:'store'},
+  {id:'doll',   name:'Momo doll',         price:10000,  bonus:.12, desc:'+12% on cost of every bowl.', cat:'store'},
   {id:'boil1',  name:'Strong burner',     price:2500,  boil:.85,   desc:'Noodles boil 15% faster.', cat:'kitchen'},
   {id:'boil2',  name:'Ultra burner',      price:9000,  boil:.7,   desc:'Noodles boil 30% faster.', req:'boil1', cat:'kitchen'},
   {id:'boil3',  name:'Turbo burner',      price:21000, boil:.4,   desc:'Noodles boil 60% faster.', req:'boil2', cat:'kitchen'},
@@ -181,7 +185,7 @@ const UPGRADES=[
 const ECON={
   START_MONEY:2000,
   START_STOCK:{chashu:6,green:6,white:6,nori:6,noodle:7},
-  rent:d=>Math.min(9000, 1200+300*Math.max(0,d-6)),   // paid every night: ¥1200 on days 1–6, then +¥300 a day from day 7, never more than ¥9,000
+  rent:d=>Math.min(9000, 1200+150*Math.max(0,d-6)),   // paid every night: ¥1200 on days 1–6, then +¥150 a day from day 7, never more than ¥9,000
   patience:d=>Math.max(40,100-(d-1)*5),   // patience 1 = this many seconds × 1/PATIENCE_SLOWER (day 1: 110 s → ~129 s real; −3 s a day; floor 85 s → ~100 s)
   TIP_HIGH:200, TIP_MID:100,              // tips (score ≥ GRADING.TIP_FROM); each customer multiplies these
   PREP_YIELD:.7,                          // a perfect prep turns a pack into 70% of its base portions
