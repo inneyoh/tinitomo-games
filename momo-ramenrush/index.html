@@ -191,13 +191,25 @@
       <div class="row"><button class="btn red" id="btnPatch">Let's cook! ▶</button></div>
     </div>
   </div>
-  <div id="transferPanel" hidden role="dialog" aria-modal="true"><div class="transferCard"><h2>Transfer Momo-ya Save</h2><p>Copy your progress between Safari and the Home Screen app. Your original save stays intact.</p><button id="transferSend">1. Send this save</button><p>Copy the transfer code from the JSON response in the new tab. Expires in 30 minutes.</p><input id="transferCode" placeholder="Paste transfer code"><button id="transferFetch">2. Open received save</button><p>Copy the full JSON response from the new tab, then paste it below.</p><textarea id="transferJson" rows="3" placeholder="Paste JSON response"></textarea><button id="transferImport">3. Import received save</button><p id="transferStatus" role="status"></p><button id="transferClose">Close</button></div></div>
+  <div id="transferPanel" hidden role="dialog" aria-modal="true"><div class="transferCard">
+    <h2>Transfer Momo-ya Save</h2>
+    <p>Copy your progress between Safari and your Home Screen app. Sending does not delete your original save.</p>
+    <button id="transferSend" type="button">Send this save</button>
+    <p>Transfer codes expire after 30 minutes. Keep your code private.</p>
+    <div id="transferCodeResult" hidden><label for="transferGenerated">Your transfer code</label><input id="transferGenerated" readonly><button id="transferCopy" type="button">Copy code</button></div>
+    <label for="transferCode">Receive save using a code</label>
+    <input id="transferCode" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste 32-character code">
+    <button id="transferFetch" type="button">Preview received save</button>
+    <div id="transferPreview" hidden><p id="transferPreviewText"></p><button id="transferImport" type="button">Confirm import and back up current save</button></div>
+    <p id="transferStatus" role="status" aria-live="polite"></p>
+    <button id="transferClose" type="button">Close</button>
+  </div></div>
   <div id="toast"></div>
 </div>
 
 <script src="patch-notes.js?v=202610301548"></script>
 <script src="config.js?v=202610302030"></script>
 <script src="game.js?v=202610301548"></script>
-<script src="save-transfer.js?v=20261031b"></script>
+<script src="save-transfer.js?v=20261031bridge1"></script>
 </body>
 </html>
