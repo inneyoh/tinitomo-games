@@ -165,6 +165,8 @@ const UPGRADES=[
   {id:'knife',  name:'Chashu knife',      price:2000,             desc:'Wider timing when slicing chashu at night.', cat:'prep'},
   {id:'mold',   name:'Ramen mold',        price:2000,             desc:'When bundling noodles at night, the scale slows down 80% near 140 g.', cat:'prep'},
   {id:'extra',  name:"Here's some extra!", price:6000, baseMul:1.5, desc:"Increases base stock amount by 1.5 times, thank Momo's networking!", minDay:7, cat:'prep'},
+  {id:'disc1',  name:"Here's some discount!", price:5000, discItems:1, desc:"30% chance for 1 stock item to be on discount, thank Momo's networking!", cat:'prep'},
+  {id:'disc2',  name:"You're THE Dr. Mo!?",   price:8000, discItems:2, desc:"30% chance for 2 stock items to be on discount, thank Momo's reputation!", req:'disc1', minDay:7, cat:'prep'},
   {id:'stock1', name:'More Stocks!',        price:3000,  maxBuy:4,  desc:'Buy up to 4 packs of each ingredient a night.', cat:'prep'},
   {id:'stock2', name:'More More Stocks!',   price:8000,  maxBuy:6,  desc:'Buy up to 6 packs of each ingredient a night.', req:'stock1', minDay:6, cat:'prep'},
   {id:'stock3', name:'Momomomore Stocks!',  price:16000, maxBuy:8, desc:'Buy up to 8 packs of each ingredient a night.', req:'stock2', minDay:12, cat:'prep'},
@@ -180,6 +182,9 @@ const UPGRADES=[
   {id:'boil2',  name:'Ultra burner',      price:9000,  boil:.7,   desc:'Noodles boil 30% faster.', req:'boil1', cat:'kitchen'},
   {id:'boil3',  name:'Turbo burner',      price:21000, boil:.4,   desc:'Noodles boil 60% faster.', req:'boil2', cat:'kitchen'},
 ];
+
+/* ---- night market discounts (needs "Here's some discount!"): chance a night has a sale, and how big it is ---- */
+const DISCOUNT={ CHANCE:.3, MIN:.30, MAX:.60, STEP:.05 };   // 30% chance · 30–60% off in 5% steps
 
 /* ---- story economy ---- */
 const ECON={

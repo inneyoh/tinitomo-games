@@ -1553,11 +1553,16 @@ function showNight(){
   $('#rpLedger').innerHTML=`<span>Sales</span><span class="pos">+${yen(D.sales)}</span><span>Tips</span><span class="pos">+${yen(D.tips)}</span><span>Rent</span><span class="neg">−${yen(rent)}</span>${Object.keys(gone).length?`<span>Spoiled</span><span class="neg">${Object.entries(gone).map(([k,n])=>`${n} ${MARKET[k].name.toLowerCase()}`).join(', ')}</span>`:''}<span class="tot">Money left</span><span class="tot ${after<0?'neg':''}">${yen(after)}</span>`;
   const bt=$('#btnIpad');
   if(after<0){ bt.textContent="Can't pay rent…"; bt.onclick=gameOver; }
-  else { bt.textContent='Pay rent & open iPad ▶'; bt.onclick=()=>{ P.money=after; N.market=shuffled(STOCK_KEYS).slice(0,UP.types()); saveGame(); openIpad(); }; }
+  else { bt.textContent='Pay rent & open iPad ▶'; bt.onclick=()=>{ P.money=after; N.market=shuffled(STOCK_KEYS).slice(0,UP.types()); rollDiscounts(); saveGame(); openIpad(); }; }
 }
 function openIpad(){ $('#report').hidden=true; $('#ipad').hidden=false; N.qty={}; N.market.forEach(k=>N.qty[k]=1); N.tab='market'; renderIpad(); }
+/* tonight's sale: with the discount upgrades, a DISCOUNT.CHANCE roll puts 1 (or 2) of tonight's deliveries on sale */
+function rollDiscounts(){ N.disc={}; const n=Math.max(0,...owned('discItems')); if(!n || Math.random()>=DISCOUNT.CHANCE) return;
+  const steps=Math.round((DISCOUNT.MAX-DISCOUNT.MIN)/DISCOUNT.STEP);
+  shuffled(N.market).slice(0,n).forEach(k=>{ N.disc[k]=Math.round((DISCOUNT.MIN+DISCOUNT.STEP*Math.floor(Math.random()*(steps+1)))*100)/100; }); }
+const unitPrice=k=>Math.round(MARKET[k].price*(1-((N.disc||{})[k]||0)));
 const freeTonight=()=>P.freeStockDay===P.day;   // apology night after the upgrade rebalance: ingredients are 100% off
-const marketCost=()=>freeTonight()?0:N.market.reduce((s,k)=>s+(N.qty[k]||0)*MARKET[k].price,0);
+const marketCost=()=>freeTonight()?0:N.market.reduce((s,k)=>s+(N.qty[k]||0)*unitPrice(k),0);
 function renderIpad(){
   $('#ipDay').textContent=P.day; $('#ipMoney').textContent=yen(P.money);
   $('#tabMarket').classList.toggle('on',N.tab==='market'); $('#tabWare').classList.toggle('on',N.tab==='ware');
@@ -1570,10 +1575,11 @@ function renderIpad(){
   const L=$('#ipList');
   if(N.tab==='market'){
     const tm=EVENTS.find(e=>e.id===P.nextEvent)||EVENTS[0];
-    L.innerHTML=(freeTonight()?`<div class="ipEvent" style="background:#e5f6dc;border-color:#3e8e3a"><b>🎁 Tonight's ingredients are 100% off!</b><br>Our apology for the upgrade reset — stock up for free.</div>`:'')+`<div class="ipEvent"><b>Tomorrow: ${tm.name}</b><br>${tm.desc}</div><div style="font-size:12px;opacity:.8;line-height:1.4">Tonight's delivery: <b>${N.market.map(k=>MARKET[k].name).join(', ')}</b>. Everything you buy, Momo preps tonight — neat prep keeps every portion.</div>`+
+    const sale=Object.keys(N.disc||{}).filter(k=>N.market.includes(k));
+    L.innerHTML=(sale.length&&!freeTonight()?`<div class="ipEvent" style="background:#ffe1dc;border-color:#d2322d"><b>🏷️ Sale tonight!</b> ${sale.map(k=>`${MARKET[k].name} −${Math.round(N.disc[k]*100)}%`).join(' · ')}</div>`:'')+(freeTonight()?`<div class="ipEvent" style="background:#e5f6dc;border-color:#3e8e3a"><b>🎁 Tonight's ingredients are 100% off!</b><br>Our apology for the upgrade reset — stock up for free.</div>`:'')+`<div class="ipEvent"><b>Tomorrow: ${tm.name}</b><br>${tm.desc}</div><div style="font-size:12px;opacity:.8;line-height:1.4">Tonight's delivery: <b>${N.market.map(k=>MARKET[k].name).join(', ')}</b>. Everything you buy, Momo preps tonight — neat prep keeps every portion.</div>`+
       STOCK_KEYS.map(k=>{ const m=MARKET[k], on=N.market.includes(k), q=N.qty[k]||0;
         return `<div class="ipItem ${on?'tonight':'off'}"><div class="ic"><img src="${m.img}" alt=""></div>
-          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}${spoilsSoon(k)?` <span style="color:var(--marker)">· ${spoilsSoon(k)} spoil after tomorrow</span>`:''}<br>${on?`${m.pack} · ${freeTonight()?'<b style="color:#3e8e3a">FREE</b> <s>'+yen(m.price)+'</s>':yen(m.price)} → up to +${Math.round(m.base*UP.baseMul()*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
+          <div><h4>${m.name}${on?'<span class="tag">TONIGHT</span>':''}</h4><p>In stock: <b>${P.stock[k]}</b> ${m.unit}${spoilsSoon(k)?` <span style="color:var(--marker)">· ${spoilsSoon(k)} spoil after tomorrow</span>`:''}<br>${on?`${m.pack} · ${freeTonight()?'<b style="color:#3e8e3a">FREE</b> <s>'+yen(m.price)+'</s>':(N.disc||{})[k]?'<b style="color:#d2322d">'+yen(unitPrice(k))+'</b> <s>'+yen(m.price)+'</s> <span class="tag" style="background:#d2322d">−'+Math.round(N.disc[k]*100)+'%</span>':yen(m.price)} → up to +${Math.round(m.base*UP.baseMul()*ECON.PREP_YIELD)}`:'No delivery tonight'}</p></div>
           ${on?`<div class="step"><button data-k="${k}" data-d="-1" aria-label="Fewer">−</button><span>${q}</span><button data-k="${k}" data-d="1" aria-label="More">+</button></div>`:'<span></span>'}</div>`; }).join('');
     L.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; N.qty[k]=Math.max(0,Math.min(UP.maxBuy(),(N.qty[k]||0)+ +b.dataset.d)); blip(600,.04); renderIpad(); });
   } else {
@@ -1617,6 +1623,7 @@ function drawIcon(cv){ const c=cv.getContext('2d'); c.scale(2,2); const id=cv.da
   else if(id==='extra'){ [[10,30],[24,24],[38,30]].forEach(([x,y])=>{ rr(c,x-8,y-6,16,18,3); fs(c,vg(c,y-6,y+12,'#e2b27a','#b98249'),1.8); }); txt(c,'×1.5',26,12,11,'#3e8e3a',700,'center',3,'#fff'); }
   else if(id==='drmo'){ drawTebo(c,22,34,true,0); c.strokeStyle='#7fe3ff'; c.lineWidth=2.5; c.beginPath(); c.moveTo(42,40); c.lineTo(42,12); c.moveTo(36,18); c.lineTo(42,10); c.lineTo(48,18); c.stroke(); }
   else if(id==='pudding'){ c.beginPath(); c.moveTo(12,42); c.lineTo(16,18); c.lineTo(36,18); c.lineTo(40,42); c.closePath(); fs(c,vg(c,18,42,'#ffe39a','#f2b94a'),2); ell(c,26,18,10,4,'#7a3b12',2); ell(c,26,44,16,4,'#fffaf0',2); }
+  else if(id==='disc1'||id==='disc2'){ c.beginPath(); c.moveTo(6,26); c.lineTo(22,8); c.lineTo(46,8); c.lineTo(46,44); c.lineTo(22,44); c.closePath(); fs(c,id==='disc2'?'#e0a800':'#d2322d',2); ell(c,16,26,3,3,'#fff',1.5); txt(c,id==='disc2'?'%%':'%',33,27,id==='disc2'?13:16,'#fff',700); }
   else if(id==='mold'){ c.beginPath(); c.moveTo(8,20); c.lineTo(44,20); c.lineTo(38,42); c.lineTo(14,42); c.closePath(); fs(c,steel(c,8,44),2); ell(c,26,20,18,4,'#2d3a2b',2); txt(c,'140g',26,32,9,OUT,700); }
   else if(id==='boil1'||id==='boil2'||id==='boil3'){ rr(c,6,34,40,10,3); fs(c,'#5d646b',2); const n=id==='boil3'?4:id==='boil2'?3:2;
     for(let k=0;k<n;k++){ const x=26+(k-(n-1)/2)*12; c.beginPath(); c.moveTo(x-6,34); c.quadraticCurveTo(x-6,20,x,10); c.quadraticCurveTo(x+6,20,x+6,34); c.closePath(); fs(c,vg(c,10,34,'#ffd257','#e8582a'),1.5); } }
