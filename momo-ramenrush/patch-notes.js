@@ -40,6 +40,9 @@ const PATCH_NOTES = {
       "No noodles?! That's not ramen! 🍜 Even if everything else is perfect, a bowl without noodles gets a B at best!" ]], */
     ['🔧 NEW SAVE DATA TRANSFER FEATURE!', [
       'Press the "Transfer Save" button at the bottom right of the screen to get your saved data code for transferring!' ]],
+     ['🔧 OTHER GAME OPTIMISATION AND SOME TWEAKS!', [
+      'Game was too easy! Changes were made to the stocks base amount, upgrades pricing, rent calculation and patience timer for the customers.',
+      'Players will be prompted to purchase all of their upgrades again, think carefully before making your purchase!']]
   ],
   OUTRO: 'Phew! No worries for data loss anymore. <br>Time to move to the new Tinitomo Arcade homescreen app!',
   BUTTON: "Get cooking! ▶",
