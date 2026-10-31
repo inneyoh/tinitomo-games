@@ -93,7 +93,7 @@ const DAY={
 
 /* ---- RUSH: from FROM_DAY, customers who walk in during these hours come two at a time ---- */
 const RUSH={ FROM_DAY:7, MAX:7, SINGLES:3,   // at most MAX rushes a day; SINGLES single orders are always kept time for
-  SINGLE_S:35, RUSH_S:50,   // rough kitchen-clock seconds one single bowl / one rush takes. A rush is skipped if the time left (+ overtime)
+  SINGLE_S:20, RUSH_S:40,   // rough kitchen-clock seconds one single bowl / one rush takes. A rush is skipped if the time left (+ overtime)
                             // can't fit it plus the single orders still owed — keep these small, or short days skip every rush
   // how many rushes a day: [first day, rushes for sure, chance of one more]
   SCHEDULE:[[7,1,.3],[9,1,.5],[11,1,.7],[14,2,0],[17,2,.5],[20,2,.7],[21,3,0],[22,3,.5],
@@ -106,12 +106,12 @@ const RUSH={ FROM_DAY:7, MAX:7, SINGLES:3,   // at most MAX rushes a day; SINGLE
 const RUSH_TUTORIAL={
   CARDS:[
     'Two customers at once! <b class="n1">1</b> is on the left, <b class="n2">2</b> on the right.',
-    '<b>Tap a bowl</b> to work on it — it glows.',
-    'Noodles go to <b class="n1">1</b> first — <b>one tap</b> lifts tebo <b class="n1">1</b> before <b class="n2">2</b>.',
+    '<b>Tap on the bowl you want to work on!</b> The bowl will glow, tap interactions will be directed to the selected bowl.',
+    "If you've got 2 Tebos, noodles go to <b class=\"n1\">1</b> first — <b>one tap</b> lifts tebo <b class=\"n1\">1</b> before <b class=\"n2\">2</b>.",
     '<b>Tap Momo</b> to serve, then tap a bowl — or tap Momo again for <b>both</b>.',
   ],
   NEXT:'Next ▶', GO:"Let's go! ▶", SKIP:'Skip',
-};
+}
 
 /* ---- DEMAND: tomorrow's event is rolled at night (shown on the iPad) so you can stock up for it ----
    weight = how often it happens · price = bowl price × · chashu / onion = chance an order wants it */
