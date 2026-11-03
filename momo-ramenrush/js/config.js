@@ -194,14 +194,14 @@ const DISCOUNT={ CHANCE:.3, MIN:.30, MAX:.60, STEP:.05 };   // 30% chance · 30�
 const ENDLESS={
   PRICE:200, CHASHU:100, RICE:50,   // one bowl = ¥200 (+¥100 if they ordered chashu, +¥50 for rice) × score/100
   TIP_MUL:200/900,                  // tips and perfect bonuses shrink with the bowl price (story bowl = ¥900)
-  PAT_START:90, PAT_END:40, PAT_DROP:5,   // customer patience in seconds: 90 at the start, −5 s every minute played, never under 40
+  PAT_START:90, PAT_END:40, PAT_DROP:5, PAT_FROM:7, PAT_EVERY:10,   // customer patience in seconds: 90 for the first 6 customers, −5 s from the 7th,
+                                    // then another −5 s every 10 customers (17th, 27th…), never under 40
   GAP:2.5,                          // seconds before the next customer walks up to a free spot
   LANES:[[10,2],[25,3]],            // [bowls served, customers at the counter]: 1 at first, 2 after 10 bowls, 3 after 25
   MAX_PICK:2,                       // bowls you can take to the kitchen at once
   FAILS:6,                          // customers who walk out in a row = the run is over
   UPGRADE_EVERY:7, CHOICES:2,       // an upgrade pick after every 7 bowls, with 2 cards to choose from
   UPGRADE_PERFECT:4,                // …or after only 4 bowls if every one of them scored 100
-  CALM:6,                           // the first 6 customers of a run don't lose patience (it drains from the 7th on)
   ODDS:[65,25,8,2],                 // % chance a card is Common / Rare / Epic / Legendary ("Rare chance" upgrades move Common % to the others)
   PRICES:{ endless:[1000,1400,2400,16000], campaign:[1400,3000,6000,16000] },   // price by level (Lv 1–4) for each kind of line
 };

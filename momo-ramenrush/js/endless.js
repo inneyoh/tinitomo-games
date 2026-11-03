@@ -40,7 +40,8 @@ var EQ={   // var (not const): game.js checks for it before this file has run
   entries:()=>EQ.lanes.filter(Boolean),
   laneX:i=>LANE_X[i],
   capNow(){ let c=1; ENDLESS.LANES.forEach(([n,k])=>{ if(E.served>=n) c=k; }); return c; },
-  patSec:()=>Math.max(ENDLESS.PAT_END, ENDLESS.PAT_START-ENDLESS.PAT_DROP*E.t/60)*(1+EQ.eff('epat')),
+  patSec(n=E.custN){ const N=ENDLESS, drops = n<N.PAT_FROM ? 0 : 1+Math.floor((n-N.PAT_FROM)/N.PAT_EVERY);   // by customer number in this run
+    return Math.max(N.PAT_END, N.PAT_START-N.PAT_DROP*drops)*(1+EQ.eff('epat')); },
 
   /* ---------- DOM: customers behind the counter, bowls / bars / bubbles on top ---------- */
   build(){ if(EQ.built) return; EQ.built=true;
@@ -72,15 +73,15 @@ var EQ={   // var (not const): game.js checks for it before this file has run
   arrive(){ const lane=EQ.freeLane(); if(lane==null) return;
     const here=EQ.entries().map(e=>e.cust), pool=Object.keys(CUSTOMERS).filter(id=>!here.includes(id));
     const id=pickCustomer(G.lastCust,pool); G.lastCust=id; G.ticketNo++;
-    E.custN++; const calm=E.custN<=ENDLESS.CALM;   // the first customers of a run are patient
-    const d=EQ.dom[lane], e={lane, calm, cust:id, order:{cust:id,no:G.ticketNo,pos:genOrder(id)}, bowl:newBowl(), pat:100, patSec:EQ.patSec(), state:'wait',
+    E.custN++;
+    const d=EQ.dom[lane], e={lane, cust:id, order:{cust:id,no:G.ticketNo,pos:genOrder(id)}, bowl:newBowl(), pat:100, patSec:EQ.patSec(), state:'wait',
       el:d.el, bar:d.bar, bub:d.bub, bw:d.bw, cv:mkCv()};
     EQ.lanes[lane]=e;
     const x=LANE_X[lane], h=CUST_H[id], sc=csize(id)*LANE_SC, bottom=752+h*sc*.38, head=bottom-h*sc;
     Object.assign(d.el.style,{left:(x-180)+'px', top:(bottom-h)+'px', height:h+'px'});
     d.el.innerHTML=`<div class="eSc">${custHTML(id,'idle')}</div>`; d.el.classList.remove('eat','impatient');
     d.bub.style.left=(x-130)+'px'; d.bub.style.top=(head-150)+'px';
-    d.bar.style.left=(x-90)+'px'; d.bar.style.top=(head-44)+'px'; d.bar.className='ePat'+(calm?' hide':''); d.bar.firstElementChild.style.width='100%';
+    d.bar.style.left=(x-90)+'px'; d.bar.style.top=(head-44)+'px'; d.bar.className='ePat'; d.bar.firstElementChild.style.width='100%';
     d.hit.style.top=(head-20)+'px'; d.hit.style.height=(990-head)+'px';
     EQ.drawSlipBowl(e); d.bw.classList.remove('sel','off');
     requestAnimationFrame(()=>d.el.classList.remove('away')); blip(620,.06);
@@ -152,7 +153,6 @@ var EQ={   // var (not const): game.js checks for it before this file has run
     const busy=EQ.entries().length;
     if(busy<E.cap){ E.arriveIn-=dt; if(E.arriveIn<=0){ E.arriveIn=ENDLESS.GAP; EQ.arrive(); } } else E.arriveIn=Math.max(E.arriveIn,ENDLESS.GAP*.4);
     EQ.entries().forEach(e=>{ if(e.gone || e.served || !(e.state==='wait'||e.state==='cook')) return;
-      if(e.calm) return;
       e.pat=Math.max(0,e.pat-dt*100/e.patSec);
       const cls=e.pat<30?'low':e.pat<60?'mid':'', pw=(Math.round(e.pat*2)/2)+'%', key=cls+pw;
       if(key!==e.key){ e.key=key; e.bar.classList.toggle('mid',cls==='mid'); e.bar.classList.toggle('low',cls==='low'); e.bar.firstElementChild.style.width=pw;
