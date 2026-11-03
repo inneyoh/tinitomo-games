@@ -190,7 +190,7 @@ var EQ={   // var (not const): game.js checks for it before this file has run
       const order=[want,...[3,2,1,0].filter(r=>r<want),...[0,1,2,3].filter(r=>r>want)];   // none of that rarity: the next lower, then higher
       for(const r of order){ const of=pool.filter(c=>c.rar===r); if(of.length){ const c=of[Math.floor(Math.random()*of.length)]; pick.push(c); pool.splice(pool.indexOf(c),1); break; } } }
     E.cards=pick; EQ.renderUp(); },
-  renderUp(){ $('#euTitle').textContent=`${E.served} bowls! Pick an upgrade`; $('#euSub').innerHTML=`You have <b>${yen(E.money)}</b>`;
+  renderUp(){ $('#euTitle').textContent='Pick an upgrade!'; $('#euSub').innerHTML=`${E.served} bowl${E.served===1?'':'s'} served · you have <b>${yen(E.money)}</b>`;
     $('#euCards').style.gridTemplateColumns=`repeat(${Math.max(1,Math.min(3,E.cards.length))},1fr)`;
     $('#euCards').innerHTML = E.cards.length ? E.cards.map((c,k)=>{ const poor=E.money<c.price, need=(c.u.req||[]).map(r=>{ const [ln,lv]=r.split(':'); return LINE[ln].levels[lv-1].name; });
       return `<div class="euCard r${c.rar}"><div class="euTop"><span class="euRar">${RARITY[c.rar]}</span><span class="euLv">Lv ${c.lv}${c.l.levels.length>1?`/${c.l.levels.length}`:''}</span></div>
