@@ -300,7 +300,8 @@ function drawShopBack(){
   const rg=c.createRadialGradient(450,520,40,450,520,520); rg.addColorStop(0,'rgba(255,228,170,.55)'); rg.addColorStop(1,'rgba(255,228,170,0)'); c.fillStyle=rg; c.fillRect(0,0,900,770);
   // menu rail + plaques
   rr(c,150,330,600,12,4); fs(c,vg(c,330,342,'#a8743f','#7a4f2a'),3);
-  const MENU=[['Shoyu','¥'+CFG.PRICE.toLocaleString()],['Chashu','+250'],['Rice','¥150'],['Nori','+100'],['Garlic','free'],['Spicy','free']];
+  const MENU=endlessCounter() ? [['Shoyu','¥'+ENDLESS.PRICE],['Chashu','+'+ENDLESS.CHASHU],['Rice','+'+ENDLESS.RICE],['Nori','free'],['Garlic','free'],['Spicy','free']]
+    : [['Shoyu','¥'+CFG.PRICE.toLocaleString()],['Chashu','+250'],['Rice','¥150'],['Nori','+100'],['Garlic','free'],['Spicy','free']];
   MENU.forEach(([a,p],i)=>{ const x=176+i*94, y=346;
     c.strokeStyle=OUT; c.lineWidth=2; c.beginPath(); c.moveTo(x+20,342); c.lineTo(x+20,y+4); c.moveTo(x+56,342); c.lineTo(x+56,y+4); c.stroke();
     shadow(c,x+40,y+108,32,4,.12); rr(c,x,y,78,100,6); fs(c,vg(c,y,y+100,'#f3d6a6','#ddb47a'),3);
@@ -376,7 +377,8 @@ function drawUnderCounter(c){
   c.strokeStyle='#24140a'; c.lineWidth=3; c.beginPath(); c.moveTo(0,LIP); c.lineTo(900,LIP); c.moveTo(0,FACE); c.lineTo(900,FACE); c.stroke();
   shine(c,0,LIP+3,900,4,2,.45);
 }
-function drawShopFront(props=true){
+const endlessCounter=()=>G.play==='endless' && G.mode!=='home';   // endless: a bare counter (no tray, no props), endless menu prices
+function drawShopFront(props=true){ if(endlessCounter()) props=false;
   const c=$('#shopFront').getContext('2d'); c.clearRect(0,0,900,1450);
   drawUnderCounter(c);
   // far edge (wood rim) + red lacquer counter surface (ends at the near lip, y≈1004)
@@ -399,6 +401,7 @@ function drawShopFront(props=true){
   c.beginPath(); c.moveTo(186,800); c.lineTo(186,740); c.quadraticCurveTo(186,722,196,716); c.lineTo(196,700); c.lineTo(206,700); c.lineTo(206,716); c.quadraticCurveTo(216,722,216,740); c.lineTo(216,800); c.closePath(); fs(c,vg(c,700,800,'#6b3a1e','#2c140a'),3);
   rr(c,193,690,16,14,4); fs(c,'#e3483c',2.5); shine(c,190,744,4,48,2,.35);
   }
+  if(endlessCounter()) return;
   // black lacquer tray
   shadow(c,437,984,230,22,.45);
   rr(c,232,772,410,206,18); fs(c,vg(c,772,978,'#3a3532','#0f0d0c'),4,'#000');
@@ -888,11 +891,11 @@ function kitchenFrame(dt){
   // tool motion (tap = automatic; drag-release = pour where you let go)
   if(K.rice){ K.rice.T+=dt; if(!K.rice.served && K.rice.T>=RICE_T*.5){ K.rice.served=true; b.rice=true; blip(760,.08); floatTxt('Rice',BROTH.x+(G.rush?0:70),BROTH.y-70); }
     if(K.rice.T>=RICE_T) K.rice=null; }
-  const M=K.M; if(M){ M.T+=dt;
-    if(M.stage==='go'){ const k=Math.min(1,M.T/(.24*CFG.SCOOP_TIME)), e=k*k*(3-2*k); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*40; if(k>=1){ M.stage='act'; M.T=0; } }
-    else if(M.stage==='act'){ M.ang = M.t==='fat' ? 0 : -Math.min(1,M.T/(.14*CFG.SCOOP_TIME))*1.1; if(M.t==='fat') M.x=M.to.x+Math.sin(M.T*40)*10;
-      if(M.T>=.2*CFG.SCOOP_TIME){ if(M.apply){ M.apply(); M.apply=null; K.dirty=true; } if(M.keep){ M.stage='back'; M.T=0; M.from={x:M.x,y:M.y}; M.to=M.home||M.from; M.full=false; } else K.M=null; } }
-    else if(M.stage==='back'){ const k=Math.min(1,M.T/(.22*CFG.SCOOP_TIME)), e=k*k*(3-2*k); M.ang=(1-e)*(M.ang||0); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*24; if(k>=1) K.M=null; }
+  const M=K.M; if(M){ M.T+=dt; const ST=CFG.SCOOP_TIME/(['tare','garlic','chili'].includes(M.t)?UP.scoop():1);
+    if(M.stage==='go'){ const k=Math.min(1,M.T/(.24*ST)), e=k*k*(3-2*k); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*40; if(k>=1){ M.stage='act'; M.T=0; } }
+    else if(M.stage==='act'){ M.ang = M.t==='fat' ? 0 : -Math.min(1,M.T/(.14*ST))*1.1; if(M.t==='fat') M.x=M.to.x+Math.sin(M.T*40)*10;
+      if(M.T>=.2*ST){ if(M.apply){ M.apply(); M.apply=null; K.dirty=true; } if(M.keep){ M.stage='back'; M.T=0; M.from={x:M.x,y:M.y}; M.to=M.home||M.from; M.full=false; } else K.M=null; } }
+    else if(M.stage==='back'){ const k=Math.min(1,M.T/(.22*ST)), e=k*k*(3-2*k); M.ang=(1-e)*(M.ang||0); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*24; if(k>=1) K.M=null; }
     if(!K.M && K.queue>0 && K.lastTap){ K.queue--; autoAct({...K.lastTap}); }
   }
   if(!K.M && !K.lastTap) K.queue=0;
@@ -901,7 +904,7 @@ function kitchenFrame(dt){
   if(K.rise) K.rise=K.rise.map(r=>Math.max(0,r-dt*1.1));
   if(has('drmo')||has('drmo2')) NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling'||!ord) return;
     if(!has('drmo2') && !(twoTebo() && s.i===1)) return;   // prototype: only the 2nd tebo in a rush; Double Tebo: every tebo   // Dr Mo's Tebo: lifts itself at the ordered firmness
-    const t=boilT(n), w=want(ord.pos).noodle; if(t>=CFG.FIRM_CENTERS[w]){ n.state='lifted'; n.time=t; n.water=1; blip(880,.12); floatTxt((G.rush?`${s.i+1} · `:'')+'Dr Mo! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
+    const t=boilT(n), w=want(ord.pos).noodle; if(t>=CFG.FIRM_CENTERS[w]){ n.state='lifted'; n.time=t; n.water=1; if(has('drmo3')){ n.water=Math.min(n.water,.04); n.flicks=1; } blip(880,.12); floatTxt((G.rush?`${s.i+1} · `:'')+'Dr Mo! '+FIRM_NAME[w]+(has('drmo3')?' · dry':''),K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
   NSL().forEach(s=>{ const n=s.bowl.nood, ord=G.rush?G.rush.slots[s.i].order:G.order; if(n.state!=='boiling' || !has('bell') || !ord) return; const t=boilT(n), w=want(ord.pos).noodle;
     if(!n.rang && Math.abs(t-CFG.FIRM_CENTERS[w])<=CFG.FIRM_TOL*.6){ n.rang=true; blip(1320,.25,'sine',.12); setTimeout(()=>blip(1760,.3,'sine',.1),120); floatTxt((G.rush?`${s.i+1} · `:'')+'Ding! '+FIRM_NAME[w],K.stn===NOODLE_STEP?K.px0+teboX(s.i)-36:BROTH.x,K.stn===NOODLE_STEP?372:BROTH.y-90); } });
   const boilingNow=NSL().filter(s=>s.bowl.nood.state==='boiling');
@@ -1018,16 +1021,17 @@ function loadSave(){
 }
 function saveGame(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(P)); }catch(e){} }
 let P=loadSave()||freshSave();
-const has=id=>!!P.upgrades[id];
-const owned=k=>UPGRADES.filter(u=>has(u.id) && u[k]!==undefined).map(u=>u[k]);
+const endlessRun=()=>G.play==='endless';   // endless runs have their own upgrades (endless.js), nothing is shared with the story
+const has=id=> endlessRun() ? EQ.has(id) : !!P.upgrades[id];
+const owned=k=> endlessRun() ? EQ.owned(k) : UPGRADES.filter(u=>has(u.id) && u[k]!==undefined).map(u=>u[k]);
 const UP={ baseMul:()=>Math.max(1,...owned('baseMul')), perfect:()=>1+owned('perfectBonus').reduce((a,b)=>a+b,0), soup:()=>Math.max(1,...owned('soup')), flick:()=>Math.min(1,...owned('flick')), oneFlick:()=>owned('oneFlick').length>0,
-  pat:()=>Math.max(1,...owned('pat')), maxBuy:()=>Math.max(3,...owned('maxBuy')), types:()=>Math.min(STOCK_KEYS.length,Math.max(3,...owned('types'))), bonus:()=>owned('bonus').reduce((a,b)=>a+b,0), boil:()=>Math.min(1,...owned('boil')) };
+  pat:()=>Math.max(1,...owned('pat')), maxBuy:()=>Math.max(3,...owned('maxBuy')), types:()=>Math.min(STOCK_KEYS.length,Math.max(3,...owned('types'))), bonus:()=>owned('bonus').reduce((a,b)=>a+b,0), boil:()=>Math.min(1,...owned('boil')), scoop:()=>Math.max(1,...owned('scoop')) };
 /* noodle cooking speed: default is 15% faster than v8, burners make it 10% / 30% faster again */
 const boilSpeed=()=>(1/0.85)/UP.boil();
 const boilT=nd=>(performance.now()-nd.start)/1000*boilSpeed();
 const yen=n=>'¥'+Math.round(n).toLocaleString();
 const D={n:0,done:0,sales:0,tips:0,walk:0};   // today
-const E={served:0,money:0};                   // endless session
+const E={served:0,money:0};                   // endless session (endless.js)
 const useStock=()=>G.play==='story';           // endless + tutorial replay have unlimited ingredients
 const stockOf=k=>useStock()?P.stock[k]:Infinity;
 /* stock is kept in batches (lots) that spoil: exp = the last day a batch can be used (SHELF in config.js) */
@@ -1072,6 +1076,8 @@ function layoutStage(view){
   const focus=(z,fx,fy,sx,sy)=>$('#stage').style.transform=`translate(${W*sx-fx*z}px,${H*sy-(fy+TOP_H)*z}px) scale(${z})`;
   if(view==='tray') focus(s*1.75,437,850,.5,.25);
   else if(view==='cust') focus(s*1.12,520,520,.5,.3);
+  else if(view==='eq'){ const sheet=$('#orderSheet'), y=Math.min(top, H-sheet.offsetHeight-6-(TOP_H+1000)*s);   // endless: whole counter, slid up to sit just above the order sheet
+    $('#stage').style.transform=`translate(${left}px,${y}px) scale(${s})`; }
   else $('#stage').style.transform=`translate(${left}px,${top}px) scale(${s})`;
   $('#boardHud').style.top = sh.classList.contains('home') ? (top+(TOP_H+922)*s)+'px' : '';   // on the tray at home, top of the screen in service
 }
@@ -1154,7 +1160,7 @@ function homeTurn(after){ const m=HOME.m, hm=$('#homeMomo'), fl=hm.querySelector
 function slurpText(x,y){ const s=document.createElement('div'); s.className='slurp'; s.style.fontSize='34px'; s.textContent=['Slurp!','Zuzu…','Mmm!'][Math.floor(Math.random()*3)]; s.style.left=x+'px'; s.style.top=y+'px'; $('#scene').appendChild(s); setTimeout(()=>s.remove(),1200); }
 function refreshHome(){ const endless=P.lastMode==='endless';   // the tray shows whichever mode was played last
   $('#hotTray .hm:not(.hmEnd)').hidden=endless; $('#hotTray .hmEnd').hidden=!endless; $('#hmBest').textContent=(P.endlessBest||0).toLocaleString();
-  $('#btnEndless').innerHTML=`Endless${P.endlessBest?` · Best ${P.endlessBest} bowl${P.endlessBest===1?'':'s'}`:''} ▶<small>Just make ramen. No rent, no stock, no rush.</small>`;
+  $('#btnEndless').innerHTML=`Endless${P.endlessBest?` · Best ${P.endlessBest} bowl${P.endlessBest===1?'':'s'}`:''} ▶<small>Up to 3 customers, its own upgrades. 6 walk-outs in a row ends the run.</small>`;
   $('#hmDay').textContent=P.day; $('#hmMoney').textContent=P.money.toLocaleString(); $('#hmRent').textContent=ECON.rent(P.day).toLocaleString(); $('#btnDay').innerHTML= P.resume&&P.resume.day===P.day ? `Continue Day ${P.day} · ${clockStr(Math.min(P.resume.D.clock||DAY.OPEN,DAY.CLOSE))} ▶<small>Pick up where you saved</small>` : `Story · Day ${P.day} ▶<small>Rent, stock, patience and night prep</small>`; $('#hotDrink').classList.toggle('locked',!P.tutorialDone); }
 /* patch notes live in patch-notes.js; shown once per VERSION (remembered on this phone, outside the game save) */
 function showPatch(){ const N=typeof PATCH_NOTES!=='undefined'?PATCH_NOTES:null; if(!N||!N.SHOW) return;
@@ -1165,8 +1171,8 @@ function showPatch(){ const N=typeof PATCH_NOTES!=='undefined'?PATCH_NOTES:null;
   $('#patchList').innerHTML=(N.INTRO?`<p class="pIntro">${N.INTRO}</p>`:'')+N.SECTIONS.map(([h,lines,kind])=>`<h4 class="${kind==='sub'?'sub':''}">${h}</h4>${lines&&lines.length?`<ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul>`:''}`).join('')+(N.OUTRO?`<p class="pOutro">${N.OUTRO}</p>`:'');
   $('#patch').hidden=false;
   $('#btnPatch').onclick=()=>{ try{ localStorage.setItem('momo-ramen-shop.patch',N.VERSION); }catch(e){} $('#patch').hidden=true; blip(700,.06); }; }
-function goHome(){ endRush(); G.clockHold=false; G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
-  $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); showScene('shop'); layoutStage(false); buildHome(); refreshHome(); music('title'); }
+function goHome(){ endRush(); if(typeof EQ!=='undefined') EQ.leave(); G.clockHold=false; G.arriveIn=0; G.sess=(G.sess||0)+1; G.paused=false; $('#pause').hidden=true; G.mode='home'; G.waiting=false; G.tut=false; $('#shop').classList.add('home'); $('#btnNextCust').hidden=true; ['orderSheet','scoreSheet','modeSheet'].forEach(i=>$('#'+i).classList.remove('on'));
+  $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); showScene('shop'); layoutStage(false); drawShopBack(); drawShopFront(); buildHome(); refreshHome(); music('title'); }
 
 /* =====================================================================
    16. A BUSINESS DAY — customers, patience, serving, paying
@@ -1185,11 +1191,11 @@ function startDay(){ P.lastMode='story'; G.play='story'; G.tut=!P.tutorialDone; 
   else P.dayStart={day:P.day,money:P.money,stock:{...P.stock},lots:JSON.parse(JSON.stringify(P.lots||{})),rep:repOf(),served:P.served};   // for "Restart the day"
   P.resume=null; saveGame(); enterService();
   const ev=curEvent(); if(ev && ev.id!=='normal') setTimeout(()=>toast(`Today: ${ev.name}<br><small>${ev.desc}</small>`),600); }
-function startEndless(){ P.lastMode='endless'; E.newBest=false; saveGame(); G.play='endless'; G.tut=false; G.firstOrder=false; Object.assign(E,{served:0,money:0}); Object.assign(D,{n:Infinity,done:0,sales:0,tips:0,walk:0}); enterService(); }
+function startEndless(){ P.lastMode='endless'; saveGame(); EQ.start(); }
 function startTutorial(){ if(!P.tutorialDone){ toast('The tutorial starts with your first story day'); return; }
   G.play='tutorial'; G.tut=true; G.firstOrder=true; Object.assign(D,{n:1,done:0,sales:0,tips:0,walk:0}); enterService(); }
 function updateHud(){
-  if(G.play==='endless'){ $('#hudDay').textContent=`Endless · bowl ${E.served+1}`; $('#hudCoins').textContent=yen(E.money); }
+  if(G.play==='endless'){ $('#hudDay').innerHTML=`Endless · ${E.served} served${E.fails?` · <i class="eFail">✕${E.fails}/${ENDLESS.FAILS}</i>`:''}`; $('#hudCoins').textContent=yen(E.money); }
   else if(G.play==='tutorial'){ $('#hudDay').textContent='Tutorial'; $('#hudCoins').textContent=''; }
   else { $('#hudDay').textContent=`Day ${P.day} · ${G.tut?'tutorial':clockStr(Math.min(D.clock,DAY.CLOSE))} · ★${repStars(repOf())}`; $('#hudCoins').textContent=yen(P.money); } }
 /* the shop clock: only runs while serving in story mode (not during the tutorial bowl, not while paused) */
@@ -1207,6 +1213,7 @@ function nextCustomer(){
   G.clockHold=false;
   endRush();
   $('#btnNextCust').hidden=true; $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); hush(); clearTrayFx(); resetMomoBack();
+  if(endlessRun()){ EQ.resume(); return; }
   if(G.play==='tutorial' && D.done>=1){ toast('Tutorial complete!'); goHome(); return; }
   if(G.play==='story' && closed()){ closeShop(); return; }
   updateHud(); $('#cust').classList.add('away');
@@ -1227,6 +1234,7 @@ function arrive(){
       $('#orderCoach').hidden=!G.tut; $('#scoreCoach').hidden=!G.tut; later(redrawAllCircles,60); later(redrawAllCircles,520); },650); },350);
 }
 function patienceTick(dt){
+  if(endlessRun()){ EQ.tick(dt); return; }
   if(G.rush){ rushPatience(dt); return; }
   if(!G.waiting || G.play!=='story' || G.tut) return;
   G.pat=Math.max(0,G.pat-dt*100*ECON.PATIENCE_SLOWER/(ECON.patience(P.day)*UP.pat()*(CUSTOMERS[G.order.cust].pat||1)));
@@ -1295,10 +1303,12 @@ function rushWindow(){ if(G.play!=='story' || G.tut || !D.rushAt || !D.rushAt.le
   const need=Math.max(0,RUSH.SINGLES-(D.singles||0))*SINGLE_S();
   if(left+DAY.OVERTIME < need+RUSH_S()){ D.rushAt.shift(); return null; }   // running behind: skip this rush so the single orders still fit
   const t=D.rushAt.shift(); return [t,t,rushName(t)]; }
-const slotEl=i=>i?$('#cust2'):$('#cust'), slotBar=i=>i?$('#patBar2'):$('#patBar'), slotBubble=i=>i?$('#custBubble2'):$('#custBubble');
+const eqSlot=i=>G.rush&&G.rush.eq ? G.rush.slots[i] : null;   // endless: rush slots are customers at the counter lanes
+const slotEl=i=>eqSlot(i)?eqSlot(i).el:(i?$('#cust2'):$('#cust')), slotBar=i=>eqSlot(i)?eqSlot(i).bar:(i?$('#patBar2'):$('#patBar')), slotBubble=i=>eqSlot(i)?eqSlot(i).bub:(i?$('#custBubble2'):$('#custBubble'));
+const rushCX=i=>eqSlot(i)?EQ.laneX(eqSlot(i).lane):RUSH_CX[i];
 const live=()=> G.rush ? G.rush.slots.filter(s=>!s.gone&&!s.served) : [];
 function sayAt(i,t){ const b=slotBubble(i); if(b.textContent!==t) b.textContent=t; b.classList.remove('off'); }
-const sayC=t=> G.rush&&G.rush.cur!=null ? sayAt(G.rush.cur,t) : say(t);
+const sayC=t=> G.rush&&G.rush.cur!=null ? sayAt(G.rush.cur,t) : endlessRun()&&E.solo ? EQ.say(E.solo,t) : say(t);
 function setGeom(x){ BOWL.x=x; BROTH.x=x+CX*BK; BOWL_HIT.x=x-5; POUR_AT.x=x+95; }
 /* do something to bowl i without changing which bowl is selected (used by drag & drop) */
 function onBowl(i,f){ if(!G.rush || i==null || i===G.rush.active) return f(); const prev=G.rush.active; setSlot(i); try{ f(); } finally{ const b=G.bowl; b._v=(b._v||0)+1; setSlot(prev); } }
@@ -1398,7 +1408,7 @@ function rushServe(list){
   G.serving=true; if(list.length===2){ serveBoth(); return; } G.serveQ=list.slice(); rushServeNext(); }
 function rushServeNext(){ const i=G.serveQ.shift(), s=G.rush.slots[i]; setSlot(i); G.rush.cur=i; s.waiting=false; s.served=true; slotBar(i).classList.add('hide'); serveBowl(); }
 /* both bowls at once: side by side on the tray, two score cards, both eat and pay together */
-function serveBoth(){ G.clockHold=true; G.serveQ=[]; K.ask=false; $('#serveAsk').hidden=true; $('#coach').hidden=true;
+function serveBoth(){ G.clockHold=true; if(endlessRun()) E.hold=true; G.serveQ=[]; K.ask=false; $('#serveAsk').hidden=true; $('#coach').hidden=true;
   const R=G.rush; R.duo=true; R.res=R.slots.map(s=>{ s.waiting=false; s.served=true; slotBar(s.i).classList.add('hide'); const r=score(s.order,s.bowl); bookRecord(s.bowl,r.total,s.cust); return r; });
   P.firstDone=true; saveGame(); G.waiting=false;
   showScene('shop'); layoutStage(false); drawShopFront(false); $('#stage').classList.add('duo');
@@ -1433,14 +1443,13 @@ function showScoreBoth(){ const R=G.rush, sh=$('#scoreSheet'); sh.classList.add(
       <div class="sdRows">${r.rows.map(x=>{ const cls= x.max===0?'ng': x.pts===x.max?'ok': x.pts>0?'mid':'ng'; return `<div><span>${x.label}</span><span class="${cls}">${x.max?x.pts+'/'+x.max:x.pts}</span></div>`; }).join('')}</div></div>`; }).join('');
   sh.classList.add('on'); blip(990,.25,'sine'); }
 function eatBoth(){ const R=G.rush; $('#scoreSheet').classList.remove('on','duo'); clearTrayFx(); layoutStage(false);
-  R.slots.forEach((s,i)=>later(()=>{ slotEl(i).classList.add('eat'); ['Slurp!','Slurrrp…'].forEach((w,k)=>later(()=>slurpText(RUSH_CX[i]-150+k*130,420),k*500)); },800));
+  R.slots.forEach((s,i)=>later(()=>{ slotEl(i).classList.add('eat'); ['Slurp!','Slurrrp…'].forEach((w,k)=>later(()=>slurpText(rushCX(i)-150+k*130,420),k*500)); },800));
   later(()=>blip(300,.1,'sine',.05),900);
   later(()=>R.slots.forEach((s,i)=>{ s.bowl.eaten=true; drawRamen(i?$('#shopBowl2'):$('#shopBowl'),s.bowl); (i?$('#shopRice2'):$('#shopRice')).classList.add('hidden-o'); }),2200);
   later(()=>{ let total=0; const pays=R.slots.map((s,i)=>{ const r=R.res[i], id=s.cust, C=CUSTOMERS[id], el=slotEl(i); el.classList.remove('eat');
       G.order=s.order; const fv=favHit(id,r); el.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); sayAt(i, fv?C.fav.line:(C.react[r.grade]||C.react.C));
-      const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
-      const tip = r.total>=GRADING.TIP_FROM ? Math.round((s.pat>66?ECON.TIP_HIGH:s.pat>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?Math.round(C.perfect*UP.perfect()):0;
-      P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; D.done++; total+=r.total; rentCutFor(id,r); return [base+tip+bonus,tip+bonus]; });
+      const {base,tip,bonus}=payFor(id,r,s.pat,s.order); bumpRep(r.grade);
+      if(endlessRun()) EQ.paid(s,base+tip+bonus); else { P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; rentCutFor(id,r); } D.done++; total+=r.total; return [base+tip+bonus,tip+bonus]; });
     saveGame(); updateHud();
     const f=faceFor(Math.round(total/2)), m=$('#shopMomo');
     later(()=>ppFlip(m.querySelector('.flip'),()=>{ m.classList.add('front'); m.querySelector('.body').src=f.img; }).then(()=>{
@@ -1457,6 +1466,7 @@ function rushAfterReveal(bt){ const cur=G.rush.cur;
 function say(t){ const b=$('#custBubble'); if(b.textContent!==t) b.textContent=t; b.classList.remove('off'); }
 function hush(){ $('#custBubble').classList.add('off'); }
 function toKitchen(){
+  if(endlessRun()) EQ.enterKitchen();
   $('#custBubble2').classList.add('off');
   G.clockHold=false; if(G.timedOrder){ G.waiting=true; G.timedOrder=false; }
   if(G.rush && G.rush.timed){ G.rush.timed=false; G.rush.slots.forEach(s=>{ if(!s.gone&&!s.served) s.waiting=true; }); G.waiting=true; }
@@ -1475,7 +1485,7 @@ function serveBowl(){
   const b=G.bowl;
   if(b.tare===0 && b.soup<0.05 && b.nood.state!=='bowl'){ toast('The bowl is still empty!'); return; }
   if(b.nood.state==='boiling'||b.nood.state==='lifted'){ toast('The noodles are still in the boiler!'); return; }
-  G.clockHold=true;   // …and while they eat, until the player continues
+  G.clockHold=true; if(endlessRun()) E.hold=true;   // …and while they eat, until the player continues
   G.tutWas=G.tut; G.waiting=!!(G.rush&&live().some(s=>s.waiting)); G.patServe=G.pat; (G.rush?slotBar(G.rush.cur):$('#patBar')).classList.add('hide'); $('#coach').hidden=true; K.ask=false; $('#serveAsk').hidden=true;
   G.result=score(G.order,b); P.firstDone=true; bookRecord(b,G.result.total,G.order.cust); saveGame();
   showScene('shop'); layoutStage(false);
@@ -1497,25 +1507,29 @@ function showScore(){
   const r=G.result;
   $('#scStamp').textContent=r.grade; $('#scStamp').style.animation='none'; void $('#scStamp').offsetWidth; $('#scStamp').style.animation='';
   $('#scTotal').innerHTML=`${r.total}<small> / 100</small>`;
-  $('#scMomo').textContent= (G.rush?`Bowl ${G.rush.cur+1} · ${CUSTOMERS[G.order.cust].name} · `:'')+(G.play==='story'&&!G.tutWas ? `Grade ${r.grade} · patience left ${Math.round(G.patServe)}%` : `Grade ${r.grade}`);
+  $('#scMomo').textContent= (G.rush?`Bowl ${G.rush.cur+1} · ${CUSTOMERS[G.order.cust].name} · `:'')+(G.play!=='tutorial'&&!G.tutWas ? `Grade ${r.grade} · patience left ${Math.round(G.patServe)}%` : `Grade ${r.grade}`);
   $('#scoreList').innerHTML=`<div class="r hd"><span>Item</span><span>Ordered</span><span>Made</span><span class="p">Pts</span></div>`+
     r.rows.map(x=>{ const cls= x.max===0?'ng': x.pts===x.max?'ok': x.pts>0?'mid':'ng';
       return `<div class="r"><span>${x.label}</span><span>${x.wnt}</span><span class="${cls}">${x.got}</span><span class="p ${cls}">${x.max?x.pts+'/'+x.max:x.pts}</span></div>`; }).join('');
   $('#scoreSheet').classList.add('on'); blip(r.total>=75?990:440,.25,'sine');
 }
+/* what a bowl pays: price × score, tips by patience left, perfect bonus. Endless: ¥200 (+chashu / rice) and smaller tips (ENDLESS in config.js) */
+function payFor(id,r,pat,order){ const C=CUSTOMERS[id], en=endlessRun(), w=want(order.pos), mul=en?ENDLESS.TIP_MUL:1;
+  const price = en ? ENDLESS.PRICE+(w.chashu?ENDLESS.CHASHU:0)+(w.rice?ENDLESS.RICE:0) : CFG.PRICE*((curEvent()||{}).price||1);
+  const base=Math.round(price*r.total/100*(1+UP.bonus()));
+  const tip = r.total>=GRADING.TIP_FROM ? Math.round((pat>66?ECON.TIP_HIGH:pat>33?ECON.TIP_MID:0)*C.tip*repTip()*mul) : 0, bonus = r.total>=GRADING.PERFECT_FROM?Math.round(C.perfect*UP.perfect()*mul):0;
+  return {base,tip,bonus}; }
 function eat(){
   $('#scoreSheet').classList.remove('on'); clearTrayFx(); layoutStage(false);
-  const id=G.order.cust, r=G.result, c=G.rush?slotEl(G.rush.cur):$('#cust'), sx=G.rush?RUSH_CX[G.rush.cur]-190:260;
+  const id=G.order.cust, r=G.result, c=G.rush?slotEl(G.rush.cur):endlessRun()?E.solo.el:$('#cust'), sx=G.rush?rushCX(G.rush.cur)-190:endlessRun()?EQ.laneX(E.solo.lane)-190:260;
   later(()=>{ c.classList.add('eat');
     ['Slurp!','Slurrrp…','Fuu fuu'].forEach((w,i)=>later(()=>{ slurpText(sx+i*130,420); blip(300+i*60,.1,'sine',.05); },i*500));
   },800);
   later(()=>{ G.bowl.eaten=true; drawRamen($('#shopBowl'),G.bowl); $('#shopRice').classList.add('hidden-o'); },2200);
   later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; sayC(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
-    const base=Math.round(CFG.PRICE*r.total/100*(1+UP.bonus())*((curEvent()||{}).price||1)); bumpRep(r.grade);
-    const C=CUSTOMERS[id], tip = r.total>=GRADING.TIP_FROM ? Math.round((G.patServe>66?ECON.TIP_HIGH:G.patServe>33?ECON.TIP_MID:0)*C.tip*repTip()) : 0, bonus = r.total>=GRADING.PERFECT_FROM?Math.round(C.perfect*UP.perfect()):0;
+    const {base,tip,bonus}=payFor(id,r,G.patServe,G.order); bumpRep(r.grade);
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; rentCutFor(id,r); }
-    else if(G.play==='endless'){ E.money+=base+tip+bonus; E.served++;
-      if(E.served>(P.endlessBest||0)){ if(P.endlessBest && !E.newBest){ E.newBest=true; later(()=>toast(`New best: ${E.served} bowls!`),1400); } P.endlessBest=E.served; saveGame(); } }
+    else if(endlessRun()) EQ.paid(G.rush?G.rush.slots[G.rush.cur]:E.solo, base+tip+bonus);
     D.done++;
     if(G.tut){ G.tut=false; P.tutorialDone=true; later(()=>toast(G.play==='story'?'Tutorial complete! The rest of Day 1 is up to you.':'Tutorial complete!'),2200); }
     saveGame(); updateHud();
@@ -1895,7 +1909,7 @@ function pauseGame(){ if(G.paused) return; G.paused=true; G.pausedAt=performance
   $('#btnSaveHome').innerHTML = story ? 'Save &amp; go home' : 'Go home';
   $('#pause').hidden=false; blip(500,.06); }
 function resumeGame(){ if(!G.paused) return; const away=performance.now()-G.pausedAt, nd=G.bowl&&G.bowl.nood;
-  if(nd && nd.state==='boiling') nd.start+=away;                     // the noodles did not cook while paused
+  NSL().forEach(s=>{ const n=s.bowl&&s.bowl.nood; if(n&&n.state==='boiling') n.start+=away; });   // the noodles did not cook while paused (both tebos)
   G.paused=false; $('#pause').hidden=true; last=performance.now(); blip(700,.06); }
 $('#btnPause').onclick=pauseGame;
 $('#btnResume').onclick=resumeGame;
@@ -1924,7 +1938,7 @@ $('#btnBookBack').onclick=goHome;
 $('#btnReset').onclick=()=>{ const b=$('#btnReset');
   if(b.dataset.arm==='1'){ P={...freshSave(P.book,P.tutorialDone,P.seen),endlessBest:P.endlessBest||0,cbook:P.cbook||{}}; saveGame(); refreshHome(); b.dataset.arm=''; b.textContent='Start a new story'; toast('New game started (your Customer Book is kept)'); return; }
   b.dataset.arm='1'; b.textContent='Tap again to reset money, stock and upgrades'; setTimeout(()=>{ b.dataset.arm=''; b.textContent='Start a new story'; },2500); };
-$('#btnToKitchen').onclick=toKitchen;
+$('#btnToKitchen').onclick=()=> endlessRun() ? EQ.toKitchen() : toKitchen();
 $('#btnEat').onclick=()=> G.rush&&G.rush.duo ? eatBoth() : eat();
 $('#btnNextCust').onclick=()=>{ const f=G.btnAct; G.btnAct=null; $('#btnNextCust').hidden=true; f?f():nextCustomer(); };
 $('#btnPrev').onclick=()=>goStation(K.stn-1);

@@ -113,7 +113,7 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 #custBubble{left:560px;top:300px;}
 #shopBowl{position:absolute;left:287px;top:660px;width:300px;height:300px;transition:transform .9s cubic-bezier(.5,0,.3,1),opacity .3s;}
 #shopRice{position:absolute;left:510px;top:812px;width:128px;max-width:none;transition:transform .9s cubic-bezier(.5,0,.3,1),opacity .3s;}
-.hidden-o{opacity:0}
+.hidden-o{opacity:0;pointer-events:none}
 .slurp{position:absolute;font-weight:700;color:var(--ink);font-size:46px;animation:rise 1.2s ease-out forwards;pointer-events:none;-webkit-text-stroke:2px #fff;paint-order:stroke}
 @keyframes rise{from{opacity:0;transform:translateY(20px)}20%{opacity:1}to{opacity:0;transform:translateY(-80px)}}
 #shopMomo{position:absolute;left:380px;top:985px;transition:top .35s cubic-bezier(.3,1.5,.5,1);width:440px;height:475px;transform-origin:50% 100%;will-change:transform;animation:hopS 1.6s ease-in-out infinite}
@@ -534,3 +534,55 @@ button:focus-visible{outline:3px solid #ffd257;outline-offset:2px;}
 
 #transferPanel{position:absolute;inset:0;z-index:110;background:#1b100cce;display:flex;align-items:center;justify-content:center;padding:14px}
 #transferPanel[hidden]{display:none!important}.transferCard{width:100%;max-width:430px;max-height:94%;overflow:auto;background:#fff3dc;border:4px solid #61391f;border-radius:18px;padding:16px;box-shadow:0 10px 35px #140b09aa;color:#4a2b1a;font:600 14px Fredoka,sans-serif}.transferCard h2{margin:0 0 8px;font-size:22px}.transferCard p{font-size:12px;line-height:1.4}.transferCard button{display:block;width:100%;margin:9px 0;padding:10px;border:2px solid #6b4125;border-radius:10px;background:#f5ce8e;font:700 15px Fredoka,sans-serif}.transferCard input,.transferCard textarea{box-sizing:border-box;width:100%;padding:9px;border:2px solid #a77b56;border-radius:9px;background:#fffdfa;color:#342114;font:14px monospace}#transferStatus{white-space:pre-wrap}
+
+/* ===== Endless mode: 3 counter spots, bowls with order slips, upgrade cards ===== */
+#shop.endless #cust,#shop.endless #patBar,#shop.endless #custBubble{display:none}
+#shop.home #eBack,#shop.home #eFront,#shop.home #eHint{display:none}
+#eBack,#eFront{position:absolute;left:0;top:0;width:900px;height:1450px;pointer-events:none}
+.ecust{position:absolute;width:360px;transition:transform .6s cubic-bezier(.3,1.4,.5,1),opacity .4s}
+.ecust.away{transform:translateY(90px);opacity:0}
+.ecust .eSc{position:absolute;left:0;bottom:0;width:360px;height:100%;transform:scale(.8);transform-origin:50% 100%}
+.ecust .cbox{position:absolute;left:0;top:0;width:360px;transform-origin:50% 100%}
+.ecust .csprite{position:absolute;left:0;top:0;width:360px;max-width:none;transform-origin:50% 100%;will-change:transform;backface-visibility:hidden;animation:breath 4.6s ease-in-out infinite}
+.ecust:nth-child(2) .csprite{animation-delay:-1.5s}.ecust:nth-child(3) .csprite{animation-delay:-3s}
+.ecust.eat .csprite{animation:chew 1.1s ease-in-out infinite}
+.ecust.impatient .csprite{animation:jitter .25s infinite}
+.ecust .cfx{position:absolute;width:84px;max-width:none;animation:pop .5s cubic-bezier(.3,1.8,.5,1) both}
+.eBowl{position:absolute;top:772px;width:210px;height:210px;transition:opacity .3s,transform .35s cubic-bezier(.3,1.5,.5,1)}
+.eBowl canvas{width:100%;height:100%;transition:filter .2s}
+.eBowl.off{opacity:0;transform:translateY(24px) scale(.9)}
+.eBowl.sel{animation:eSel 1.1s ease-in-out infinite}
+.eBowl.sel canvas{filter:drop-shadow(0 0 6px #fff3a8) drop-shadow(0 0 14px #ffd23a)}
+@keyframes eSel{0%,100%{transform:translateY(-6px) scale(1.04)}50%{transform:translateY(-12px) scale(1.07)}}
+.eNum{position:absolute;right:8px;top:30px;width:46px;height:46px;border-radius:50%;border:4px solid #fff;display:none;place-items:center;color:#fff;font-size:26px;font-weight:700;box-shadow:0 3px 0 rgba(0,0,0,.25);background:#3e8e3a}
+.eNum.on{display:grid}
+.eNum.n1{background:#d2322d}.eNum.n2{background:#2e78c8}
+.ePat{position:absolute;width:180px;height:22px;border:4px solid var(--ink);border-radius:14px;background:#fff8ec;overflow:hidden;box-shadow:0 4px 0 rgba(91,58,46,.2);transition:opacity .3s}
+.ePat i{position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(#9be07f,#5cb44a);border-radius:9px}
+.ePat.mid i{background:linear-gradient(#ffd66b,#f2a93b)}.ePat.low i{background:linear-gradient(#ff8c7a,#e0463a)}
+.ePat.hide{opacity:0}
+.bubble.eBub{font-size:25px;padding:11px 16px;max-width:260px;border-width:4px;border-radius:24px}
+.eHit{position:absolute;width:280px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#stage.zoomed #eBack,#stage.zoomed #eFront .eBowl,#stage.zoomed #eFront .ePat{filter:blur(7px) brightness(.82) saturate(.9)}
+#eHint{position:absolute;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:6;pointer-events:none;background:rgba(43,24,12,.9);color:#ffe9b8;border:2.5px solid #241309;border-radius:16px;padding:8px 16px;font-weight:700;font-size:15px;white-space:nowrap;animation:eHint 1.6s ease-in-out infinite}
+#eHint[hidden]{display:none}
+@keyframes eHint{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
+#boardHud .eFail{font-style:normal;color:#ff8c7a}
+#eUp,#eOver{position:absolute;inset:0;z-index:97;background:rgba(25,12,5,.62);display:flex;align-items:center;justify-content:center;padding:16px}
+#eUp[hidden],#eOver[hidden]{display:none}
+#eUp .panel{width:min(380px,100%)}
+#eUp .pv{display:inline-block;background:#e0a800;color:#fff;font-weight:700;font-size:12px;border-radius:8px;padding:2px 8px;align-self:flex-start}
+#eUp .row{justify-content:space-between}
+#eUp .row [hidden]{display:none}
+#euCards{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.euCard{border:3px solid var(--ink);border-radius:14px;background:#fffdf7;padding:8px;display:flex;flex-direction:column;gap:5px;position:relative;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.euCard .euTop{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700}
+.euCard .euRar{color:#fff;border-radius:7px;padding:1px 7px}
+.euCard .euLv{opacity:.7}
+.euCard .euName{font-size:15px;line-height:1.15}
+.euCard .euDesc{font-size:12px;line-height:1.3;flex:1}
+.euCard .euNeed{font-size:10.5px;color:#4e823d;font-weight:600}
+.euCard .euBuy{width:100%;padding:7px 6px;font-size:15px}
+.euCard.r0 .euRar{background:#8a8f96}.euCard.r1 .euRar{background:#2e78c8}.euCard.r2 .euRar{background:#8e44ad}.euCard.r3 .euRar{background:linear-gradient(90deg,#e0a800,#f39c12)}
+.euCard.r1{border-color:#2e78c8}.euCard.r2{border-color:#8e44ad;box-shadow:0 4px 0 rgba(142,68,173,.3)}
+.euCard.r3{border-color:#e0a800;background:linear-gradient(#fff9e0,#fffdf7);box-shadow:0 0 14px rgba(224,168,0,.55),0 4px 0 rgba(224,168,0,.35)}

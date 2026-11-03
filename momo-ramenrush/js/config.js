@@ -188,6 +188,78 @@ const UPGRADES=[
 /* ---- night market discounts (needs "Here's some discount!"): chance a night has a sale, and how big it is ---- */
 const DISCOUNT={ CHANCE:.3, MIN:.30, MAX:.60, STEP:.05 };   // 30% chance · 30–60% off in 5% steps
 
+/* =====================================================================
+   ENDLESS MODE — its own run: its own money and upgrades (nothing is shared with the story)
+   ===================================================================== */
+const ENDLESS={
+  PRICE:200, CHASHU:100, RICE:50,   // one bowl = ¥200 (+¥100 if they ordered chashu, +¥50 for rice) × score/100
+  TIP_MUL:200/900,                  // tips and perfect bonuses shrink with the bowl price (story bowl = ¥900)
+  PAT_START:90, PAT_END:40, PAT_DROP:5,   // customer patience in seconds: 90 at the start, −5 s every minute played, never under 40
+  GAP:2.5,                          // seconds before the next customer walks up to a free spot
+  LANES:[[10,2],[25,3]],            // [bowls served, customers at the counter]: 1 at first, 2 after 10 bowls, 3 after 25
+  MAX_PICK:2,                       // bowls you can take to the kitchen at once
+  FAILS:6,                          // customers who walk out in a row = the run is over
+  UPGRADE_EVERY:7, CHOICES:2,       // an upgrade pick after every 7 bowls, with 2 cards to choose from
+  ODDS:[65,25,8,2],                 // % chance a card is Common / Rare / Epic / Legendary ("Rare chance" upgrades move Common % to the others)
+  PRICES:{ endless:[500,700,1200,8000], campaign:[700,1500,3000,8000] },   // price by level (Lv 1–4) for each kind of line
+};
+const RARITY=['Common','Rare','Epic','Legendary'];   // a card's rarity = its level (Lv 1 Common … Lv 4 Legendary) unless a line says otherwise
+/* Each line is bought one level at a time; a level replaces the one before it.
+   kind = which price list (ENDLESS.PRICES) · prices / rarity = this line's own (rarity: 0 Common … 3 Legendary)
+   req = other lines that must be at a level first, e.g. 'bell:1' (Timer bell) or 'cushion:3' (Sofa seats)
+   Effects: epat = customers wait +x longer · bonus = +x on every bowl · scoop = ladling (tare, garlic, chili) ×faster
+   soup / boil / flick / oneFlick / autoLift = as in the story · autoDrain = lifted noodles drip dry by themselves
+   perfectBonus = +x on the perfect-bowl bonus · reroll = refreshes per upgrade pick · choices = extra card · luck = +x rare chance */
+const ENDLESS_UPGRADES=[
+  {line:'cushion', kind:'endless', levels:[
+    {id:'plush',   name:'Plush cushion',  epat:.10, desc:'Customers wait 10% longer.'},
+    {id:'fluffy',  name:'Fluffy cushion', epat:.20, desc:'Customers wait 20% longer.'},
+    {id:'sofa',    name:'Sofa seats',     epat:.40, desc:'Customers wait 40% longer.'},
+    {id:'minipad', name:'Mini Game iPad', epat:.70, desc:'Customers wait 70% longer — they are busy playing!', req:['charm:3','pudding:3']}]},
+  {line:'charm', kind:'endless', levels:[
+    {id:'lemon', name:"Soso's lemon water", bonus:.05, desc:'+5% on every bowl.'},
+    {id:'noren', name:'Noren curtain',      bonus:.10, desc:'+10% on every bowl.'},
+    {id:'doll',  name:'Momo doll',          bonus:.20, desc:'+20% on every bowl.'}]},
+  {line:'prep', kind:'endless', levels:[
+    {id:'prep1', name:'Prep speed', scoop:1.1, desc:'Ladling tare, garlic and chili oil is 10% faster.'},
+    {id:'prep2', name:'Prep speed', scoop:1.2, desc:'Ladling tare, garlic and chili oil is 20% faster.'},
+    {id:'prep3', name:'Prep speed', scoop:1.4, desc:'Ladling tare, garlic and chili oil is 40% faster.'}]},
+  {line:'tap', kind:'campaign', levels:[
+    {id:'tap',  name:'Soup tap',  soup:1.4, desc:'Soup pours 1.4× faster.'},
+    {id:'tap2', name:'Super tap', soup:2,   desc:'Soup pours 2× faster.'},
+    {id:'tap3', name:'Ultra tap', soup:2.3, desc:'Soup pours 2.3× faster.'},
+    {id:'tap4', name:'Turbo Tap', soup:3,   desc:'Soup pours 3× faster.', req:['prep:3','bell:1']}]},
+  {line:'burner', kind:'campaign', levels:[
+    {id:'boil1', name:'Strong burner', boil:.85, desc:'Noodles boil 15% faster.'},
+    {id:'boil2', name:'Ultra burner',  boil:.7,  desc:'Noodles boil 30% faster.'},
+    {id:'boil3', name:'Turbo burner',  boil:.4,  desc:'Noodles boil 60% faster.'},
+    {id:'boil4', name:'Max Burner',    boil:.2,  desc:'Noodles boil 80% faster.', req:['cushion:3','bell:1']}]},
+  {line:'twin', kind:'campaign', levels:[
+    {id:'tebo2nd', name:'Second tebo', desc:'Two bowls: cook two portions of noodles at once, one tebo for each bowl.'},
+    {id:'drmo',  name:"Dr Mo's Prototype Tebo", autoLift:'second', desc:'Two bowls: the 2nd tebo rises by itself at the ordered firmness.', req:['bell:1']},
+    {id:'drmo2', name:"Dr Mo's Double Tebo!?",  autoLift:'all', desc:'Every tebo rises by itself at the ordered firmness.'},
+    {id:'drmo3', name:"Dr Mo's Ultra Tebo Set", autoLift:'all', autoDrain:true, desc:'Every tebo rises by itself at the ordered firmness — and drips dry by itself too.', req:['tebo:3','bell:1']}]},
+  {line:'tebo', kind:'campaign', levels:[
+    {id:'tebo',  name:'Tebo strainer', flick:.8, desc:'Each flick drains 20% better.'},
+    {id:'tebo2', name:'Tebo Plus',     flick:.5, desc:'Each flick drains 50% better.'},
+    {id:'tebo3', name:'Ultra Tebo',    oneFlick:true, desc:'One flick drains it all.'}]},
+  {line:'pudding', kind:'campaign', levels:[
+    {id:'pud1', name:'Store bought Pudding', perfectBonus:.10, desc:'Perfect-bowl bonus tip +10%.'},
+    {id:'pud2', name:"Nono's Pudding",       perfectBonus:.20, desc:'Perfect-bowl bonus tip +20%.'},
+    {id:'pud3', name:"Koko's Pudding",       perfectBonus:.30, desc:'Perfect-bowl bonus tip +30%.'}]},
+  {line:'bell', kind:'campaign', levels:[
+    {id:'bell', name:'Timer bell', desc:'Dings when the noodles reach the ordered texture.'}]},
+  {line:'refresh', prices:[1000,3000], levels:[
+    {id:'refresh1', name:'Refresh upgrade selection', reroll:1, desc:'Re-roll the cards once per upgrade pick.'},
+    {id:'refresh2', name:'Refresh upgrade selection', reroll:2, desc:'Re-roll the cards twice per upgrade pick.'}]},
+  {line:'choice', prices:[4000], rarity:[2], levels:[
+    {id:'choice1', name:'Upgrade selection +1', choices:1, desc:'One more card to choose from at every upgrade pick.'}]},
+  {line:'luck', prices:[1000,2000,3000], levels:[
+    {id:'luck1', name:'Rare upgrade chance', luck:.10, desc:'+10% chance for Rare or better cards.'},
+    {id:'luck2', name:'Rare upgrade chance', luck:.20, desc:'+20% chance for Rare or better cards.'},
+    {id:'luck3', name:'Rare upgrade chance', luck:.30, desc:'+30% chance for Rare or better cards.'}]},
+];
+
 /* ---- story economy ---- */
 const ECON={
   START_MONEY:2000,
