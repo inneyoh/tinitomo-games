@@ -9,7 +9,7 @@ const LANE_X=[165,450,735], LANE_SC=.8;   // where the 3 counter spots are, and 
 const LINE=Object.fromEntries(ENDLESS_UPGRADES.map(l=>[l.line,l]));
 const LV_OF={}; ENDLESS_UPGRADES.forEach(l=>l.levels.forEach((u,k)=>LV_OF[u.id]=[l.line,k+1]));   // upgrade id → [line, level]
 
-const EQ={
+var EQ={   // var (not const): game.js checks for it before this file has run
   lanes:[null,null,null], built:false,
 
   /* ---------- upgrades (this run only) ---------- */
