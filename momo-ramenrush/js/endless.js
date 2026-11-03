@@ -53,10 +53,11 @@ var EQ={   // var (not const): game.js checks for it before this file has run
       const bub=document.createElement('div'); bub.className='bubble eBub off';
       const hit=document.createElement('div'); hit.className='eHit'; hit.style.left=(LANE_X[i]-140)+'px'; hit.onclick=()=>EQ.tap(i);
       fr.append(bw,bar,bub,hit); return {el,bw,bar,bub,hit}; });
+    $('#kStage').insertAdjacentHTML('beforeend','<div id="gPick" class="k-ui" hidden></div>');
     const hint=document.createElement('div'); hint.id='eHint'; hint.hidden=true; hint.textContent='Tap a bowl to take the order'; $('#shop').appendChild(hint);
     $('#app').insertAdjacentHTML('beforeend',`
-      <div id="eUp" hidden><div class="panel"><span class="pv">UPGRADE TIME</span><h2 id="euTitle">Pick an upgrade</h2><div class="sub" id="euSub"></div>
-        <div id="euCards"></div><div class="row"><button class="btn tiny" id="btnEuRoll">↻ Refresh</button><button class="btn" id="btnEuSkip">Skip ▶</button></div></div></div>
+      <div id="eUp" hidden><div class="euWrap"><div class="euHead"><span class="pv">UPGRADE TIME</span><h2 id="euTitle">Pick an upgrade</h2><div id="euSub"></div></div>
+        <div id="euCards"></div><div class="euFoot"><button class="btn tiny" id="btnEuRoll">↻ Refresh</button><button class="btn" id="btnEuSkip">Skip ▶</button></div></div></div>
       <div id="eOver" hidden><div class="panel"><h2>Endless over!</h2><img class="momoNight" src="assets/momo_confused.webp" alt="Momo looking worried">
         <div class="sub" id="eoSub"></div><div class="ledger" id="eoLedger"></div>
         <div class="row"><button class="btn" id="btnEoHome">Home</button><button class="btn red" id="btnEoAgain">Play again ▶</button></div></div></div>`);
@@ -192,12 +193,54 @@ var EQ={   // var (not const): game.js checks for it before this file has run
     E.cards=pick; EQ.renderUp(); },
   renderUp(){ $('#euTitle').textContent='Pick an upgrade!'; $('#euSub').innerHTML=`${E.served} bowl${E.served===1?'':'s'} served · you have <b>${yen(E.money)}</b>`;
     $('#euCards').style.gridTemplateColumns=`repeat(${Math.max(1,Math.min(3,E.cards.length))},1fr)`;
-    $('#euCards').innerHTML = E.cards.length ? E.cards.map((c,k)=>{ const poor=E.money<c.price, need=(c.u.req||[]).map(r=>{ const [ln,lv]=r.split(':'); return LINE[ln].levels[lv-1].name; });
-      return `<div class="euCard r${c.rar}"><div class="euTop"><span class="euRar">${RARITY[c.rar]}</span><span class="euLv">Lv ${c.lv}${c.l.levels.length>1?`/${c.l.levels.length}`:''}</span></div>
-        <b class="euName">${c.u.name}</b><div class="euDesc">${c.u.desc}</div>${need.length?`<div class="euNeed">Needs ${need.join(' + ')} ✓</div>`:''}
+    $('#euCards').innerHTML = E.cards.length ? E.cards.map((c,k)=>{ const poor=E.money<c.price;
+      return `<div class="euCard r${c.rar}"><span class="euRar">${RARITY[c.rar]}</span>
+        <canvas class="euIc" width="128" height="128" data-id="${c.u.id}"></canvas>
+        <b class="euName">${c.u.name}</b><span class="euLv">${c.l.levels.length>1?`Lv ${c.lv}`:'&nbsp;'}</span><div class="euDesc">${c.u.short||c.u.desc}</div>
         <button class="btn ${poor?'':'red'} euBuy" data-k="${k}" ${poor?'disabled':''}>${yen(c.price)}</button></div>`; }).join('')
       : '<div class="sub">Everything is maxed out!</div>';
     $('#euCards').querySelectorAll('.euBuy').forEach(b=>b.onclick=()=>EQ.buy(E.cards[+b.dataset.k]));
+    $('#euCards').querySelectorAll('canvas.euIc').forEach(cv=>eIcon(cv,cv.dataset.id));
     const rb=$('#btnEuRoll'); rb.hidden=!EQ.lv('refresh'); rb.disabled=E.rolls<=0; rb.textContent=`↻ Refresh (${E.rolls})`; },
+  /* Garlic Scooper: tap the garlic ladle → pick the amount → Momo puts that much in with one scoop */
+  garlicPick(h){ const b=G.bowl, el=$('#gPick');
+    el.innerHTML='<b>How much garlic?</b>'+GARLIC_LIST.slice(1).map((n,k)=>`<button data-n="${k+1}" class="${b.garlic===k+1?'on':''}">${n}</button>`).join('')+'<button class="x">✕</button>';
+    el.hidden=false; blip(640,.05);
+    el.querySelectorAll('button').forEach(bt=>bt.onclick=ev=>{ ev.stopPropagation(); el.hidden=true; if(bt.classList.contains('x')) return;
+      const n=+bt.dataset.n; if(n<=b.garlic){ toast('That much garlic is already in'); return; } if(K.M) return;
+      K.M={t:'garlic',x:h.home.x,y:h.home.y,from:h.home,to:POUR_AT,stage:'go',T:0,keep:true,home:h.home,full:true,
+        apply:()=>{ b.garlic=n; b._v=(b._v||0)+1; spray('garlic'); blip(300+n*40,.09,'sine'); floatTxt(`Garlic: ${GARLIC_LIST[n]}`,BROTH.x+(G.rush?0:70),BROTH.y-70); }}; }); },
   buy(c){ if(E.money<c.price) return; E.money-=c.price; E.up[c.l.line]=c.lv; sfx('pay'); toast(`${c.u.name}${c.l.levels.length>1?' · Lv '+c.lv:''}!`); EQ.closeUp(); },
 };
+
+/* ---------- card pictures (52 × 52 units; story icons reused where they exist) ---------- */
+const E_ICON={plush:'plush',fluffy:'fluffy',sofa:'sofa',lemon:'lemon',noren:'noren',doll:'doll',tap:'tap',tap2:'tap2',boil1:'boil1',boil2:'boil2',boil3:'boil3',
+  bell:'bell'};
+function eIcon(cv,id){ const c=cv.getContext('2d'); c.setTransform(1,0,0,1,0,0); c.clearRect(0,0,cv.width,cv.height);
+  const s=cv.width/52; c.translate(cv.width*.5-26*s*.92,cv.height*.5-26*s*.92); c.scale(s*.92,s*.92);
+  if(E_ICON[id]){ const o=document.createElement('canvas'); o.width=o.height=104; o.dataset.icon=E_ICON[id]; drawIcon(o);
+    const put=()=>c.drawImage(o,0,0,52,52); put(); if(['doll','lemon'].includes(id)) setTimeout(put,150); return; }
+  const flame=(x,y,h,w)=>{ c.beginPath(); c.moveTo(x-w,y); c.quadraticCurveTo(x-w,y-h*.6,x,y-h); c.quadraticCurveTo(x+w,y-h*.6,x+w,y); c.closePath(); fs(c,vg(c,y-h,y,'#ffd257','#e8582a'),1.5); };
+  const ladle=(x,y,col)=>{ c.save(); c.translate(x,y); c.rotate(-.5); rr(c,-3,-26,6,26,3); fs(c,'#b98249',2); ell(c,0,4,12,8,steel(c,-12,12),2); ell(c,0,2,9,4,col,0); c.restore(); };
+  const mt=(x,y,s=.42)=>{ c.save(); c.translate(x-14*s,y+22*s); c.scale(s,s); drawTebo(c,0,0,true,0); c.restore(); };   // a small tebo centred on x,y
+  const up=()=>{ c.strokeStyle='#4fb8e0'; c.lineWidth=3; c.lineCap='round'; c.beginPath(); c.moveTo(45,42); c.lineTo(45,14); c.moveTo(39,20); c.lineTo(45,12); c.lineTo(51,20); c.stroke(); };
+  if(/^tebo\d?$/.test(id)){ mt(24,28,.46); if(id==='tebo2') txt(c,'+',44,12,18,'#3e8e3a',700,'center',3,'#fff'); if(id==='tebo3') txt(c,'★',44,12,16,'#e0a800',700,'center',3,'#fff'); }
+  else if(id==='tebo2nd'||id==='drmo'||id==='drmo2'||id==='drmo3'){ mt(15,26,.36); mt(31,30,.36); if(id!=='tebo2nd') up();
+    if(id==='drmo') txt(c,'②',8,46,10,'#2e78c8',700,'center',3,'#fff');
+    if(id==='drmo3'){ c.beginPath(); c.moveTo(10,36); c.quadraticCurveTo(4,46,10,48); c.quadraticCurveTo(16,46,10,36); fs(c,'#9fdcf5',1.5); txt(c,'★',30,8,11,'#e0a800',700,'center',3,'#fff'); } }
+  else if(id==='tap3'||id==='tap4'){ const gold=id==='tap4'; rr(c,6,6,24,38,6); fs(c,vg(c,6,44,gold?'#fff1a8':'#d9c6ff',gold?'#e0a800':'#8e63c4'),2); rr(c,26,18,18,8,3); fs(c,gold?'#ffd257':'#c9a7e8',2);
+    c.fillStyle='#e8a33a'; rr(c,36,27,5,18,2); c.fill(); txt(c,gold?'3×':'2.3×',18,26,gold?11:8.5,OUT,700); }
+  else if(id==='boil4'){ rr(c,4,36,44,10,3); fs(c,'#5d646b',2); [8,17,26,35,44].forEach((x,k)=>flame(x,36,k===2?30:22,5)); }
+  else if(id==='minipad'){ rr(c,8,6,36,42,6); fs(c,'#3a3532',2); rr(c,12,10,28,32,3); fs(c,vg(c,10,42,'#9fdcf5','#4f86c6'),0); ell(c,26,45,1.6,1.6,'#888',0);
+    rr(c,16,24,8,8,2); fs(c,'#ffd257',1); rr(c,28,18,8,8,2); fs(c,'#e9645f',1); rr(c,28,30,8,8,2); fs(c,'#6aa84f',1); }
+  else if(/^prep\d$/.test(id)){ ladle(20,30,'#4a1c08'); txt(c,'+'.repeat(+id.slice(4)),38,14,13,'#3e8e3a',700,'center',3,'#fff'); }
+  else if(/^pud\d$/.test(id)){ const n=+id.slice(3); c.beginPath(); c.moveTo(12,44); c.lineTo(16,20); c.lineTo(36,20); c.lineTo(40,44); c.closePath(); fs(c,vg(c,20,44,'#ffe39a','#f2b94a'),2); ell(c,26,20,10,4,'#7a3b12',2); ell(c,26,46,16,4,'#fffaf0',2);
+    if(n>=2){ ell(c,26,13,4,4,'#e8584a',1.5); } if(n===3){ c.beginPath(); c.moveTo(16,8); c.lineTo(20,2); c.lineTo(26,7); c.lineTo(32,2); c.lineTo(36,8); c.closePath(); fs(c,'#ffd257',1.5); } }
+  else if(id==='gscoop'){ if(ok(IMG.garlic)) c.drawImage(IMG.garlic,6,22,30,20); ladle(34,26,'#f1dc9c'); txt(c,'?',44,10,13,'#d2322d',700,'center',3,'#fff'); }
+  else if(id==='csift'){ c.save(); c.translate(26,22); c.rotate(-.25); ell(c,0,0,16,8,null,2.5); c.save(); c.clip(); c.strokeStyle='rgba(91,58,46,.5)'; c.lineWidth=1; for(let k=-16;k<=16;k+=4){ c.beginPath(); c.moveTo(k,-9); c.lineTo(k,9); c.stroke(); } c.restore(); ell(c,0,0,16,8,null,2.5); rr(c,14,-2,18,4,2); fs(c,'#b98249',1.5); c.restore();
+    for(let k=0;k<9;k++){ ell(c,14+(k*7)%24,32+(k*5)%14,1.8,1.8,'#c8301a',0); } }
+  else if(/^refresh\d$/.test(id)){ c.strokeStyle='#3e8e3a'; c.lineWidth=5; c.lineCap='round'; c.beginPath(); c.arc(26,26,15,.3,5.2); c.stroke(); c.beginPath(); c.moveTo(42,10); c.lineTo(41,22); c.lineTo(30,18); c.closePath(); c.fillStyle='#3e8e3a'; c.fill(); txt(c,'×'+id.slice(7),26,27,11,OUT,700); }
+  else if(id==='choice1'){ [[-8,-.2],[0,0],[8,.2]].forEach(([dx,a],k)=>{ c.save(); c.translate(26+dx,28); c.rotate(a); rr(c,-9,-14,18,28,3); fs(c,k===2?'#ffe39a':'#fffaf0',2); c.restore(); }); txt(c,'+1',40,10,12,'#8e44ad',700,'center',3,'#fff'); }
+  else if(/^luck\d$/.test(id)){ c.beginPath(); for(let k=0;k<10;k++){ const r=k%2?8:19, a=-Math.PI/2+k*Math.PI/5; c.lineTo(26+r*Math.cos(a),27+r*Math.sin(a)); } c.closePath(); fs(c,vg(c,8,46,'#fff1a8','#e0a800'),2); txt(c,'+'.repeat(+id.slice(4)),26,28,9,OUT,700); }
+  else { ell(c,26,26,18,18,'#efe3cb',2); txt(c,'?',26,27,20,OUT,700); }
+}

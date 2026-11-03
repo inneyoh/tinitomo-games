@@ -772,7 +772,7 @@ kc.addEventListener('pointermove',e=>{
   const h=K.hand; if(!h) return;
   if(Math.hypot(p.x-h.sx,p.y-h.sy)>8) h.moved=true;
   if(h.moved){ h.x=p.x-h.gx*.4; h.y=p.y-h.gy*.4-10; }
-  if(h.t==='fat') fatShake(h,p);
+  if(h.t==='fat' || (h.t==='chili' && has('csift'))) fatShake(h,p);
   if(h.t==='tebo'){ const dy=p.y-h.lastY; if(dy>0) h.down+=dy; else if(dy<-2 && h.down>26){ flick(h.slot); h.down=0; } }
   h.lastX=p.x; h.lastY=p.y;
 });
@@ -786,11 +786,13 @@ function endPointer(e){
   if(!h.moved){   // tap = Momo does the whole motion for you
     if(h.kind==='top'||h.kind==='rice'||h.kind==='nori'){ const id=h.t; if(b[id]){ b[id]=false; giveStock(id); K.dirty=true; floatTxt('Removed',BROTH.x,BROTH.y-60); blip(300); return; } }
     if(h.kind==='tebo'){ flick(h.slot); return; }
+    if(h.t==='garlic' && has('gscoop') && typeof EQ!=='undefined'){ EQ.garlicPick(h); return; }   // Garlic Scooper (endless upgrade)
     autoAct(h); return;
   }
   if(h.kind==='bundle'){ const n=bundleSlot().i; if(overBoiler(p) && n!=null){ K.M={t:'bundle',x:p.x,y:p.y,from:p,to:{x:K.px0+teboX(n),y:TEBO_IN[1]-20},stage:'go',T:0,apply:()=>dropBundle(n),keep:false}; } else K.M={t:'bundle',x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:false}; return; }
   if(h.kind==='tebo'){ if(bowlAt(p)!=null){ const n=h.slot; if(G.rush){ setSlot(n); renderKTicket(); } K.M={t:'tebo',slot:n,x:p.x,y:p.y,from:p,to:p,stage:'act',T:0,apply:()=>teboToBowl(n),keep:false}; } return; }
   if(h.kind==='fat'){ K.M={t:'fat',x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:true}; return; }
+  if(h.t==='chili' && has('csift') && h.lastShake){ K.M={t:h.t,x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:true,home:h.home}; return; }   // sifted: the chili goes back, no extra scoop
   const bi=bowlAt({x:p.x,y:p.y+24});   // a drag drops into whichever bowl it's over — the selection stays as it was
   if(bi!=null) K.M={t:h.t,x:p.x,y:p.y,from:p,to:p,stage:'act',T:0,apply:()=>onBowl(bi,()=>applyFor(h)()),keep:keepsTool(h),home:h.home,full:h.full};
   else K.M={t:h.t,x:p.x,y:p.y,from:p,to:h.home,stage:'back',T:0,keep:true,home:h.home};
@@ -830,8 +832,11 @@ function fatShake(h,p){
   const now=performance.now(), ready=!h.lastShake || now-h.lastShake>FAT_GAP;
   if(h.dir===0){ if(p.x!==h.ext){ h.dir=Math.sign(p.x-h.ext); h.ext=p.x; } return; }   // arriving over the bowl only sets the direction
   if((h.dir>0 && p.x>h.ext) || (h.dir<0 && p.x<h.ext)) h.ext=p.x;            // still going the same way: remember the far point
-  else if(Math.abs(p.x-h.ext)>=FAT_STROKE && ready){ h.dir=-h.dir; h.ext=p.x; h.lastShake=now; onBowl(h.tb,()=>shakeFat(h.x,h.y)); }
+  else if(Math.abs(p.x-h.ext)>=FAT_STROKE && ready){ h.dir=-h.dir; h.ext=p.x; h.lastShake=now; onBowl(h.tb,()=> h.t==='chili' ? siftChili(h.x,h.y) : shakeFat(h.x,h.y)); }
 }
+function siftChili(x,y){ const b=G.bowl; if(b.spice>=5){ if(!(K.maxT>K.t-1)){ K.maxT=K.t; floatTxt('Max spice',BROTH.x+(G.rush?0:70),BROTH.y-70); } return; }   // Chili Sift (endless upgrade)
+  b.spice++; K.dirty=true; blip(520+b.spice*40,.05,'square',.04); for(let k=0;k<12;k++) K.parts.push({x:x-14+Math.random()*28,y:y+8,vx:(Math.random()-.5)*40,vy:20+Math.random()*40,r:2+Math.random()*1.5,col:'#c8301a',life:.9,g:700,stopY:BROTH.y+Math.random()*20});
+  floatTxt(`Chili × ${b.spice}`,BROTH.x+(G.rush?0:70),BROTH.y-70); }
 function shakeFat(x,y){ const b=G.bowl; if(b.fat>=4){ floatTxt('Max richness',BROTH.x+(G.rush?0:70),BROTH.y-70); return; }
   b.fat++; K.dirty=true; blip(700,.05,'square',.04); for(let k=0;k<12;k++) K.parts.push({x:x-14+Math.random()*28,y:y+8,vx:(Math.random()-.5)*40,vy:20+Math.random()*40,r:2+Math.random()*2,col:'#fffaf0',life:.9,g:700,stopY:BROTH.y+Math.random()*20});
   floatTxt(RICH_NAME[b.fat],BROTH.x+(G.rush?0:70),BROTH.y-70); }
@@ -849,7 +854,7 @@ function floatTxt(s,x,y){ K.fx.push({s,x,y,t:0}); }
 /* ---------------------------------------------------------------------
    11f. moving between steps
    --------------------------------------------------------------------- */
-function goStation(i){ i=Math.max(0,Math.min(6,i)); K.camT=i*KW; K.queue=0; if(i!==K.stn){ K.stn=i; K.hop=.6; blip(420+i*30,.06); updateHighlight(); } }
+function goStation(i){ i=Math.max(0,Math.min(6,i)); const gp=$('#gPick'); if(gp) gp.hidden=true; K.camT=i*KW; K.queue=0; if(i!==K.stn){ K.stn=i; K.hop=.6; blip(420+i*30,.06); updateHighlight(); } }
 const addMore=el=>{ if(!el.querySelector('.tk-more')) el.insertAdjacentHTML('beforeend','<div class="tk-more"></div>'); };
 function renderKTicket(){ const el=$('#kTicket'), el2=$('#kTicket2'); $('#kStage').classList.toggle('rush',!!G.rush);
   if(!G.rush){ $('#btnRemake').style.top=''; $('#btnToss').style.top=''; el2.hidden=true; el.hidden=false; el.classList.remove('act'); el.classList.toggle('focus',!ticketMini); renderTicket(el,G.order,false); addMore(el); return; }
@@ -891,7 +896,7 @@ function kitchenFrame(dt){
   // tool motion (tap = automatic; drag-release = pour where you let go)
   if(K.rice){ K.rice.T+=dt; if(!K.rice.served && K.rice.T>=RICE_T*.5){ K.rice.served=true; b.rice=true; blip(760,.08); floatTxt('Rice',BROTH.x+(G.rush?0:70),BROTH.y-70); }
     if(K.rice.T>=RICE_T) K.rice=null; }
-  const M=K.M; if(M){ M.T+=dt; const ST=CFG.SCOOP_TIME/(['tare','garlic','chili'].includes(M.t)?UP.scoop():1);
+  const M=K.M; if(M){ M.T+=dt; const ST=['tare','garlic','chili'].includes(M.t) ? Math.max(.2,CFG.SCOOP_TIME-UP.react())/UP.scoop() : CFG.SCOOP_TIME;   // prep speed: shorter ladle reaction time, then faster
     if(M.stage==='go'){ const k=Math.min(1,M.T/(.24*ST)), e=k*k*(3-2*k); M.x=M.from.x+(M.to.x-M.from.x)*e; M.y=M.from.y+(M.to.y-M.from.y)*e-Math.sin(k*Math.PI)*40; if(k>=1){ M.stage='act'; M.T=0; } }
     else if(M.stage==='act'){ M.ang = M.t==='fat' ? 0 : -Math.min(1,M.T/(.14*ST))*1.1; if(M.t==='fat') M.x=M.to.x+Math.sin(M.T*40)*10;
       if(M.T>=.2*ST){ if(M.apply){ M.apply(); M.apply=null; K.dirty=true; } if(M.keep){ M.stage='back'; M.T=0; M.from={x:M.x,y:M.y}; M.to=M.home||M.from; M.full=false; } else K.M=null; } }
@@ -1025,7 +1030,7 @@ const endlessRun=()=>G.play==='endless';   // endless runs have their own upgrad
 const has=id=> endlessRun() ? EQ.has(id) : !!P.upgrades[id];
 const owned=k=> endlessRun() ? EQ.owned(k) : UPGRADES.filter(u=>has(u.id) && u[k]!==undefined).map(u=>u[k]);
 const UP={ baseMul:()=>Math.max(1,...owned('baseMul')), perfect:()=>1+owned('perfectBonus').reduce((a,b)=>a+b,0), soup:()=>Math.max(1,...owned('soup')), flick:()=>Math.min(1,...owned('flick')), oneFlick:()=>owned('oneFlick').length>0,
-  pat:()=>Math.max(1,...owned('pat')), maxBuy:()=>Math.max(3,...owned('maxBuy')), types:()=>Math.min(STOCK_KEYS.length,Math.max(3,...owned('types'))), bonus:()=>owned('bonus').reduce((a,b)=>a+b,0), boil:()=>Math.min(1,...owned('boil')), scoop:()=>Math.max(1,...owned('scoop')) };
+  pat:()=>Math.max(1,...owned('pat')), maxBuy:()=>Math.max(3,...owned('maxBuy')), types:()=>Math.min(STOCK_KEYS.length,Math.max(3,...owned('types'))), bonus:()=>owned('bonus').reduce((a,b)=>a+b,0), boil:()=>Math.min(1,...owned('boil')), scoop:()=>Math.max(1,...owned('scoop')), react:()=>owned('react').reduce((a,b)=>a+b,0) };
 /* noodle cooking speed: default is 15% faster than v8, burners make it 10% / 30% faster again */
 const boilSpeed=()=>(1/0.85)/UP.boil();
 const boilT=nd=>(performance.now()-nd.start)/1000*boilSpeed();

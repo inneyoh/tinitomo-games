@@ -207,57 +207,63 @@ const RARITY=['Common','Rare','Epic','Legendary'];   // a card's rarity = its le
 /* Each line is bought one level at a time; a level replaces the one before it.
    kind = which price list (ENDLESS.PRICES) · prices / rarity = this line's own (rarity: 0 Common … 3 Legendary)
    req = other lines that must be at a level first, e.g. 'bell:1' (Timer bell) or 'cushion:3' (Sofa seats)
-   Effects: epat = customers wait +x longer · bonus = +x on every bowl · scoop = ladling (tare, garlic, chili) ×faster
+   short = the line shown on the upgrade card
+   Effects: epat = customers wait +x longer · bonus = +x on every bowl · scoop = ladling (tare, garlic, chili) ×faster · react = ladle reaction time −x s (from CFG.SCOOP_TIME)
+   garlicPick = tap the garlic ladle to choose the amount · chiliSift = shake chili over the bowl like the back fat
    soup / boil / flick / oneFlick / autoLift = as in the story · autoDrain = lifted noodles drip dry by themselves
    perfectBonus = +x on the perfect-bowl bonus · reroll = refreshes per upgrade pick · choices = extra card · luck = +x rare chance */
 const ENDLESS_UPGRADES=[
   {line:'cushion', kind:'endless', levels:[
-    {id:'plush',   name:'Plush cushion',  epat:.10, desc:'Customers wait 10% longer.'},
-    {id:'fluffy',  name:'Fluffy cushion', epat:.20, desc:'Customers wait 20% longer.'},
-    {id:'sofa',    name:'Sofa seats',     epat:.40, desc:'Customers wait 40% longer.'},
-    {id:'minipad', name:'Mini Game iPad', epat:.70, desc:'Customers wait 70% longer — they are busy playing!', req:['charm:3','pudding:3']}]},
+    {id:'plush',   name:'Plush cushion', short:'Wait +10%',  epat:.10, desc:'Customers wait 10% longer.'},
+    {id:'fluffy',  name:'Fluffy cushion', short:'Wait +20%', epat:.20, desc:'Customers wait 20% longer.'},
+    {id:'sofa',    name:'Sofa seats', short:'Wait +40%',     epat:.40, desc:'Customers wait 40% longer.'},
+    {id:'minipad', name:'Mini Game iPad', short:'Wait +70%', epat:.70, desc:'Customers wait 70% longer — they are busy playing!', req:['charm:3','pudding:3']}]},
   {line:'charm', kind:'endless', levels:[
-    {id:'lemon', name:"Soso's lemon water", bonus:.05, desc:'+5% on every bowl.'},
-    {id:'noren', name:'Noren curtain',      bonus:.10, desc:'+10% on every bowl.'},
-    {id:'doll',  name:'Momo doll',          bonus:.20, desc:'+20% on every bowl.'}]},
+    {id:'lemon', name:"Soso's lemon water", short:'Bowls +5%', bonus:.05, desc:'+5% on every bowl.'},
+    {id:'noren', name:'Noren curtain', short:'Bowls +10%',      bonus:.10, desc:'+10% on every bowl.'},
+    {id:'doll',  name:'Momo doll', short:'Bowls +20%',          bonus:.20, desc:'+20% on every bowl.'}]},
   {line:'prep', kind:'endless', levels:[
-    {id:'prep1', name:'Prep speed', scoop:1.1, desc:'Ladling tare, garlic and chili oil is 10% faster.'},
-    {id:'prep2', name:'Prep speed', scoop:1.2, desc:'Ladling tare, garlic and chili oil is 20% faster.'},
-    {id:'prep3', name:'Prep speed', scoop:1.4, desc:'Ladling tare, garlic and chili oil is 40% faster.'}]},
+    {id:'prep1', name:'Prep speed', short:'Ladle 10% faster', scoop:1.1, react:.05, desc:'Ladling tare, garlic and chili oil is 10% faster (reaction time −0.05).'},
+    {id:'prep2', name:'Prep speed', short:'Ladle 20% faster', scoop:1.2, react:.10, desc:'Ladling tare, garlic and chili oil is 20% faster (reaction time −0.10).'},
+    {id:'prep3', name:'Prep speed', short:'Ladle 40% faster', scoop:1.4, react:.15, desc:'Ladling tare, garlic and chili oil is 40% faster (reaction time −0.15).'}]},
   {line:'tap', kind:'campaign', levels:[
-    {id:'tap',  name:'Soup tap',  soup:1.4, desc:'Soup pours 1.4× faster.'},
-    {id:'tap2', name:'Super tap', soup:2,   desc:'Soup pours 2× faster.'},
-    {id:'tap3', name:'Ultra tap', soup:2.3, desc:'Soup pours 2.3× faster.'},
-    {id:'tap4', name:'Turbo Tap', soup:3,   desc:'Soup pours 3× faster.', req:['prep:3','bell:1']}]},
+    {id:'tap',  name:'Soup tap', short:'Soup 1.4× faster',  soup:1.4, desc:'Soup pours 1.4× faster.'},
+    {id:'tap2', name:'Super tap', short:'Soup 2× faster', soup:2,   desc:'Soup pours 2× faster.'},
+    {id:'tap3', name:'Ultra tap', short:'Soup 2.3× faster', soup:2.3, desc:'Soup pours 2.3× faster.'},
+    {id:'tap4', name:'Turbo Tap', short:'Soup 3× faster', soup:3,   desc:'Soup pours 3× faster.', req:['prep:3','bell:1']}]},
   {line:'burner', kind:'campaign', levels:[
-    {id:'boil1', name:'Strong burner', boil:.85, desc:'Noodles boil 15% faster.'},
-    {id:'boil2', name:'Ultra burner',  boil:.7,  desc:'Noodles boil 30% faster.'},
-    {id:'boil3', name:'Turbo burner',  boil:.4,  desc:'Noodles boil 60% faster.'},
-    {id:'boil4', name:'Max Burner',    boil:.2,  desc:'Noodles boil 80% faster.', req:['cushion:3','bell:1']}]},
+    {id:'boil1', name:'Strong burner', short:'Boil 15% faster', boil:.85, desc:'Noodles boil 15% faster.'},
+    {id:'boil2', name:'Ultra burner', short:'Boil 30% faster',  boil:.7,  desc:'Noodles boil 30% faster.'},
+    {id:'boil3', name:'Turbo burner', short:'Boil 60% faster',  boil:.4,  desc:'Noodles boil 60% faster.'},
+    {id:'boil4', name:'Max Burner', short:'Boil 80% faster',    boil:.2,  desc:'Noodles boil 80% faster.', req:['cushion:3','bell:1']}]},
   {line:'twin', kind:'campaign', levels:[
-    {id:'tebo2nd', name:'Second tebo', desc:'Two bowls: cook two portions of noodles at once, one tebo for each bowl.'},
-    {id:'drmo',  name:"Dr Mo's Prototype Tebo", autoLift:'second', desc:'Two bowls: the 2nd tebo rises by itself at the ordered firmness.', req:['bell:1']},
-    {id:'drmo2', name:"Dr Mo's Double Tebo!?",  autoLift:'all', desc:'Every tebo rises by itself at the ordered firmness.'},
-    {id:'drmo3', name:"Dr Mo's Ultra Tebo Set", autoLift:'all', autoDrain:true, desc:'Every tebo rises by itself at the ordered firmness — and drips dry by itself too.', req:['tebo:3','bell:1']}]},
+    {id:'tebo2nd', name:'Second tebo', short:'Cook 2 noodles at once', desc:'Two bowls: cook two portions of noodles at once, one tebo for each bowl.'},
+    {id:'drmo',  name:"Dr Mo's Prototype Tebo", short:'Tebo ② lifts itself', autoLift:'second', desc:'Two bowls: the 2nd tebo rises by itself at the ordered firmness.', req:['bell:1']},
+    {id:'drmo2', name:"Dr Mo's Double Tebo!?", short:'Every tebo lifts itself',  autoLift:'all', desc:'Every tebo rises by itself at the ordered firmness.'},
+    {id:'drmo3', name:"Dr Mo's Ultra Tebo Set", short:'Lifts itself + drips dry', autoLift:'all', autoDrain:true, desc:'Every tebo rises by itself at the ordered firmness — and drips dry by itself too.', req:['tebo:3','bell:1']}]},
   {line:'tebo', kind:'campaign', levels:[
-    {id:'tebo',  name:'Tebo strainer', flick:.8, desc:'Each flick drains 20% better.'},
-    {id:'tebo2', name:'Tebo Plus',     flick:.5, desc:'Each flick drains 50% better.'},
-    {id:'tebo3', name:'Ultra Tebo',    oneFlick:true, desc:'One flick drains it all.'}]},
+    {id:'tebo',  name:'Tebo strainer', short:'Drain 20% better', flick:.8, desc:'Each flick drains 20% better.'},
+    {id:'tebo2', name:'Tebo Plus', short:'Drain 50% better',     flick:.5, desc:'Each flick drains 50% better.'},
+    {id:'tebo3', name:'Ultra Tebo', short:'1 flick drains all',    oneFlick:true, desc:'One flick drains it all.'}]},
   {line:'pudding', kind:'campaign', levels:[
-    {id:'pud1', name:'Store bought Pudding', perfectBonus:.10, desc:'Perfect-bowl bonus tip +10%.'},
-    {id:'pud2', name:"Nono's Pudding",       perfectBonus:.20, desc:'Perfect-bowl bonus tip +20%.'},
-    {id:'pud3', name:"Koko's Pudding",       perfectBonus:.30, desc:'Perfect-bowl bonus tip +30%.'}]},
+    {id:'pud1', name:'Store bought Pudding', short:'Perfect tip +10%', perfectBonus:.10, desc:'Perfect-bowl bonus tip +10%.'},
+    {id:'pud2', name:"Nono's Pudding", short:'Perfect tip +20%',       perfectBonus:.20, desc:'Perfect-bowl bonus tip +20%.'},
+    {id:'pud3', name:"Koko's Pudding", short:'Perfect tip +30%',       perfectBonus:.30, desc:'Perfect-bowl bonus tip +30%.'}]},
   {line:'bell', kind:'campaign', levels:[
-    {id:'bell', name:'Timer bell', desc:'Dings when the noodles reach the ordered texture.'}]},
+    {id:'bell', name:'Timer bell', short:'Dings on time', desc:'Dings when the noodles reach the ordered texture.'}]},
+  {line:'gscoop', prices:[3000], rarity:[2], levels:[
+    {id:'gscoop', name:'Garlic Scooper', short:'Pick garlic amount', garlicPick:true, desc:'Tap the garlic ladle to choose how much garlic goes in, in one scoop.', req:['prep:3']}]},
+  {line:'csift', prices:[3000], rarity:[2], levels:[
+    {id:'csift', name:'Chili Sift', short:'Shake to sift chili', chiliSift:true, desc:'Hold the chili and shake it over the bowl, like the back fat.', req:['prep:3']}]},
   {line:'refresh', prices:[1000,3000], levels:[
-    {id:'refresh1', name:'Refresh upgrade selection', reroll:1, desc:'Re-roll the cards once per upgrade pick.'},
-    {id:'refresh2', name:'Refresh upgrade selection', reroll:2, desc:'Re-roll the cards twice per upgrade pick.'}]},
+    {id:'refresh1', name:'Refresh upgrade selection', short:'1 re-roll per pick', reroll:1, desc:'Re-roll the cards once per upgrade pick.'},
+    {id:'refresh2', name:'Refresh upgrade selection', short:'2 re-rolls per pick', reroll:2, desc:'Re-roll the cards twice per upgrade pick.'}]},
   {line:'choice', prices:[4000], rarity:[2], levels:[
-    {id:'choice1', name:'Upgrade selection +1', choices:1, desc:'One more card to choose from at every upgrade pick.'}]},
+    {id:'choice1', name:'Upgrade selection +1', short:'+1 card per pick', choices:1, desc:'One more card to choose from at every upgrade pick.'}]},
   {line:'luck', prices:[1000,2000,3000], levels:[
-    {id:'luck1', name:'Rare upgrade chance', luck:.10, desc:'+10% chance for Rare or better cards.'},
-    {id:'luck2', name:'Rare upgrade chance', luck:.20, desc:'+20% chance for Rare or better cards.'},
-    {id:'luck3', name:'Rare upgrade chance', luck:.30, desc:'+30% chance for Rare or better cards.'}]},
+    {id:'luck1', name:'Rare upgrade chance', short:'Rare cards +10%', luck:.10, desc:'+10% chance for Rare or better cards.'},
+    {id:'luck2', name:'Rare upgrade chance', short:'Rare cards +20%', luck:.20, desc:'+20% chance for Rare or better cards.'},
+    {id:'luck3', name:'Rare upgrade chance', short:'Rare cards +30%', luck:.30, desc:'+30% chance for Rare or better cards.'}]},
 ];
 
 /* ---- story economy ---- */
