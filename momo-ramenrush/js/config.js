@@ -200,8 +200,10 @@ const ENDLESS={
   MAX_PICK:2,                       // bowls you can take to the kitchen at once
   FAILS:6,                          // customers who walk out in a row = the run is over
   UPGRADE_EVERY:7, CHOICES:2,       // an upgrade pick after every 7 bowls, with 2 cards to choose from
+  UPGRADE_PERFECT:4,                // …or after only 4 bowls if every one of them scored 100
+  CALM:6,                           // the first 6 customers of a run don't lose patience (it drains from the 7th on)
   ODDS:[65,25,8,2],                 // % chance a card is Common / Rare / Epic / Legendary ("Rare chance" upgrades move Common % to the others)
-  PRICES:{ endless:[500,700,1200,8000], campaign:[700,1500,3000,8000] },   // price by level (Lv 1–4) for each kind of line
+  PRICES:{ endless:[1000,1400,2400,16000], campaign:[1400,3000,6000,16000] },   // price by level (Lv 1–4) for each kind of line
 };
 const RARITY=['Common','Rare','Epic','Legendary'];   // a card's rarity = its level (Lv 1 Common … Lv 4 Legendary) unless a line says otherwise
 /* Each line is bought one level at a time; a level replaces the one before it.
@@ -251,16 +253,16 @@ const ENDLESS_UPGRADES=[
     {id:'pud3', name:"Koko's Pudding", short:'Perfect tip +30%',       perfectBonus:.30, desc:'Perfect-bowl bonus tip +30%.'}]},
   {line:'bell', kind:'campaign', levels:[
     {id:'bell', name:'Timer bell', short:'Dings on time', desc:'Dings when the noodles reach the ordered texture.'}]},
-  {line:'gscoop', prices:[3000], rarity:[2], levels:[
+  {line:'gscoop', prices:[6000], rarity:[2], levels:[
     {id:'gscoop', name:'Garlic Scooper', short:'Pick garlic amount', garlicPick:true, desc:'Tap the garlic ladle to choose how much garlic goes in, in one scoop.', req:['prep:3']}]},
-  {line:'csift', prices:[3000], rarity:[2], levels:[
+  {line:'csift', prices:[6000], rarity:[2], levels:[
     {id:'csift', name:'Chili Sift', short:'Shake to sift chili', chiliSift:true, desc:'Hold the chili and shake it over the bowl, like the back fat.', req:['prep:3']}]},
-  {line:'refresh', prices:[1000,3000], levels:[
+  {line:'refresh', prices:[2000,6000], levels:[
     {id:'refresh1', name:'Refresh upgrade selection', short:'1 re-roll per pick', reroll:1, desc:'Re-roll the cards once per upgrade pick.'},
     {id:'refresh2', name:'Refresh upgrade selection', short:'2 re-rolls per pick', reroll:2, desc:'Re-roll the cards twice per upgrade pick.'}]},
-  {line:'choice', prices:[4000], rarity:[2], levels:[
+  {line:'choice', prices:[8000], rarity:[2], levels:[
     {id:'choice1', name:'Upgrade selection +1', short:'+1 card per pick', choices:1, desc:'One more card to choose from at every upgrade pick.'}]},
-  {line:'luck', prices:[1000,2000,3000], levels:[
+  {line:'luck', prices:[2000,4000,6000], levels:[
     {id:'luck1', name:'Rare upgrade chance', short:'Rare cards +10%', luck:.10, desc:'+10% chance for Rare or better cards.'},
     {id:'luck2', name:'Rare upgrade chance', short:'Rare cards +20%', luck:.20, desc:'+20% chance for Rare or better cards.'},
     {id:'luck3', name:'Rare upgrade chance', short:'Rare cards +30%', luck:.30, desc:'+30% chance for Rare or better cards.'}]},

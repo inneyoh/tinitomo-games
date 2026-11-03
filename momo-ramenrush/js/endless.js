@@ -26,7 +26,7 @@ var EQ={   // var (not const): game.js checks for it before this file has run
   /* ---------- the run ---------- */
   start(){
     EQ.build(); EQ.clear(); endRush();
-    Object.assign(E,{served:0, money:0, fails:0, t:0, clock:0, up:{}, arriveIn:.6, nextUp:ENDLESS.UPGRADE_EVERY, sel:[], solo:null, hold:false, panel:false, over:false, newBest:false, cap:1, ending:false});
+    Object.assign(E,{served:0, money:0, fails:0, t:0, clock:0, up:{}, arriveIn:.6, since:0, allPerfect:true, custN:0, sel:[], solo:null, hold:false, panel:false, over:false, newBest:false, cap:1, ending:false});
     G.play='endless'; G.tut=false; G.firstOrder=false; G.rush=null; G.order=null; G.serving=false;
     Object.assign(D,{n:Infinity,done:0,sales:0,tips:0,walk:0});
     G.mode='service'; $('#modeSheet').classList.remove('on'); $('#shop').classList.remove('home'); $('#shop').classList.add('endless');
@@ -72,14 +72,15 @@ var EQ={   // var (not const): game.js checks for it before this file has run
   arrive(){ const lane=EQ.freeLane(); if(lane==null) return;
     const here=EQ.entries().map(e=>e.cust), pool=Object.keys(CUSTOMERS).filter(id=>!here.includes(id));
     const id=pickCustomer(G.lastCust,pool); G.lastCust=id; G.ticketNo++;
-    const d=EQ.dom[lane], e={lane, cust:id, order:{cust:id,no:G.ticketNo,pos:genOrder(id)}, bowl:newBowl(), pat:100, patSec:EQ.patSec(), state:'wait',
+    E.custN++; const calm=E.custN<=ENDLESS.CALM;   // the first customers of a run are patient
+    const d=EQ.dom[lane], e={lane, calm, cust:id, order:{cust:id,no:G.ticketNo,pos:genOrder(id)}, bowl:newBowl(), pat:100, patSec:EQ.patSec(), state:'wait',
       el:d.el, bar:d.bar, bub:d.bub, bw:d.bw, cv:mkCv()};
     EQ.lanes[lane]=e;
     const x=LANE_X[lane], h=CUST_H[id], sc=csize(id)*LANE_SC, bottom=752+h*sc*.38, head=bottom-h*sc;
     Object.assign(d.el.style,{left:(x-180)+'px', top:(bottom-h)+'px', height:h+'px'});
     d.el.innerHTML=`<div class="eSc">${custHTML(id,'idle')}</div>`; d.el.classList.remove('eat','impatient');
     d.bub.style.left=(x-130)+'px'; d.bub.style.top=(head-150)+'px';
-    d.bar.style.left=(x-90)+'px'; d.bar.style.top=(head-44)+'px'; d.bar.className='ePat'; d.bar.firstElementChild.style.width='100%';
+    d.bar.style.left=(x-90)+'px'; d.bar.style.top=(head-44)+'px'; d.bar.className='ePat'+(calm?' hide':''); d.bar.firstElementChild.style.width='100%';
     d.hit.style.top=(head-20)+'px'; d.hit.style.height=(990-head)+'px';
     EQ.drawSlipBowl(e); d.bw.classList.remove('sel','off');
     requestAnimationFrame(()=>d.el.classList.remove('away')); blip(620,.06);
@@ -134,13 +135,13 @@ var EQ={   // var (not const): game.js checks for it before this file has run
     $('#btnNextCust').hidden=true; $('#coinPop').classList.remove('on'); $('#momoBubble').classList.add('off'); clearTrayFx(); resetMomoBack(); ['#shopBowl','#shopRice'].forEach(q=>$(q).classList.add('hidden-o'));
     EQ.entries().forEach(e=>{ if(e.state==='cook' && !e.served && !e.gone){ e.state='wait'; e.bw.classList.remove('off'); } });   // (safety) anything not served goes back on the counter
     EQ.freeDone(); showScene('shop'); EQ.sheet(); updateHud();
-    if(E.served>=E.nextUp){ while(E.nextUp<=E.served) E.nextUp+=ENDLESS.UPGRADE_EVERY; EQ.showUp(); } },
+    if(E.since>=ENDLESS.UPGRADE_EVERY || (E.allPerfect && E.since>=ENDLESS.UPGRADE_PERFECT)){ E.since=0; E.allPerfect=true; EQ.showUp(); } },   // every 7 bowls, or 4 if all of them scored 100
   /* served and walked-out customers leave their spot */
   freeDone(){ EQ.lanes.forEach((e,i)=>{ if(e && (e.state==='served'||e.served||e.gone||e.state==='gone')) EQ.dropLane(i); }); },
   dropLane(i,now){ const e=EQ.lanes[i]; if(!e) return; EQ.lanes[i]=null; const d=EQ.dom[i];
     d.bub.classList.add('off'); d.bar.classList.add('hide'); d.bw.classList.add('off'); d.bw.classList.remove('sel'); d.el.classList.add('away'); d.el.classList.remove('impatient','eat');
     if(now) d.el.innerHTML=''; E.sel=E.sel.filter(s=>s!==e); },
-  paid(e,amount){ E.money+=amount; E.served++; E.fails=0; e.served=true; e.state='served';
+  paid(e,amount,total){ E.money+=amount; E.served++; E.since++; if(total<100) E.allPerfect=false; E.fails=0; e.served=true; e.state='served';
     if(E.served>(P.endlessBest||0)){ if(P.endlessBest && !E.newBest){ E.newBest=true; later(()=>toast(`New best: ${E.served} bowls!`),1400); } P.endlessBest=E.served; saveGame(); }
     const cap=EQ.capNow(); if(cap>E.cap){ E.cap=cap; later(()=>toast(`It's getting busy!<br><small>Up to ${cap} customers at the counter now</small>`),1800); } },
 
@@ -151,6 +152,7 @@ var EQ={   // var (not const): game.js checks for it before this file has run
     const busy=EQ.entries().length;
     if(busy<E.cap){ E.arriveIn-=dt; if(E.arriveIn<=0){ E.arriveIn=ENDLESS.GAP; EQ.arrive(); } } else E.arriveIn=Math.max(E.arriveIn,ENDLESS.GAP*.4);
     EQ.entries().forEach(e=>{ if(e.gone || e.served || !(e.state==='wait'||e.state==='cook')) return;
+      if(e.calm) return;
       e.pat=Math.max(0,e.pat-dt*100/e.patSec);
       const cls=e.pat<30?'low':e.pat<60?'mid':'', pw=(Math.round(e.pat*2)/2)+'%', key=cls+pw;
       if(key!==e.key){ e.key=key; e.bar.classList.toggle('mid',cls==='mid'); e.bar.classList.toggle('low',cls==='low'); e.bar.firstElementChild.style.width=pw;

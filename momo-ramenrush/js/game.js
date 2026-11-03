@@ -1454,7 +1454,7 @@ function eatBoth(){ const R=G.rush; $('#scoreSheet').classList.remove('on','duo'
   later(()=>{ let total=0; const pays=R.slots.map((s,i)=>{ const r=R.res[i], id=s.cust, C=CUSTOMERS[id], el=slotEl(i); el.classList.remove('eat');
       G.order=s.order; const fv=favHit(id,r); el.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); sayAt(i, fv?C.fav.line:(C.react[r.grade]||C.react.C));
       const {base,tip,bonus}=payFor(id,r,s.pat,s.order); bumpRep(r.grade);
-      if(endlessRun()) EQ.paid(s,base+tip+bonus); else { P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; rentCutFor(id,r); } D.done++; total+=r.total; return [base+tip+bonus,tip+bonus]; });
+      if(endlessRun()) EQ.paid(s,base+tip+bonus,r.total); else { P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; rentCutFor(id,r); } D.done++; total+=r.total; return [base+tip+bonus,tip+bonus]; });
     saveGame(); updateHud();
     const f=faceFor(Math.round(total/2)), m=$('#shopMomo');
     later(()=>ppFlip(m.querySelector('.flip'),()=>{ m.classList.add('front'); m.querySelector('.body').src=f.img; }).then(()=>{
@@ -1534,7 +1534,7 @@ function eat(){
   later(()=>{ c.classList.remove('eat'); const fv=favHit(id,r); c.innerHTML=custHTML(id, lowGrade(r)?'sad':'happy', lowGrade(r)); const R=CUSTOMERS[id].react; sayC(fv?CUSTOMERS[id].fav.line:(R[r.grade]||R.C)); if(fv) blip(1180,.12,'sine');
     const {base,tip,bonus}=payFor(id,r,G.patServe,G.order); bumpRep(r.grade);
     if(G.play==='story'){ P.money+=base+tip+bonus; D.sales+=base; D.tips+=tip+bonus; P.served++; rentCutFor(id,r); }
-    else if(endlessRun()) EQ.paid(G.rush?G.rush.slots[G.rush.cur]:E.solo, base+tip+bonus);
+    else if(endlessRun()) EQ.paid(G.rush?G.rush.slots[G.rush.cur]:E.solo, base+tip+bonus, r.total);
     D.done++;
     if(G.tut){ G.tut=false; P.tutorialDone=true; later(()=>toast(G.play==='story'?'Tutorial complete! The rest of Day 1 is up to you.':'Tutorial complete!'),2200); }
     saveGame(); updateHud();
