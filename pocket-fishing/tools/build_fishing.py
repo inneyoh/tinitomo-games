@@ -38,10 +38,13 @@ inp = inp.replace("  if (scene === 'title' && !TZ) TZ = { t:0 };\n  else if (sce
 PATCHES = [
     # host font
     (helpers, "const FONT = \"'M PLUS Rounded 1c',system-ui,sans-serif\";", "const FONT = \"'Fredoka','M PLUS Rounded 1c',system-ui,sans-serif\";"),
-    # Bae: one early tap per bite is forgiven
-    (fishing, "  if (F.state === 'nibble'){ fishEscapes('Too early! It got spooked.'); return; }",
-              "  if (F.state === 'nibble'){ if (traits().forgive && !F.forgiven){ F.forgiven = true; setMsg('Bae waits patiently…', 1.4); return; } fishEscapes('Too early! It got spooked.'); return; }"),
-    (fishing, "function startApproach(){\n", "function startApproach(){\n  F.forgiven = false;\n"),
+    # Bae: Final Pull gauge moves slower (10/15/20% for 1/2/3-star fish)
+    (fishing, "C.speed = BAL.finalSpeed[si];", "C.speed = BAL.finalSpeed[si] * tr.finalSlow[si];"),
+    # Bae: +30% coins, with a badge on the result card
+    (fishing, "const coins = Math.round(BAL.coins[f.star - 1] * (.75 + .6 * ratio) * (perfect ? 1.2 : 1)) * qty;",
+              "const coins = Math.round(BAL.coins[f.star - 1] * (.75 + .6 * ratio) * (perfect ? 1.2 : 1) * traits().coinMul) * qty;"),
+    (fishing, "  if (save.char === 'soso') badges.push(",
+              "  if (save.char === 'bae') badges.push('<span class=\"badge b2\" style=\"animation:none\">Bae bonus: +30% coins</span>');\n  if (save.char === 'soso') badges.push("),
     # Fishing Line upgrade: less tension build-up
     (fishing, "const strain = 18 * BAL.tugStrain[si] * tr.tugEase", "const strain = 18 * BAL.tugStrain[si] * tr.tugEase * (save.lineMul || 1)"),
     # catch close-up: the host's 3D sea shows through (soft depth tint instead of an opaque gradient)
@@ -116,12 +119,13 @@ function traits(){
     bait     : id === 'momo',
     allPerfect: id === 'momo',
     double   : id === 'soso' ? .2 + (save.sosoBonus || 0) : 0,
-    biteMul  : id === 'kew' ? 1.7 : id === 'bae' ? 1.3 : 1,
+    biteMul  : id === 'kew' ? 1.7 : 1,
     tugEase  : id === 'kew' ? .7 : 1,
     zoneMul  : id === 'kew' ? 1.3 : 1,
     tugGain  : id === 'rang' ? 1.2 : 1,
     hearts   : id === 'rang' ? 4 : 2,
-    forgive  : id === 'bae',
+    coinMul  : id === 'bae' ? 1.3 : 1,                      // Bae: +30% coins
+    finalSlow: id === 'bae' ? [.9, .85, .8] : [1, 1, 1],     // Bae: Final Pull gauge 10/15/20% slower for 1/2/3-star fish
   };
 }
 const curChar = () => CHARACTERS.find(c => c.id === save.char) || CHARACTERS[0];

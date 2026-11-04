@@ -938,7 +938,7 @@ const CHARS = [
   { id: 'soso', name: 'Soso', skill: 'Soso wants fish', desc: '+20% Double Catch chance. Every catch that isn\u2019t a double adds +2% more (up to +20%).', h: 1.6 },
   { id: 'kew', name: 'Kew', skill: 'Zen is Kew', desc: 'Bite window +70%. Tugging takes less effort. Final Pull green zone +30%.', h: 1.55 },
   { id: 'rang', name: 'Rang', skill: 'Rangahahaha', desc: 'Tug gauge fills 20% faster. +2 extra hearts for the Final Pull.', h: 1.55 },
-  { id: 'bae', name: 'Bae', skill: 'Puppy Patience', desc: 'Bite window +30%. One too-early tap per bite is forgiven, so the fish stays.', h: 1.55 }
+  { id: 'bae', name: 'Bae', skill: 'Lucky Paws', desc: 'Earns 30% more coins. Final Pull gauge moves 10% / 15% / 20% slower for ★ / ★★ / ★★★ fish.', h: 1.55 }
 ];
 const texLoader = new THREE.TextureLoader();
 const blobGeo = new THREE.CircleGeometry(0.4, 24); blobGeo.rotateX(-PI / 2);
@@ -2375,12 +2375,13 @@ function traits(){
     bait     : id === 'momo',
     allPerfect: id === 'momo',
     double   : id === 'soso' ? .2 + (save.sosoBonus || 0) : 0,
-    biteMul  : id === 'kew' ? 1.7 : id === 'bae' ? 1.3 : 1,
+    biteMul  : id === 'kew' ? 1.7 : 1,
     tugEase  : id === 'kew' ? .7 : 1,
     zoneMul  : id === 'kew' ? 1.3 : 1,
     tugGain  : id === 'rang' ? 1.2 : 1,
     hearts   : id === 'rang' ? 4 : 2,
-    forgive  : id === 'bae',
+    coinMul  : id === 'bae' ? 1.3 : 1,                      // Bae: +30% coins
+    finalSlow: id === 'bae' ? [.9, .85, .8] : [1, 1, 1],     // Bae: Final Pull gauge 10/15/20% slower for 1/2/3-star fish
   };
 }
 const curChar = () => CHARACTERS.find(c => c.id === save.char) || CHARACTERS[0];
@@ -3050,7 +3051,6 @@ function baitDrift(dt){
   if (!F.appr && d < 70*S) F.wait = Math.min(F.wait, .2);   // fish notices the bait right away
 }
 function startApproach(){
-  F.forgiven = false;
   let best = null, bd = 1e9;
   for (const sh of F.shadows){ if (sh.flee > 0) continue; const d = Math.hypot(sh.x - F.bob.x, sh.y - F.bob.y); if (d < bd){ bd = d; best = sh; } }
   if (!best){ F.wait = 1; return; }
@@ -3067,7 +3067,7 @@ function fishEscapes(msg){
 }
 function fishingTap(p){
   if (F.state === 'bite'){ F.state = 'hooked'; F.hookT = 0; F.msgT = 0; vibrate([30, 40, 30]); splash(F.bob.x, F.bob.y, 18, 1.3); return; }
-  if (F.state === 'nibble'){ if (traits().forgive && !F.forgiven){ F.forgiven = true; setMsg('Bae waits patiently…', 1.4); return; } fishEscapes('Too early! It got spooked.'); return; }
+  if (F.state === 'nibble'){ fishEscapes('Too early! It got spooked.'); return; }
   if ((F.state === 'idle' || F.state === 'waiting') && p.y < SEA_LIMIT()){
     if (F.appr){ F.appr.flee = 1; F.appr.a = rand(0, TAU); F.appr = null; }
     const tip = rodTip();
@@ -3181,7 +3181,7 @@ function enterPhase(p){
   const si = C.fish.star - 1, tr = traits();
   if (p === 'tug'){ C.idx = 2; C.banner = 'Fight!'; C.need = 3.4 * tr.tugEase * BAL.tugNeed[si]; C.prog = 0; C.tension = 15;
     C.fa = rand(0, TAU); C.turn = 0; C.turnT = 0; C.thrash = 0; C.thrashT = rand(2.5, 4); C.eff = 0; C.jx = 0; C.jy = 0; C.jm = 0; }
-  if (p === 'final'){ C.idx = 3; C.banner = 'Final Pull!'; C.np = 0; C.nv = 1; C.speed = BAL.finalSpeed[si];
+  if (p === 'final'){ C.idx = 3; C.banner = 'Final Pull!'; C.np = 0; C.nv = 1; C.speed = BAL.finalSpeed[si] * tr.finalSlow[si];
     C.zw = clamp(.2 * tr.zoneMul * BAL.finalZone[si], .08, .5); C.zc = rand(.25, .75); C.chances = C.maxCh = tr.hearts; C.allPerfect = tr.allPerfect; }
   splash(C.fx, C.fy, 10, 1); vibrate(30);
 }
@@ -3422,7 +3422,7 @@ function finishCatch(perfect){
   const size = +(f.min + (f.max - f.min) * ratio).toFixed(1);
   const qty = Math.random() < traits().double ? 2 : 1;
   if (save.char === 'soso') save.sosoBonus = qty > 1 ? 0 : Math.min(.2, +((save.sosoBonus || 0) + .02).toFixed(2));
-  const coins = Math.round(BAL.coins[f.star - 1] * (.75 + .6 * ratio) * (perfect ? 1.2 : 1)) * qty;
+  const coins = Math.round(BAL.coins[f.star - 1] * (.75 + .6 * ratio) * (perfect ? 1.2 : 1) * traits().coinMul) * qty;
   const rec = save.col[f.id], isNew = !rec, record = rec && size > rec.best;
   save.col[f.id] = { count:(rec ? rec.count : 0) + qty, best:Math.max(rec ? rec.best : 0, size) };
   save.coins += coins; fishCount += qty; writeSave();
@@ -3433,6 +3433,7 @@ function finishCatch(perfect){
   if (ratio > .85) badges.push('<span class="badge b2">BIG ONE!</span>');
   if (perfect) badges.push('<span class="badge b3">Perfect Pull</span>');
   if (qty > 1) badges.push('<span class="badge b3">×2 Double Catch!</span>');
+  if (save.char === 'bae') badges.push('<span class="badge b2" style="animation:none">Bae bonus: +30% coins</span>');
   if (save.char === 'soso') badges.push(`<span class="badge b2" style="animation:none">Soso wants fish: ${Math.round(20 + save.sosoBonus * 100)}%</span>`);
   document.getElementById('rBadges').innerHTML = badges.join('');
   const rc = document.getElementById('rCanvas'); rc.width = 600; rc.height = 260;
