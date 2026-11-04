@@ -124,7 +124,7 @@ function traits(){
     zoneMul  : id === 'kew' ? 1.3 : 1,
     tugGain  : id === 'rang' ? 1.2 : 1,
     hearts   : id === 'rang' ? 4 : 2,
-    coinMul  : id === 'bae' ? 1.3 : 1,                      // Bae: +30% coins
+    coinMul  : id === 'bae' ? 1.5 : 1,                      // Bae: +50% coins
     finalSlow: id === 'bae' ? [.9, .85, .8] : [1, 1, 1],     // Bae: Final Pull gauge 10/15/20% slower for 1/2/3-star fish
   };
 }
