@@ -40,11 +40,11 @@ PATCHES = [
     (helpers, "const FONT = \"'M PLUS Rounded 1c',system-ui,sans-serif\";", "const FONT = \"'Fredoka','M PLUS Rounded 1c',system-ui,sans-serif\";"),
     # Bae: Final Pull gauge moves slower (10/15/20% for 1/2/3-star fish)
     (fishing, "C.speed = BAL.finalSpeed[si];", "C.speed = BAL.finalSpeed[si] * tr.finalSlow[si];"),
-    # Bae: +30% coins, with a badge on the result card
+    # Bae: +50% coins, with a badge on the result card
     (fishing, "const coins = Math.round(BAL.coins[f.star - 1] * (.75 + .6 * ratio) * (perfect ? 1.2 : 1)) * qty;",
               "const coins = Math.round(BAL.coins[f.star - 1] * (.75 + .6 * ratio) * (perfect ? 1.2 : 1) * traits().coinMul) * qty;"),
     (fishing, "  if (save.char === 'soso') badges.push(",
-              "  if (save.char === 'bae') badges.push('<span class=\"badge b2\" style=\"animation:none\">Bae bonus: +30% coins</span>');\n  if (save.char === 'soso') badges.push("),
+              "  if (save.char === 'bae') badges.push('<span class=\"badge b2\" style=\"animation:none\">Bae bonus: +50% coins</span>');\n  if (save.char === 'soso') badges.push("),
     # Fishing Line upgrade: less tension build-up
     (fishing, "const strain = 18 * BAL.tugStrain[si] * tr.tugEase", "const strain = 18 * BAL.tugStrain[si] * tr.tugEase * (save.lineMul || 1)"),
     # catch close-up: the host's 3D sea shows through (soft depth tint instead of an opaque gradient)
