@@ -1,5 +1,5 @@
 // Offline cache for the prototype. Bump VERSION when files change.
-const VERSION = 'gg-v2';
+const VERSION = 'gg-v3';
 const FILES = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/main.js', 'js/state.js', 'js/data.js', 'js/art.js', 'js/ui.js',

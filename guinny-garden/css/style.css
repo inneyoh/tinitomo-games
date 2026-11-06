@@ -203,7 +203,7 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .herb { height: 100%; aspect-ratio: 1; transform: rotate(180deg); opacity: .9; }
 .herb svg, .herb img { width: 100%; height: 100%; }
 .jar-shelf { top: 15%; left: 4%; width: 62%; display: flex; flex-direction: column; gap: 2px; }
-.jars { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4%; padding: 0 4% 0 2%; margin: 0 auto; width: min(100%, 90cqh); }
+.jars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3%; padding: 0 4% 0 2%; margin: 0 auto; width: min(100%, 90cqh); }
 .jar { position: relative; width: 100%; aspect-ratio: 4 / 5; background: rgba(255, 255, 255, .55); border: 2.5px solid var(--line); border-radius: 22% 22% 26% 26%; display: grid; place-items: center; }
 .jar::before { content: ""; position: absolute; top: -12%; left: 18%; right: 18%; height: 14%; background: var(--wood-d); border: 2px solid var(--line); border-radius: 4px; }
 .jar-ico { width: 80%; height: 80%; }
@@ -226,51 +226,8 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .craft-spot .sparkles::after { right: 6%; top: 20%; animation-delay: .6s; }
 @keyframes twinkle { 50% { opacity: .2; transform: scale(.6); } }
 
-/* --- Garden --- */
-.garden-view .sky { inset: 0; }
-.garden-view .sun { width: 13cqmin; aspect-ratio: 1; right: 8%; top: 7%; }
-.garden-view .cloud { top: 12%; width: 22%; height: 7%; }
-.garden-view .cloud.c2 { top: 24%; animation-duration: 60s; animation-delay: -25s; }
-.hill { border-radius: 50% 50% 0 0; }
-.hill.h1 { left: -20%; width: 80%; bottom: 46%; height: 18%; background: #CFE0BE; }
-.hill.h2 { right: -25%; width: 90%; bottom: 46%; height: 13%; background: #BFD6AE; }
-body[data-tod="night"] .hill.h1 { background: #9FB4A0; } body[data-tod="night"] .hill.h2 { background: #93A996; }
-.fence { left: 0; right: 0; bottom: 49%; height: 8%; background:
-  linear-gradient(transparent 30%, #F3E8D6 30% 42%, transparent 42% 64%, #F3E8D6 64% 76%, transparent 76%),
-  repeating-linear-gradient(90deg, transparent 0 18px, #F6EDDF 18px 30px, transparent 30px 48px); }
-.grass { left: 0; right: 0; bottom: 0; height: 50%; background: radial-gradient(circle at 20% 30%, rgba(255,255,255,.25) 0 3px, transparent 4px) 0 0 / 34px 30px, #C6DCB0; border-top: 2.5px solid var(--line); }
-body[data-tod="night"] .grass { background-color: #A7BD9C; }
-.garden-view .guinny { height: min(34cqh, 40cqw); left: 4%; bottom: 47%; z-index: 4; }
-.watering-can { width: 12cqmin; aspect-ratio: 1; left: calc(4% + min(34cqh, 40cqw) * .95); bottom: 48%; z-index: 4; }
-.watering-can svg { width: 100%; height: 100%; }
-
-.plots { left: 3%; right: 3%; bottom: 3%; height: 44%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 3cqmin; z-index: 5; }
-.plot { position: relative; display: block; min-height: 64px; border-radius: 18px; }
-.plot .soil { position: absolute; left: 4%; right: 4%; bottom: 14%; height: 46%; border-radius: 50%; background: #B69A7E; border: 2.5px solid var(--line); box-shadow: inset 0 6px 0 rgba(0,0,0,.08); }
-.plot.s0 .soil { background: #C5AD94; }
-.plot.s1 .soil, .plot.s2 .soil, .plot.s3 .soil { background: #9E8168; }
-.plot .plant { position: absolute; left: 50%; bottom: 22%; height: 90%; aspect-ratio: 1; transform: translateX(-50%); transform-origin: 50% 100%; }
-.plot .plant svg, .plot .plant img { width: 100%; height: 100%; }
-.plot.s3 .plant { animation: sway 2.4s ease-in-out infinite; }
-@keyframes sway { 0%, 100% { transform: translateX(-50%) rotate(-3deg); } 50% { transform: translateX(-50%) rotate(3deg); } }
-.plot-tag {
-  position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); white-space: nowrap;
-  background: var(--paper); border: 2px solid var(--line); border-radius: 999px; padding: 1px 10px; font-size: .74rem; font-weight: 800;
-}
-.plot.s-1 .plot-tag { background: var(--cream); color: var(--ink-soft); }
-.plot.s0 .plot-tag { background: #D6E7F0; }
-.plot.s3 .plot-tag { background: var(--butter); animation: hop 1.2s ease-in-out infinite; }
-.plot:active { transform: scale(.96); }
-.plot.splash::after { content: ""; position: absolute; left: 25%; right: 25%; top: 10%; height: 50%; background:
-  radial-gradient(circle, #A8CBE0 0 4px, transparent 5px) 0 0 / 16px 16px; animation: rain .7s linear; pointer-events: none; }
-@keyframes rain { from { transform: translateY(-30%); opacity: 1; } to { transform: translateY(30%); opacity: 0; } }
-
+/* --- Garden: see "Garden" section at the end --- */
 @container view (aspect-ratio > 1.1) {
-  .garden-view .plots { left: 36%; right: 3%; bottom: 4%; height: 62%; }
-  .garden-view .guinny { height: min(56cqh, 34cqw); left: 1%; bottom: 8%; }
-  .garden-view .watering-can { left: 24%; bottom: 6%; width: 10cqmin; }
-  .garden-view .fence { bottom: 64%; } .grass { height: 66%; }
-  .hill.h1, .hill.h2 { bottom: 62%; }
   .work-view .guinny { height: 56cqh; left: 14%; }
 }
 
@@ -426,7 +383,7 @@ body[data-tod="night"] .grass { background-color: #A7BD9C; }
 .canvas > * { position: absolute; }
 .canvas .layer { inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .canvas::after { content: ""; position: absolute; inset: 0; background: var(--tint); pointer-events: none; z-index: 30; transition: background 2s; }
-.shop-view::after { display: none; }
+.shop-view::after, .garden-view::after { display: none; }
 
 /* Guinny behind the counter (counter layer is drawn on top of her) */
 .canvas .guinny { pointer-events: none; }
@@ -572,3 +529,156 @@ body[data-tod="night"] .grass { background-color: #A7BD9C; }
 @media (orientation: landscape) and (min-aspect-ratio: 6/5) {
   .shop-hint { left: 14px; transform: none; max-width: min(60%, 460px); text-align: left; border-radius: 22px; }
 }
+
+/* ====================================================================
+   Garden — placeholder art on the same canvas as the shop (1672×941 /
+   941×1672), so a background image can replace .g-sky … .g-path later.
+   ==================================================================== */
+.g-canvas { touch-action: none; }
+.g-sky { inset: 0; background: linear-gradient(var(--sky1), var(--sky2)); overflow: hidden; transition: background 2s; }
+.g-canvas .sun { position: absolute; width: 7%; aspect-ratio: 1; right: 8%; top: 7%; }
+.g-canvas .cloud { top: 9%; width: 16%; height: 6%; }
+.g-canvas .cloud.c2 { top: 19%; animation-duration: 60s; animation-delay: -25s; }
+.g-hill { border-radius: 50% 50% 0 0; background: #CFE0BE; }
+.g-hill.h2 { background: #BFD6AE; }
+.g-fence { left: 0; right: 0; background:
+  linear-gradient(transparent 28%, #F3E8D6 28% 40%, transparent 40% 62%, #F3E8D6 62% 74%, transparent 74%),
+  repeating-linear-gradient(90deg, transparent 0 2.2%, #F6EDDF 2.2% 3.6%, transparent 3.6% 5.4%); }
+.g-grass { left: 0; right: 0; bottom: 0; border-top: 3px solid #A9C79A;
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .25) 0 3px, transparent 4px) 0 0 / 40px 34px, #C9DEB3; }
+.g-path { background: #EBDCC2; border-radius: 40% 40% 0 0 / 12% 12% 0 0; opacity: .9; }
+body[data-tod="night"] .g-grass { background-color: #A9BF9E; }
+body[data-tod="night"] .g-hill { background: #9FB4A0; }
+
+[data-o="landscape"] .g-hill.h1 { left: -10%; width: 60%; top: 18%; height: 22%; }
+[data-o="landscape"] .g-hill.h2 { left: 40%; width: 80%; top: 22%; height: 16%; }
+[data-o="landscape"] .g-fence { top: 23%; height: 9%; }
+[data-o="landscape"] .g-grass { top: 31%; }
+[data-o="landscape"] .g-path { left: 14%; width: 12%; top: 31%; bottom: 0; }
+[data-o="portrait"]  .g-hill.h1 { left: -20%; width: 90%; top: 14%; height: 10%; }
+[data-o="portrait"]  .g-hill.h2 { left: 30%; width: 100%; top: 16%; height: 8%; }
+[data-o="portrait"]  .g-fence { top: 18.5%; height: 4.5%; }
+[data-o="portrait"]  .g-grass { top: 22.5%; }
+[data-o="portrait"]  .g-path { display: none; }
+
+.g-canvas[data-o="landscape"] .guinny { left: 13%; top: 29%; width: 15%; z-index: 4; }
+.g-canvas[data-o="portrait"] .guinny { left: 4%; top: 15.5%; width: 30%; z-index: 4; }
+
+/* plots */
+.g-canvas .plot { z-index: 5; cursor: pointer; }
+.g-canvas .plot-base { position: absolute; inset: 0; transition: background .6s; }
+.plot.soil .plot-base { top: 30%; border-radius: 26px; border: 2.5px solid var(--line); background:
+  repeating-linear-gradient(transparent 0 22%, rgba(94, 69, 53, .14) 22% 26%), #C2A386; box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .07); }
+.plot.soil.wet .plot-base { background-color: #94775F; }
+.plot.pot .plot-base { top: 42%; background: #E0A88A; border: 2.5px solid var(--line); border-radius: 6px 6px 18px 18px;
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%); }
+.plot.pot .plot-base::before { content: ""; position: absolute; left: 4%; right: 4%; top: 6%; height: 20%; border-radius: 50%; background: #A58569; transition: background .6s; }
+.plot.pot.wet .plot-base::before { background: #7D624C; }
+.plot.pot .plot-base::after { content: ""; position: absolute; left: 0; right: 0; top: 30%; height: 3px; background: rgba(107, 74, 54, .35); }
+.g-canvas .plant { position: absolute; left: 0; right: 0; bottom: 24%; height: 80%; display: flex; justify-content: space-evenly; align-items: flex-end; pointer-events: none; }
+.plot.pot .plant { bottom: 48%; height: 62%; }
+.g-canvas .plant svg { height: 100%; width: auto; aspect-ratio: 1; flex: none; transform-origin: 50% 100%; }
+.plot.soil .plant svg { height: 82%; margin: 0 -6%; }
+.plot.ready .plant svg { animation: sway2 2.4s ease-in-out infinite; }
+.plot.ready .plant svg:nth-child(2) { animation-delay: -.8s; } .plot.ready .plant svg:nth-child(3) { animation-delay: -1.6s; }
+@keyframes sway2 { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.plot.empty .plot-base::after { content: "＋"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: rgba(255, 252, 246, .85); font-weight: 800; font-size: 1.6rem; background: none; height: auto; }
+.plot.pot.empty .plot-base::after { top: 62%; }
+.plot.locked { cursor: pointer; }
+.plot.locked .plot-base { background: #BFD6AE; border-style: dashed; border-color: rgba(107, 74, 54, .55); clip-path: none; border-radius: 22px; }
+.plot.locked .plot-base::before, .plot.locked .plot-base::after { display: none; }
+.plot-badge { position: absolute; left: 50%; top: 0; transform: translate(-50%, -30%); pointer-events: none; z-index: 2; }
+.plot.locked .plot-badge { top: 55%; }
+.b-drop { display: block; width: 40px; height: 40px; padding: 5px; border-radius: 50%; background: var(--paper); border: 2.5px solid var(--line); box-shadow: var(--shadow); animation: hop 1.1s ease-in-out infinite; }
+.b-drop svg { width: 100%; height: 100%; }
+.b-ready { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--butter); border: 2.5px solid var(--line); font-weight: 800; color: var(--rose-d); box-shadow: var(--shadow); animation: hop 1.1s ease-in-out infinite; }
+.lock { background: var(--paper); border: 2px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: .75rem; font-weight: 800; white-space: nowrap; }
+.plot-bar { position: absolute; left: 22%; right: 22%; bottom: 6%; height: 7px; border-radius: 999px; background: rgba(255, 252, 246, .7); border: 1.5px solid var(--line); overflow: hidden; pointer-events: none; }
+.plot.pot .plot-bar { bottom: 10%; }
+.plot-bar i { display: block; height: 100%; width: 0; background: var(--sage); transition: width .5s; }
+.g-canvas .plot.bump { animation: pop .35s ease !important; }
+.plot.splash::after { content: ""; position: absolute; left: 15%; right: 15%; top: 0; height: 70%; pointer-events: none;
+  background: radial-gradient(circle, #A8CBE0 0 4px, transparent 5px) 0 0 / 18px 18px; animation: rain .8s linear; }
+@keyframes rain { from { transform: translateY(-30%); opacity: 1; } to { transform: translateY(30%); opacity: 0; } }
+
+/* landscape plot layout: 3×2 soil beds on the right, pots along the bottom */
+[data-o="landscape"] .plot.soil { width: 17.5%; height: 17%; }
+[data-o="landscape"] .plot.pot  { width: 9%; height: 13%; top: 75%; }
+[data-o="landscape"] .plot[data-i="0"] { left: 41%;   top: 35%; }
+[data-o="landscape"] .plot[data-i="1"] { left: 60%;   top: 35%; }
+[data-o="landscape"] .plot[data-i="2"] { left: 79%;   top: 35%; }
+[data-o="landscape"] .plot[data-i="3"] { left: 41%;   top: 54%; }
+[data-o="landscape"] .plot[data-i="4"] { left: 60%;   top: 54%; }
+[data-o="landscape"] .plot[data-i="5"] { left: 79%;   top: 54%; }
+[data-o="landscape"] .plot[data-i="6"] { left: 46%; }
+[data-o="landscape"] .plot[data-i="7"] { left: 59.5%; }
+[data-o="landscape"] .plot[data-i="8"] { left: 73%; }
+[data-o="landscape"] .plot[data-i="9"] { left: 86.5%; }
+/* portrait: beds in the middle, pots below, bench at the bottom */
+[data-o="portrait"] .plot.soil { width: 29%; height: 12%; }
+[data-o="portrait"] .plot.pot  { width: 18.5%; height: 10%; top: 61%; }
+[data-o="portrait"] .plot[data-i="0"] { left: 4%;    top: 33%; }
+[data-o="portrait"] .plot[data-i="1"] { left: 35.5%; top: 33%; }
+[data-o="portrait"] .plot[data-i="2"] { left: 67%;   top: 33%; }
+[data-o="portrait"] .plot[data-i="3"] { left: 4%;    top: 46.5%; }
+[data-o="portrait"] .plot[data-i="4"] { left: 35.5%; top: 46.5%; }
+[data-o="portrait"] .plot[data-i="5"] { left: 67%;   top: 46.5%; }
+[data-o="portrait"] .plot[data-i="6"] { left: 4%; }
+[data-o="portrait"] .plot[data-i="7"] { left: 28.5%; }
+[data-o="portrait"] .plot[data-i="8"] { left: 53%; }
+[data-o="portrait"] .plot[data-i="9"] { left: 77.5%; }
+
+/* work bench with tools */
+.g-canvas .bench { z-index: 8; left: auto; right: auto; bottom: auto; height: auto; }
+[data-o="landscape"] .bench { left: 1.5%; top: 43%; width: 37%; height: 36%; }
+[data-o="portrait"]  .bench { left: 3%; top: 72.5%; width: 94%; height: 18%; }
+.g-canvas .bench-top { position: absolute; left: 0; right: 0; top: 56%; height: 13%; background: var(--wood-dd); border: 2.5px solid var(--line); border-radius: 10px; }
+.g-canvas .bench-legs { position: absolute; left: 6%; right: 6%; top: 67%; bottom: 0; border: 2.5px solid var(--line); border-top: 0; border-radius: 0 0 6px 6px;
+  background: linear-gradient(90deg, var(--wood-d) 0 9%, transparent 9% 91%, var(--wood-d) 91%), linear-gradient(transparent 55%, var(--wood-d) 55% 66%, transparent 66%); }
+.tool { position: absolute; bottom: 43%; z-index: 2; }
+.tool svg { width: 100%; height: 100%; }
+.tool-can { left: 2%; width: 27%; aspect-ratio: 1; cursor: grab; touch-action: none; }
+.tool-can.lifted > svg { opacity: .25; }
+.tool-ipad { left: 31%; width: 21%; aspect-ratio: 1; transform: rotate(-6deg); }
+.tool-basket { left: 54%; width: 24%; aspect-ratio: 1; }
+.tool-shears { left: 80%; width: 16%; aspect-ratio: 1; bottom: 42%; transform: rotate(18deg); pointer-events: none; }
+[data-o="portrait"] .tool-can { width: 22%; } [data-o="portrait"] .tool-ipad { left: 29%; width: 17%; }
+[data-o="portrait"] .tool-basket { left: 52%; width: 20%; } [data-o="portrait"] .tool-shears { left: 78%; width: 13%; }
+.tool .hot-tag { bottom: auto; top: 102%; z-index: 3; }
+.tool:active:not(.tool-can) { transform: scale(.95); }
+
+/* dragged watering can (screen coordinates) */
+.can-ghost { position: fixed; z-index: 70; width: 96px; height: 96px; pointer-events: none; transform: translate(-80%, -105%) rotate(-8deg); transform-origin: 85% 90%; transition: transform .15s; filter: drop-shadow(0 6px 4px rgba(94, 69, 53, .25)); }
+.can-ghost svg { width: 100%; height: 100%; }
+.can-ghost.pouring { transform: translate(-80%, -105%) rotate(-32deg); }
+.can-ghost .pour { position: absolute; left: -6%; top: 30%; width: 30%; height: 90%; opacity: 0; background: radial-gradient(circle, #A8CBE0 0 3px, transparent 4px) 0 0 / 10px 12px; }
+.can-ghost.pouring .pour { opacity: 1; animation: pour .35s linear infinite; }
+@keyframes pour { to { background-position: 0 12px; } }
+.can-ghost.returning { transition: left .3s ease, top .3s ease, opacity .3s; opacity: 0; }
+
+.swipe-spark { position: fixed; z-index: 65; pointer-events: none; color: #E8C46A; font-style: normal; font-size: 1.2rem; transform: translate(-50%, -50%); animation: spark .6s ease-out forwards; }
+@keyframes spark { to { transform: translate(-50%, -90%) scale(.4); opacity: 0; } }
+.fly-item { position: fixed; z-index: 66; width: 44px; height: 44px; pointer-events: none; transition: transform .6s cubic-bezier(.5, -.4, .7, 1), opacity .6s; }
+.fly-item svg { width: 100%; height: 100%; }
+
+/* planting pop-up */
+.plant-pop { display: flex; flex-direction: column; gap: 14px; }
+.seed-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.seed-opt { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; min-height: 104px; border: 2.5px solid var(--line); border-radius: var(--r-md); background: var(--paper); font-weight: 800; }
+.seed-opt i { width: 46px; height: 46px; } .seed-opt i svg { width: 100%; height: 100%; }
+.seed-opt.on { background: var(--sage-l); box-shadow: inset 0 0 0 3px var(--sage); }
+.seed-opt:disabled { opacity: .45; }
+.qty { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.qty-btn { flex: none; width: 56px; height: 56px; font-size: 1.5rem; }
+.qty-btn:disabled { opacity: .4; box-shadow: none; }
+.qty-n { min-width: 70px; text-align: center; } .qty-n b { font-size: 1.8rem; line-height: 1; }
+.buy-more { align-self: center; }
+.book .book-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; box-shadow: none; }
+.book .book-card .decor-ico { width: 100%; height: 64px; display: grid; place-items: center; } .book .book-card .decor-ico svg { height: 100%; width: auto; }
+.book .book-card small { font-size: .74rem; } .book .book-card .charm { color: var(--rose-d); font-weight: 800; }
+.book-card.unknown .decor-ico { filter: brightness(0) opacity(.18); }
+.book-uses { display: flex; gap: 4px; } .book-uses i { width: 30px; height: 30px; } .book-uses svg { width: 100%; height: 100%; }
+@media (orientation: landscape) and (min-aspect-ratio: 6/5) {
+  .g-hint { left: 12px; bottom: 10px; max-width: 34%; }
+}
+.grid.book { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }

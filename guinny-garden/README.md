@@ -22,7 +22,7 @@ Then open http://localhost:8000. Any static host works (GitHub Pages, Netlify…
 |---|---|
 | **Shop** (お店) | Layered shop-front background (separate art for portrait and landscape). Guinny stands behind the counter and customers walk in from the right. **Wrapping table** (paper + ribbon) opens the packing pop-up: arrange the bouquet (bouquet orders only, straight from the flower basket), put the item in a bag, spray perfume on the bag (up to 3 sprays, more sprays mean a better tip chance). Then tap the bag to hand it over and tap the coins. The **iPad** opens Today's Menu (the lineup, shown on the chalk menu board) and the Decor Shop. |
 | **作業場** (Workshop) | Turn flowers into tea and perfume. Each recipe has 3 tap steps. |
-| **Garden** (お庭) | Plant seeds, water them, harvest when they bloom. Growth runs on **real time**, even while the game is closed. |
+| **Garden** (お庭) | Farming-game style, full screen. **Tap** an empty soil bed or pot to choose a seed and how many to plant (fills the next empty plots of that kind). **Drag the watering can** from the work bench and hover it over plants. Crops only grow while the soil is wet, and one watering lasts half the grow time. **Swipe** across ripe plants to harvest (tapping works too). The bench **iPad** has Seeds (buy ×1/×5), Plant Notes (an encyclopedia that fills in on first harvest) and Upgrades (extra beds and pots, big watering can, compost, basket, sprinkler). Herbs and berries grow in pots, flowers in beds. |
 
 Real-life time:
 - The HUD clock and the sky/lighting follow the device clock (dawn, day, dusk, night).
@@ -65,6 +65,10 @@ export const ASSET_OVERRIDES = {
 Keys are `type:id`, and the ids come from `js/data.js`. Transparent square-ish
 WebP/PNG works best (customers are about 100×140). Backgrounds (walls, counter,
 garden) are CSS in `css/style.css` under each scene's section.
+
+### Garden layout
+
+The garden uses the same canvas sizes as the shop (1672×941 / 941×1672), with placeholder CSS scenery (`.g-sky`, `.g-hill`, `.g-fence`, `.g-grass`, `.g-path`). To use real art, replace those with image layers like the shop does, then adjust the plot, bench and Guinny positions in the "Garden" section at the end of `css/style.css`.
 
 ### Shop-front layout
 
