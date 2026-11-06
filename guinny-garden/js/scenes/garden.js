@@ -7,10 +7,12 @@
 // Background + props are the user's art (assets/img/garden). Plants are placeholder SVG.
 // Positions are % of the garden canvas (css: "Garden" section).
 import { FLOWERS, PRODUCTS, PLOTS, PLANTERS, UPGRADES } from '../data.js';
-import { S, save, add, plotStage, plotRemaining, plotUnlocked, isWet, needsWater, updatePlot, wetMs, fmtTime } from '../state.js';
+import { S, save, add, jot, plotStage, plotRemaining, plotUnlocked, isWet, needsWater, updatePlot, wetMs, fmtTime } from '../state.js';
 import { F, SEED, P, plotArt, coinArt, dropArt } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 import { openTablet } from '../tablet.js';
+import { notepadApp } from '../notepad.js';
+import { MILESTONES } from '../encyclopedia.js';
 
 const IMG = 'assets/img/garden/';
 const SIZE = { landscape: [1672, 941], portrait: [941, 1672] };
@@ -140,13 +142,15 @@ function harvest(i) {
   const n = f.yield + (S.upgrades.basket ? 1 : 0);
   add(S.flowers, p.key, n);
   S.harvested[p.key] = (S.harvested[p.key] || 0) + n;
-  const first = S.harvested[p.key] === n;
+  jot(p.key, 'harvested', n);
+  const total = S.harvested[p.key];
+  const note = MILESTONES.find((m) => total - n < m.at && total >= m.at);
   const el = plotEl(i);
   flyUp(el, p.key);
   floatText(el, `+${n} ${f.name}`);
   S.garden[i] = { key: null };
   sfx('pop'); save(); render(); game.refreshWorkshop(); game.refreshShop();
-  if (first) setTimeout(() => toast(`New page: ${f.name} added to the Flower Encyclopedia ✿`), 500);
+  if (note) setTimeout(() => toast(`Guinny wrote a new ${f.name} note in her Flower Encyclopedia ✿`), 500);
 }
 
 function flyUp(from, key) {
@@ -206,6 +210,7 @@ function water(ids) {
   ids.forEach((i) => {
     const p = updatePlot(i, now);
     p.wetUntil = now + wetMs(p.key);
+    jot(p.key, 'watered');
     const el = plotEl(i);
     el.classList.remove('splash'); void el.offsetWidth; el.classList.add('splash');
     setTimeout(() => el.classList.remove('splash'), 800);
@@ -257,6 +262,7 @@ function openPlant(i) {
       const spots = [i, ...empties().filter((n) => n !== i)].slice(0, qty);
       spots.forEach((n, k) => {
         add(S.seeds, pick, -1);
+        jot(pick, 'planted');
         S.garden[n] = { key: pick, grown: 0, t: Date.now(), wetUntil: 0 };
         setTimeout(() => bump(plotEl(n)), k * 70);
       });
@@ -310,22 +316,7 @@ function openIpad(start = null) {
       };
     },
   };
-  const notepad = {
-    id: 'notepad', name: 'Notepad', icon: 'notepad',
-    render(body, ctx) {
-      const known = Object.keys(FLOWERS).filter((k) => S.harvested[k]).length;
-      ctx.sub(`Guinny’s Flower Encyclopedia · ${known} / ${Object.keys(FLOWERS).length} pages filled`);
-      body.innerHTML = `<div class="grid book">${Object.entries(FLOWERS).map(([k, f]) => {
-        const n = S.harvested[k] || 0;
-        const uses = Object.entries(PRODUCTS).filter(([, p]) => p.needs[k]).map(([pk]) => `<i title="${PRODUCTS[pk].name}">${P(pk)}</i>`).join('');
-        return n ? `<div class="card book-card">
-            <div class="decor-ico">${F(k)}</div><b>${f.name}</b><small>${f.note}</small>
-            <small class="charm">${where(f)} · ~${f.growMin} min · harvested ${n} · in basket ${S.flowers[k] || 0}</small>
-            <div class="book-uses">${uses}</div></div>`
-          : `<div class="card book-card unknown"><div class="decor-ico">${F(k)}</div><b>???</b><small>Harvest one to fill in this page.</small></div>`;
-      }).join('')}</div>`;
-    },
-  };
+  const notepad = notepadApp();
   openTablet({ theme: 'garden', apps: [florist, notepad], start, onClose: render });
 }
 

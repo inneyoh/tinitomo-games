@@ -46,6 +46,8 @@ js/data.js            flowers, products, decor, customers, start values ← bala
 js/art.js             placeholder SVG art + ASSET_OVERRIDES ← swap in real art here
 js/ui.js              sheets, toasts, sounds, hint bubbles, canvas fitting
 js/tablet.js          iPad pop-up: home screen with app icons, apps open on the tablet screen
+js/notepad.js         Notepad app: Guinny's Flower Encyclopedia
+js/encyclopedia.js    encyclopedia content: flower language, trivia, Guinny's notes, milestones
 js/scenes/*.js        shop, workshop, garden
 assets/img/           Guinny sprites, logo
 assets/icons/         app icon sizes
@@ -85,5 +87,13 @@ Tapping an iPad opens `js/tablet.js`: a tablet (the user's art) with a home scre
 
 - **Shop iPad:** background 3 (sage), with the apps **Furniture Shop** (decor) and **Guinny Line Up** (today's menu).
 - **Garden iPad:** background 1 (carnation), with the apps **Florist Shop** (seeds + garden upgrades) and **Notepad** (Guinny's Flower Encyclopedia).
+
+### Guinny's Flower Encyclopedia (Notepad app)
+
+`js/notepad.js` draws it; the content lives in `js/encyclopedia.js`.
+- **Contents page:** every flower with a fill-in meter (●●●○○) and overall completion.
+- **Flower page:** Guinny's records (times planted, waterings, harvested, sold in goods, first planted, first harvest, what's in the basket and seed bag), flower language (花言葉), field notes (home, season, where it grows, grow time, yield, seed price, care tip), trivia, which goods use it (with sales), and Guinny's own notes.
+- **Unlocking:** planting a flower opens its page. The first harvest fills in the flower language, care tip and trivia. Guinny writes her notes at 1, 10 and 30 harvests (`MILESTONES`), which also earn stamps (First bloom, Green thumb, Flower friend).
+- The save keeps `journal` (per-flower records) and `sold` (per-product sales) for these pages.
 
 To add an app, add `{ id, name, icon, render(body, ctx) }` to the `apps` list in `openIpad()` (shop.js or garden.js) and put its icon at `assets/img/ipad/icon-<icon>.webp`.

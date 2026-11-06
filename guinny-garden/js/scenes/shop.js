@@ -203,6 +203,7 @@ function collect() {
   S.coins += cust.paid;
   S.day.earned += cust.paid;
   S.day.served += 1;
+  S.sold[cust.want] = (S.sold[cust.want] || 0) + 1;
   save();
   floatText(coin, `+${cust.paid}${cust.tip ? ' ♡ tip' : ''}`, 'coin');
   coin.classList.add('hidden');

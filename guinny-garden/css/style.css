@@ -720,3 +720,59 @@ body[data-tod="night"] .cloud { opacity: .25; }
   .t-body .row { flex-wrap: wrap; }
   .t-body .row-btns { flex-direction: row; width: 100%; justify-content: flex-end; }
 }
+
+/* ====================================================================
+   Notepad: Guinny's Flower Encyclopedia (js/notepad.js)
+   Lined notebook paper inside the iPad app view.
+   ==================================================================== */
+.nb { display: flex; flex-direction: column; gap: 10px; }
+.nb-cover { text-align: center; padding: 12px 12px 10px; border-radius: 14px; background: #FFFDF6; border: 2px solid var(--line);
+  box-shadow: var(--shadow); }
+.nb-cover b { display: block; font-size: 1.05rem; }
+.nb-progress { height: 8px; margin-top: 8px; border-radius: 999px; background: var(--sage-l); border: 1.5px solid var(--line); overflow: hidden; }
+.nb-progress i { display: block; height: 100%; background: var(--rose); }
+.nb-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.nb-tile { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px 8px; min-height: 140px; text-align: center;
+  background: #FFFDF6; border: 2px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); font-weight: 800; }
+.nb-tile:active { transform: translateY(2px); box-shadow: none; }
+.nb-tile i { width: 56px; height: 56px; } .nb-tile i svg { width: 100%; height: 100%; }
+.nb-tile small { font-size: .68rem; line-height: 1.2; }
+.nb-tile.locked { background: rgba(255, 253, 246, .6); box-shadow: none; }
+.nb-tile.locked i { filter: brightness(0) opacity(.18); }
+.nb-dots { font-size: .6rem; letter-spacing: 2px; color: var(--rose-d); margin-top: auto; }
+
+.nb-page { position: relative; padding: 12px 14px 16px 30px; border-radius: 14px; border: 2px solid var(--line);
+  background:
+    linear-gradient(90deg, transparent 20px, rgba(227, 167, 168, .55) 20px 22px, transparent 22px),
+    repeating-linear-gradient(#FFFDF6 0 25px, #E7EEF2 25px 26px);
+  box-shadow: var(--shadow); gap: 4px; line-height: 1.45; }
+.nb-back { align-self: flex-start; min-height: 40px; padding: 0 12px; margin: -2px 0 4px -14px; border-radius: 999px; font-weight: 800;
+  color: var(--sage-d); background: #fff; border: 2px solid var(--sage); }
+.nb-head { display: flex; align-items: center; gap: 12px; }
+.nb-art { width: 76px; height: 76px; flex: none; background: #fff; border-radius: 50%; border: 2px solid var(--line); padding: 6px; transform: rotate(-4deg); }
+.nb-art svg { width: 100%; height: 100%; }
+.nb-head h3 { margin: 0; font-size: 1.25rem; }
+.nb-head small { font-size: .78rem; }
+.nb-stamp { display: inline-block; margin-top: 4px; padding: 2px 10px; border: 2px solid var(--rose-d); border-radius: 8px; color: var(--rose-d);
+  font-weight: 800; font-size: .74rem; transform: rotate(-3deg); background: rgba(255, 255, 255, .7); }
+.nb-page h4 { margin: 10px 0 2px; font-size: .9rem; color: var(--sage-d); }
+.nb-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.nb-stats div { text-align: center; background: rgba(255, 255, 255, .8); border: 1.5px solid var(--line); border-radius: 10px; padding: 4px 2px; }
+.nb-stats b { display: block; font-size: 1.1rem; line-height: 1.1; }
+.nb-stats small { font-size: .62rem; line-height: 1.1; }
+@container (max-width: 300px) { .nb-stats { grid-template-columns: repeat(2, 1fr); } }
+.nb-list { margin: 0; padding-left: 18px; font-size: .84rem; }
+.nb-list li { margin: 2px 0; }
+.nb-trivia li::marker { content: "✦ "; color: #D9A94A; }
+.nb-quote { margin: 0; font-size: .95rem; font-weight: 800; color: var(--rose-d); }
+.nb-locked { margin: 0; font-size: .8rem; color: var(--ink-soft); font-style: italic; opacity: .8; }
+.nb-uses { display: flex; flex-wrap: wrap; gap: 6px; }
+.nb-uses span { display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; font-weight: 800; background: rgba(255, 255, 255, .85);
+  border: 1.5px solid var(--line); border-radius: 999px; padding: 2px 10px 2px 2px; }
+.nb-uses i { width: 28px; height: 28px; } .nb-uses svg { width: 100%; height: 100%; }
+.nb-uses small { font-size: .68rem; margin-left: 2px; }
+.nb-notes { display: flex; flex-direction: column; gap: 6px; }
+.nb-note { margin: 0; padding: 8px 10px; background: #FFF6C9; border-radius: 4px; box-shadow: 0 2px 0 rgba(107, 74, 54, .15); font-size: .86rem; transform: rotate(-.6deg); }
+.nb-note:nth-child(even) { transform: rotate(.6deg); background: #FBE3E1; }
+.nb-note span { display: block; font-size: .68rem; font-weight: 800; color: var(--ink-soft); }
+.nb-done { text-align: center; font-weight: 800; color: var(--rose-d); margin: 8px 0 0; }

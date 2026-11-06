@@ -17,6 +17,8 @@ function fresh() {
     garden: PLOTS.map(() => ({ key: null })),   // { key, grown(ms), t(last update), wetUntil }
     upgrades: {},
     harvested: {},          // crop -> total harvested (unlocks encyclopedia notes)
+    journal: {},            // crop -> { planted, watered, harvested, first: { planted, harvest } } for the encyclopedia
+    sold: {},               // product -> number sold
     day: { date: todayKey(), number: 1, earned: 0, served: 0 },
     lastDay: null,          // summary of previous day
     settings: { sound: true, speedy: false },
@@ -119,6 +121,14 @@ export function rollDay() {
   S.day = { date: k, number: S.day.number + 1, earned: 0, served: 0 };
   save();
   return true;
+}
+
+// Guinny's records for the Flower Encyclopedia
+export function jot(key, field, n = 1) {
+  const j = S.journal[key] || (S.journal[key] = { planted: 0, watered: 0, harvested: 0, first: {} });
+  j[field] = (j[field] || 0) + n;
+  const firstKey = field === 'harvested' ? 'harvest' : field;
+  if (!j.first[firstKey]) j.first[firstKey] = Date.now();
 }
 
 export const add = (bag, key, n) => { bag[key] = (bag[key] || 0) + n; if (bag[key] <= 0) delete bag[key]; };
