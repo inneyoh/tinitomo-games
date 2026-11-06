@@ -204,3 +204,30 @@ export const P = (key) => art('product', key, () => productArt(key));
 export const F = (key) => art('flower', key, () => flowerArt(key));
 export const SEED = (key) => art('seed', key, () => seedArt(key));
 export const D = (key) => art('decor', key, () => decorArt[key]());
+
+// --- 作業場 stations (placeholder until real art arrives) ----------------------
+export const alchemyArt = () => svg(`
+  <rect x="8" y="96" width="184" height="16" rx="6" fill="#C9A88A" ${S}/>
+  <path d="M20 112 L22 150 M180 112 L178 150" ${S} stroke-width="6"/><path d="M20 112 L22 150 M180 112 L178 150" stroke="#D9B896" stroke-width="2"/>
+  <path d="M30 96 L30 60 L22 48 L48 48 L40 60 L40 96Z" fill="#E7DFF2" ${S} stroke-width="2.5"/><path d="M31 96 L31 76 L39 76 L39 96Z" fill="#CFC3EA"/>
+  <path d="M70 52 L70 66 C54 72 50 92 62 96 L98 96 C110 92 106 72 90 66 L90 52Z" fill="#FBF6EC" ${S}/>
+  <path d="M56 86 C60 78 100 78 104 86 C106 92 102 96 98 96 L62 96 C58 96 54 92 56 86Z" fill="#F2BFC4"/>
+  <rect x="66" y="44" width="28" height="10" rx="3" fill="#D9BE93" ${S} stroke-width="2.5"/>
+  <circle cx="76" cy="84" r="3" fill="#fff" opacity=".8"/><circle cx="86" cy="78" r="2" fill="#fff" opacity=".8"/>
+  <path d="M120 96 L160 96 L156 88 L124 88Z" fill="#B9C4C9" ${S} stroke-width="2.5"/><path d="M140 88 L140 70" ${S}/>
+  <path d="M118 70 L162 70" ${S}/><path d="M118 70 L112 82 L124 82Z M162 70 L156 82 L168 82Z" fill="#E6D3B3" ${S} stroke-width="2"/>
+  <ellipse cx="176" cy="90" rx="12" ry="7" fill="#C9B6A0" ${S} stroke-width="2.5"/>${flowerHead('rose', 176, 82, 0.18)}`, '0 0 200 150');
+
+export const kitchenArt = () => svg(`
+  <rect x="8" y="96" width="184" height="54" rx="6" fill="#DCC5A3" ${S}/>
+  <rect x="8" y="90" width="184" height="12" rx="5" fill="#C9A88A" ${S}/>
+  <rect x="20" y="108" width="46" height="34" rx="4" fill="#E9D7BA" ${S} stroke-width="2.5"/><circle cx="43" cy="125" r="4" fill="${OL}"/>
+  <rect x="78" y="108" width="46" height="34" rx="4" fill="#E9D7BA" ${S} stroke-width="2.5"/><circle cx="101" cy="125" r="4" fill="${OL}"/>
+  <path d="M26 90 L26 84 L60 84 L60 90" fill="#9FA9AE" ${S} stroke-width="2.5"/>
+  <path d="M28 84 C26 62 58 62 58 84Z" fill="#AFC39B" ${S}/><path d="M58 74 C66 70 70 64 72 58" fill="none" ${S}/><rect x="38" y="58" width="10" height="6" rx="2" fill="#D9BE93" ${S} stroke-width="2"/>
+  <path d="M40 54 C38 48 44 46 42 40 M48 54 C46 48 52 46 50 40" fill="none" stroke="#C9C1B6" stroke-width="2.5" stroke-linecap="round"/>
+  <rect x="84" y="40" width="44" height="50" rx="8" fill="#E6F0EE" ${S}/><rect x="86" y="60" width="40" height="28" rx="6" fill="#F4E3A6" opacity=".9"/>
+  <circle cx="96" cy="70" r="3" fill="#fff" opacity=".8"/><circle cx="112" cy="76" r="2" fill="#fff" opacity=".8"/><rect x="80" y="36" width="52" height="8" rx="3" fill="#C9A88A" ${S} stroke-width="2.5"/>
+  <path d="M140 30 L188 30" ${S} stroke-width="4"/><path d="M146 30 L146 22 M182 30 L182 22" ${S}/>
+  ${['mint', 'chamomile', 'lavender', 'mint'].map((k, i) => `<g transform="translate(${148 + i * 11} 34) rotate(180)">${flowerHead(k, 0, -14, 0.16)}</g>`).join('')}
+  <path d="M140 88 L188 88 L184 76 L144 76Z" fill="#EAD9BD" ${S} stroke-width="2.5"/>${[0, 1, 2].map((i) => flowerHead('mint', 152 + i * 13, 74, 0.12)).join('')}`, '0 0 200 150');

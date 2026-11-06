@@ -49,11 +49,11 @@ export const CATEGORIES = {
 };
 
 export const PRODUCTS = {
-  chamomile_tea:     { name: 'Chamomile Tea',     cat: 'tea',     price: 18, makes: 2, needs: { chamomile: 2 }, color: '#F4E3A6' },
-  mint_tea:          { name: 'Mint Tea',          cat: 'tea',     price: 16, makes: 2, needs: { mint: 2 },      color: '#C4E0C0' },
-  garden_blend:      { name: 'Garden Blend Tea',  cat: 'tea',     price: 28, makes: 2, needs: { chamomile: 1, mint: 1, lavender: 1 }, color: '#D9CFEA' },
+  chamomile_tea:     { name: 'Chamomile Tea',     cat: 'tea',     price: 18, makes: 2, method: 'pack', needs: { chamomile: 2 }, color: '#F4E3A6' },
+  mint_tea:          { name: 'Mint Tea',          cat: 'tea',     price: 16, makes: 2, method: 'pack', needs: { mint: 2 },      color: '#C4E0C0' },
+  garden_blend:      { name: 'Garden Blend Tea',  cat: 'tea',     price: 28, makes: 2, method: 'brew', needs: { chamomile: 1, mint: 1, lavender: 1 }, color: '#D9CFEA' },
   lavender_perfume:  { name: 'Lavender Perfume',  cat: 'perfume', price: 48, makes: 1, needs: { lavender: 3 }, color: '#CFC3EA' },
-  strawberry_tea:    { name: 'Strawberry Tea',    cat: 'tea',     price: 26, makes: 2, needs: { strawberry: 2, chamomile: 1 }, color: '#F4CFCB' },
+  strawberry_tea:    { name: 'Strawberry Tea',    cat: 'tea',     price: 26, makes: 2, method: 'brew', needs: { strawberry: 2, chamomile: 1 }, color: '#F4CFCB' },
   rose_perfume:      { name: 'Rose Perfume',      cat: 'perfume', price: 60, makes: 1, needs: { rose: 3 },     color: '#F2BFC4' },
   daisy_bouquet:     { name: 'Daisy Bouquet',     cat: 'bouquet', price: 30, makes: 1, fresh: true, needs: { daisy: 4 },    color: '#F7D9DE', flowers: ['daisy', 'chamomile', 'daisy'] },
   hydrangea_bouquet: { name: 'Hydrangea Bouquet', cat: 'bouquet', price: 72, makes: 1, fresh: true, needs: { hydrangea: 2, daisy: 2 }, color: '#B8CDE8', flowers: ['hydrangea', 'daisy', 'hydrangea'] },
