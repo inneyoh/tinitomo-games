@@ -1,18 +1,32 @@
 // Scene 3: Garden — cozy farming in real time.
-//  - Tap empty soil/pot → choose a seed and how many to plant
-//  - Drag the watering can from the work bench and hover it over plants to water
+//  - Tap an empty patch (planter quarter) or pot → choose a seed and how many to plant
+//    Planted patches get a soil patch + dirt mound; the sprout grows behind the mound.
+//  - Drag the watering can off the work bench and hover over a planter/pot to water it
 //  - Swipe across grown plants to harvest (a tap works too)
-//  - Work bench iPad → buy seeds, plant encyclopedia, garden upgrades
-// All art is placeholder; positions are % of the garden canvas (css: "Garden" section).
-import { FLOWERS, PRODUCTS, PLOTS, UPGRADES } from '../data.js';
+//  - Work bench iPad → Shop (seeds + garden upgrades) and Guinny's Flower Encyclopedia
+// Background + props are the user's art (assets/img/garden). Plants are placeholder SVG.
+// Positions are % of the garden canvas (css: "Garden" section).
+import { FLOWERS, PRODUCTS, PLOTS, PLANTERS, UPGRADES } from '../data.js';
 import { S, save, add, plotStage, plotRemaining, plotUnlocked, isWet, needsWater, updatePlot, wetMs, fmtTime } from '../state.js';
-import { F, SEED, P, plotArt, coinArt, canArt, ipadArt, basketArt, shearsArt, dropArt } from '../art.js';
+import { F, SEED, P, plotArt, coinArt, dropArt } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx } from '../ui.js';
 
+const IMG = 'assets/img/garden/';
+const SIZE = { landscape: [1672, 941], portrait: [941, 1672] };
+// Part of the canvas that must stay visible (fractions); the rest is lawn that may be cropped.
+const KEEP = { landscape: [0.02, 0.03, 0.99, 0.88], portrait: [0.03, 0.02, 0.97, 0.93] };
 let root, view, canvas, game;
 let active = false;
 let orient = '';
 const lastKey = [];
+
+const plotMarkup = (i) => `
+  <div class="plot ${PLOTS[i].type} q${PLOTS[i].q ?? ''}" data-i="${i}" role="button" aria-label="Garden patch ${i + 1}">
+    <img class="patch" src="${IMG}patch.webp" alt="" draggable="false">
+    <div class="plant"></div>
+    <img class="mound" src="${IMG}mound.webp" alt="" draggable="false">
+    <div class="plot-badge"></div><div class="plot-bar"><i></i></div>
+  </div>`;
 
 export function mount(el, api) {
   game = api;
@@ -21,23 +35,22 @@ export function mount(el, api) {
   root.innerHTML = `
   <div class="view garden-view">
     <div class="canvas g-canvas">
-      <div class="g-sky"><div class="sun"></div><div class="cloud"></div><div class="cloud c2"></div></div>
-      <div class="g-hill h1"></div><div class="g-hill h2"></div>
-      <div class="g-fence"></div>
-      <div class="g-grass"></div>
-      <div class="g-path"></div>
-      ${PLOTS.map((p, i) => `
-        <div class="plot ${p.type}" data-i="${i}" role="button" aria-label="${p.type === 'pot' ? 'Flower pot' : 'Soil bed'} ${i + 1}">
-          <div class="plot-base"></div><div class="plant"></div><div class="plot-badge"></div><div class="plot-bar"><i></i></div>
-        </div>`).join('')}
+      <img class="layer g-lawn" alt="" draggable="false">
       <img class="guinny" src="assets/img/guinny-garden.webp" alt="Guinny" draggable="false">
-      <div class="bench">
-        <div class="bench-top"></div><div class="bench-legs"></div>
-        <button class="tool tool-ipad" aria-label="Garden iPad">${ipadArt()}<span class="hot-tag">iPad</span></button>
-        <button class="tool tool-basket" aria-label="Harvest basket">${basketArt(true)}</button>
-        <div class="tool tool-shears" aria-hidden="true">${shearsArt()}</div>
-        <button class="tool tool-can" aria-label="Watering can — drag over plants">${canArt()}<span class="hot-tag">Drag me</span></button>
-      </div>
+      <img class="g-pot big" src="${IMG}pot-big.webp" alt="" draggable="false">
+      <img class="g-pot small" src="${IMG}pot-small.webp" alt="" draggable="false">
+      ${PLOTS.map((p, i) => (p.type === 'pot' ? plotMarkup(i).replace('class="plot pot', `class="plot pot ${p.pot}`) : '')).join('')}
+      <img class="g-bench" src="${IMG}bench.webp" alt="" draggable="false">
+      <img class="g-trowel" src="${IMG}trowel.webp" alt="" draggable="false">
+      <button class="tool tool-ipad" aria-label="Garden iPad"><img src="${IMG}ipad.webp" alt="" draggable="false"><span class="hot-tag">iPad</span></button>
+      <button class="tool tool-can" aria-label="Watering can — drag over plants"><img src="${IMG}can.webp" alt="" draggable="false"><span class="hot-tag">Drag to water</span></button>
+      ${PLANTERS.map((_, n) => `
+        <div class="planter" data-p="${n}">
+          <img class="planter-img" src="${IMG}planter.webp" alt="" draggable="false">
+          ${PLOTS.map((p, i) => (p.planter === n ? plotMarkup(i) : '')).join('')}
+          <div class="planter-lock"><span class="lock">Upgrade</span></div>
+          <div class="planter-drop b-drop">${dropArt()}</div>
+        </div>`).join('')}
     </div>
     <div class="shop-hint g-hint" role="status"></div>
   </div>`;
@@ -47,32 +60,43 @@ export function mount(el, api) {
   setupSwipe();
   setupCan();
   $('.tool-ipad', view).addEventListener('click', () => { sfx('tap'); openIpad(); });
-  $('.tool-basket', view).addEventListener('click', () => { sfx('tap'); openBasket(); });
 
   new ResizeObserver(layout).observe(view);
   layout();
   render();
 }
 
+// Fit the canvas: cover the view as much as possible while keeping the play area visible.
 function layout() {
-  const r = view.getBoundingClientRect();
-  const o = r.width >= r.height ? 'landscape' : 'portrait';
-  if (o !== orient) { orient = o; canvas.dataset.o = o; }
+  const vw = view.clientWidth, vh = view.clientHeight;
+  if (!vw || !vh) return;
+  const o = vw >= vh ? 'landscape' : 'portrait';
+  if (o !== orient) { orient = o; canvas.dataset.o = o; $('.g-lawn', canvas).src = `${IMG}lawn-${o}.webp`; }
+  const [W, H] = SIZE[o], [x0, y0, x1, y1] = KEEP[o];
+  const s = Math.min(Math.max(vw / W, vh / H), vw / (W * (x1 - x0)), vh / (H * (y1 - y0)));
+  const cw = W * s, ch = H * s;
+  const fit = (v, c, a, b) => (c <= v ? (v - c) / 2 : Math.min(-a * c, Math.max(v - b * c, (v - c) / 2)));
+  Object.assign(canvas.style, { width: `${cw}px`, height: `${ch}px`, left: `${fit(vw, cw, x0, x1)}px`, top: `${fit(vh, ch, y0, y1)}px` });
 }
 
-export function enter() { active = true; render(); }
+export function enter() { active = true; layout(); render(); }
 export function leave() { active = false; }
 export function tick() { if (active) render(); }
 
 const plotEl = (i) => $(`.plot[data-i="${i}"]`, canvas);
 const plotAt = (x, y) => document.elementsFromPoint(x, y).map((e) => e.closest && e.closest('.g-canvas .plot')).find(Boolean);
+const planterAt = (x, y) => document.elementsFromPoint(x, y).map((e) => e.closest && e.closest('.g-canvas .planter, .g-canvas .plot.pot')).find(Boolean);
+// watering a planter waters all four patches; a pot is its own plot
+const plotsUnder = (el) => (el.classList.contains('planter')
+  ? PLOTS.map((p, i) => i).filter((i) => PLOTS[i].planter === +el.dataset.p)
+  : [+el.dataset.i]);
 
 // --- Tap & swipe -------------------------------------------------------------
 function setupSwipe() {
   let swipe = null;
   canvas.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.tool, .bench')) return;
-    swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: 0, start: e.target.closest('.plot'), got: 0 };
+    if (e.target.closest('.tool')) return;
+    swipe = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: 0, start: e.target.closest('.plot, .planter'), got: 0 };
     canvas.setPointerCapture(e.pointerId);
   });
   canvas.addEventListener('pointermove', (e) => {
@@ -81,15 +105,16 @@ function setupSwipe() {
     if (swipe.moved < 12) return;
     if (Math.random() < 0.35) trail(e.clientX, e.clientY);
     const el = plotAt(e.clientX, e.clientY);
-    if (el && plotStage(+el.dataset.i) === 3) { harvest(+el.dataset.i); swipe.got++; }
+    if (el && plotUnlocked(+el.dataset.i) && plotStage(+el.dataset.i) === 3) { harvest(+el.dataset.i); swipe.got++; }
   });
-  const end = (e) => {
+  canvas.addEventListener('pointerup', (e) => {
     if (!swipe || e.pointerId !== swipe.id) return;
     const s = swipe; swipe = null;
-    if (s.moved < 12 && s.start) tapPlot(+s.start.dataset.i);
-    else if (s.got > 1) sfx('chime');
-  };
-  canvas.addEventListener('pointerup', end);
+    if (s.moved < 12 && s.start) {
+      if (s.start.classList.contains('plot')) tapPlot(+s.start.dataset.i);
+      else if (!plotUnlocked(PLOTS.findIndex((p) => p.planter === +s.start.dataset.p))) { sfx('soft'); openIpad('shop'); }
+    } else if (s.got > 1) sfx('chime');
+  });
   canvas.addEventListener('pointercancel', () => { swipe = null; });
 }
 
@@ -101,7 +126,7 @@ function trail(x, y) {
 }
 
 function tapPlot(i) {
-  if (!plotUnlocked(i)) { sfx('soft'); openIpad('upgrades'); return; }
+  if (!plotUnlocked(i)) { sfx('soft'); openIpad('shop'); return; }
   const st = plotStage(i);
   const el = plotEl(i);
   if (st === -1) { sfx('tap'); openPlant(i); return; }
@@ -120,23 +145,20 @@ function harvest(i) {
   S.harvested[p.key] = (S.harvested[p.key] || 0) + n;
   const first = S.harvested[p.key] === n;
   const el = plotEl(i);
-  flyToBasket(el, p.key);
+  flyUp(el, p.key);
   floatText(el, `+${n} ${f.name}`);
   S.garden[i] = { key: null };
   sfx('pop'); save(); render(); game.refreshWorkshop(); game.refreshShop();
-  if (first) setTimeout(() => toast(`New note: ${f.name} added to the encyclopedia ✿`), 500);
+  if (first) setTimeout(() => toast(`New page: ${f.name} added to the Flower Encyclopedia ✿`), 500);
 }
 
-function flyToBasket(from, key) {
-  const a = from.getBoundingClientRect(), b = $('.tool-basket', view).getBoundingClientRect();
+function flyUp(from, key) {
+  const a = from.getBoundingClientRect();
   const fly = h(`<div class="fly-item">${F(key)}</div>`);
-  fly.style.left = `${a.left + a.width / 2 - 22}px`; fly.style.top = `${a.top + a.height * 0.2}px`;
+  fly.style.left = `${a.left + a.width / 2 - 22}px`; fly.style.top = `${a.top}px`;
   document.body.append(fly);
-  requestAnimationFrame(() => {
-    fly.style.transform = `translate(${b.left + b.width / 2 - (a.left + a.width / 2)}px, ${b.top - a.top - a.height * 0.2}px) scale(.5)`;
-    fly.style.opacity = '.3';
-  });
-  setTimeout(() => { fly.remove(); bump($('.tool-basket', view)); }, 650);
+  requestAnimationFrame(() => { fly.style.transform = 'translateY(-70px) scale(.6)'; fly.style.opacity = '0'; });
+  setTimeout(() => fly.remove(), 650);
 }
 
 // --- Watering can (drag) -----------------------------------------------------------
@@ -146,9 +168,9 @@ function setupCan() {
   can.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     can.setPointerCapture(e.pointerId);
-    const ghost = h(`<div class="can-ghost">${canArt()}<div class="pour"></div></div>`);
+    const ghost = h(`<div class="can-ghost"><img src="${IMG}can-pour.webp" alt=""><div class="pour"></div></div>`);
     document.body.append(ghost);
-    drag = { id: e.pointerId, ghost, over: null, since: 0 };
+    drag = { id: e.pointerId, ghost, over: null, since: 0, done: new Set() };
     can.classList.add('lifted');
     move(e);
     sfx('tap');
@@ -157,16 +179,15 @@ function setupCan() {
     if (!drag || e.pointerId !== drag.id) return;
     drag.ghost.style.left = `${e.clientX}px`;
     drag.ghost.style.top = `${e.clientY}px`;
-    // hover point: just below the spout, a little left of the finger
-    const el = plotAt(e.clientX - 34, e.clientY + 6) || plotAt(e.clientX, e.clientY);
-    const i = el ? +el.dataset.i : null;
-    const thirsty = i !== null && plotUnlocked(i) && S.garden[i].key && plotStage(i) < 3;
-    drag.ghost.classList.toggle('pouring', !!thirsty);
-    if (thirsty && drag.over !== i) { drag.over = i; drag.since = performance.now(); }
-    if (!thirsty) drag.over = null;
-    if (thirsty && performance.now() - drag.since > 220 && !drag.ghost.dataset[`w${i}`]) {
-      drag.ghost.dataset[`w${i}`] = 1;   // water each plot once per drag
-      water(i);
+    const el = planterAt(e.clientX - 34, e.clientY + 6) || planterAt(e.clientX, e.clientY);
+    const ids = el ? plotsUnder(el).filter((i) => plotUnlocked(i) && S.garden[i].key && plotStage(i) < 3) : [];
+    const key = el ? (el.dataset.p ?? `pot${el.dataset.i}`) : null;
+    drag.ghost.classList.toggle('pouring', ids.length > 0);
+    if (!ids.length) { drag.over = null; return; }
+    if (drag.over !== key) { drag.over = key; drag.since = performance.now(); }
+    if (performance.now() - drag.since > 200 && !drag.done.has(key)) {
+      drag.done.add(key);   // water each planter/pot once per drag
+      water(ids);
     }
   };
   can.addEventListener('pointermove', move);
@@ -183,31 +204,37 @@ function setupCan() {
   can.addEventListener('pointercancel', end);
 }
 
-function water(i) {
-  const p = updatePlot(i);
-  p.wetUntil = Date.now() + wetMs(p.key);
+function water(ids) {
+  const now = Date.now();
+  ids.forEach((i) => {
+    const p = updatePlot(i, now);
+    p.wetUntil = now + wetMs(p.key);
+    const el = plotEl(i);
+    el.classList.remove('splash'); void el.offsetWidth; el.classList.add('splash');
+    setTimeout(() => el.classList.remove('splash'), 800);
+  });
   save();
   sfx('water');
-  const el = plotEl(i);
-  el.classList.remove('splash'); void el.offsetWidth; el.classList.add('splash');
-  setTimeout(() => el.classList.remove('splash'), 800);
   render();
 }
 
 // --- Planting -----------------------------------------------------------------------
 function openPlant(i) {
   const type = PLOTS[i].type;
-  const empties = () => PLOTS.map((p, n) => n).filter((n) => PLOTS[n].type === type && plotUnlocked(n) && !S.garden[n].key);
+  const near = (n) => (PLOTS[n].planter === PLOTS[i].planter ? 0 : 1);   // same planter first
+  const empties = () => PLOTS.map((p, n) => n)
+    .filter((n) => PLOTS[n].type === type && plotUnlocked(n) && !S.garden[n].key)
+    .sort((a, b) => near(a) - near(b) || a - b);
   const fits = Object.keys(FLOWERS).filter((k) => FLOWERS[k].where.includes(type));
   let pick = fits.find((k) => S.seeds[k]) || null;
   let qty = 1;
   const body = h('<div class="plant-pop"></div>');
-  const sheet = openSheet({ title: type === 'pot' ? 'Plant in pots' : 'Plant in soil beds', body });
+  const sheet = openSheet({ title: type === 'pot' ? 'Plant in a pot' : 'Plant seeds', body });
   const draw = () => {
     const free = empties().length;
     const max = pick ? Math.min(S.seeds[pick] || 0, free) : 0;
     qty = Math.max(1, Math.min(qty, max || 1));
-    sheet.setSub(`${free} empty ${type === 'pot' ? 'pot' : 'bed'}${free === 1 ? '' : 's'} · ${type === 'pot' ? 'pots suit herbs and berries' : 'beds suit flowers'}`);
+    sheet.setSub(type === 'pot' ? 'Pots suit herbs and berries' : `${free} empty patch${free === 1 ? '' : 'es'} · this planter fills first`);
     body.innerHTML = `
       <div class="seed-pick">${fits.map((k) => `
         <button class="seed-opt ${pick === k ? 'on' : ''}" data-k="${k}" ${S.seeds[k] ? '' : 'disabled'}>
@@ -219,7 +246,7 @@ function openPlant(i) {
           <button class="btn-toggle qty-max" ${qty >= max ? 'disabled' : ''}>Max ${max}</button>
         </div>
         <button class="btn-primary plant-go" ${max ? '' : 'disabled'}>Plant ${qty} ${FLOWERS[pick].name}</button>`
-      : `<p class="pack-tip">No seeds for ${type === 'pot' ? 'pots' : 'soil beds'} yet.</p>`}
+      : `<p class="pack-tip">No seeds for ${type === 'pot' ? 'pots' : 'planters'} yet.</p>`}
       <button class="btn-toggle buy-more">Buy seeds on the iPad</button>`;
   };
   body.addEventListener('click', (e) => {
@@ -228,14 +255,13 @@ function openPlant(i) {
     if (opt && !opt.disabled) { pick = opt.dataset.k; qty = 1; sfx('tap'); draw(); }
     else if (d && !d.disabled) { qty += +d.dataset.d; sfx('tap'); draw(); }
     else if (e.target.closest('.qty-max')) { qty = 99; sfx('tap'); draw(); }
-    else if (e.target.closest('.buy-more')) { sheet.close(); setTimeout(() => openIpad('seeds'), 230); }
+    else if (e.target.closest('.buy-more')) { sheet.close(); setTimeout(() => openIpad('shop'), 230); }
     else if (e.target.closest('.plant-go') && pick) {
-      // the tapped plot first, then the other empty plots of the same kind
       const spots = [i, ...empties().filter((n) => n !== i)].slice(0, qty);
       spots.forEach((n, k) => {
         add(S.seeds, pick, -1);
         S.garden[n] = { key: pick, grown: 0, t: Date.now(), wetUntil: 0 };
-        setTimeout(() => bump(plotEl(n)), k * 90);
+        setTimeout(() => bump(plotEl(n)), k * 70);
       });
       save(); sfx('pop'); sheet.close(); render();
       toast(`Planted ${spots.length} ${FLOWERS[pick].name}. Time to water!`);
@@ -244,64 +270,51 @@ function openPlant(i) {
   draw();
 }
 
-function openBasket() {
-  const ks = Object.keys(FLOWERS);
-  const chip = (bag, fn) => ks.filter((k) => bag[k]).map((k) => `<span class="chip"><i>${fn(k)}</i>${bag[k]}</span>`).join('') || '<span class="muted">empty</span>';
-  openSheet({ title: 'Basket & Seed Bag', body: `<div class="list">
-    <div class="card bag"><div class="bag-title">Harvest basket <small>花かご</small></div><div class="chips">${chip(S.flowers, F)}</div></div>
-    <div class="card bag"><div class="bag-title">Seed bag <small>種</small></div><div class="chips">${chip(S.seeds, SEED)}</div></div>
-    <p class="pack-tip">Flowers go to the 作業場 for tea and perfume, and to the shop counter for bouquets.</p></div>` });
-}
-
-// --- Garden iPad: Seeds · Encyclopedia · Upgrades -----------------------------------
-function openIpad(tab = 'seeds') {
+// --- Garden iPad: Shop (seeds + upgrades) · Flower Encyclopedia -------------------------
+function openIpad(tab = 'shop') {
   const body = h(`<div class="ipad">
     <div class="seg" role="tablist">
-      <button class="seg-btn" data-tab="seeds">Seeds</button>
-      <button class="seg-btn" data-tab="book">Plant Notes</button>
-      <button class="seg-btn" data-tab="upgrades">Upgrades</button>
+      <button class="seg-btn" data-tab="shop">Shop</button>
+      <button class="seg-btn" data-tab="book">Flower Encyclopedia</button>
     </div><div class="ipad-body"></div></div>`);
   const sheet = openSheet({ title: 'Garden iPad', body, cls: 'wide', onClose: render });
   const inner = $('.ipad-body', body);
-  const where = (f) => f.where.map((w) => (w === 'pot' ? 'pot' : 'soil')).join(' · ');
+  const where = (f) => f.where.map((w) => (w === 'pot' ? 'pot' : 'planter')).join(' · ');
 
-  const drawSeeds = () => {
+  const drawShop = () => {
     sheet.setSub('Seeds grow in real time, even while you’re away');
-    inner.innerHTML = `<div class="list">${Object.entries(FLOWERS).map(([k, f]) => `
+    const ups = Object.entries(UPGRADES).filter(([, u]) => !u.requires || S.upgrades[u.requires]);
+    inner.innerHTML = `<h3 class="ipad-h">Seeds</h3><div class="list">${Object.entries(FLOWERS).map(([k, f]) => `
       <div class="row">
         <div class="row-ico">${SEED(k)}</div>
-        <div class="row-main"><b>${f.name}</b><small>${where(f)} · ~${f.growMin} min · ${f.yield} per plot · have ${S.seeds[k] || 0}</small></div>
+        <div class="row-main"><b>${f.name}</b><small>${where(f)} · ~${f.growMin} min · ${f.yield} per patch · have ${S.seeds[k] || 0}</small></div>
         <div class="row-btns">
           <button class="btn-buy" data-buy="${k}" data-n="1" ${S.coins < f.seedCost ? 'disabled' : ''}>${coinArt()} ${f.seedCost}</button>
           <button class="btn-buy" data-buy="${k}" data-n="5" ${S.coins < f.seedCost * 5 ? 'disabled' : ''}>×5 · ${f.seedCost * 5}</button>
         </div>
-      </div>`).join('')}</div>`;
-  };
-  const drawBook = () => {
-    const known = Object.keys(FLOWERS).filter((k) => S.harvested[k]).length;
-    sheet.setSub(`${known} / ${Object.keys(FLOWERS).length} plants noted`);
-    inner.innerHTML = `<div class="grid book">${Object.entries(FLOWERS).map(([k, f]) => {
-      const n = S.harvested[k] || 0;
-      const uses = Object.entries(PRODUCTS).filter(([, p]) => p.needs[k]).map(([pk]) => `<i title="${PRODUCTS[pk].name}">${P(pk)}</i>`).join('');
-      return n ? `<div class="card book-card">
-          <div class="decor-ico">${F(k)}</div><b>${f.name}</b><small>${f.note}</small>
-          <small class="charm">${where(f)} · ~${f.growMin} min · harvested ${n}</small>
-          <div class="book-uses">${uses}</div></div>`
-        : `<div class="card book-card unknown"><div class="decor-ico">${F(k)}</div><b>???</b><small>Harvest one to fill in this page.</small></div>`;
-    }).join('')}</div>`;
-  };
-  const drawUp = () => {
-    sheet.setSub('Make the garden a little cozier');
-    inner.innerHTML = `<div class="grid">${Object.entries(UPGRADES).map(([k, u]) => `
+      </div>`).join('')}</div>
+      <h3 class="ipad-h">Garden upgrades</h3><div class="grid">${ups.map(([k, u]) => `
       <div class="card decor-card ${S.upgrades[k] ? 'selected' : ''}">
         <b>${u.name}</b><small>${u.desc}</small>
         ${S.upgrades[k] ? '<button class="btn-toggle on" disabled>Owned ✓</button>'
           : `<button class="btn-buy" data-up="${k}" ${S.coins < u.cost ? 'disabled' : ''}>${coinArt()} ${u.cost}</button>`}
       </div>`).join('')}</div>`;
   };
-  const draws = { seeds: drawSeeds, book: drawBook, upgrades: drawUp };
+  const drawBook = () => {
+    const known = Object.keys(FLOWERS).filter((k) => S.harvested[k]).length;
+    sheet.setSub(`Guinny’s notes · ${known} / ${Object.keys(FLOWERS).length} pages filled`);
+    inner.innerHTML = `<div class="grid book">${Object.entries(FLOWERS).map(([k, f]) => {
+      const n = S.harvested[k] || 0;
+      const uses = Object.entries(PRODUCTS).filter(([, p]) => p.needs[k]).map(([pk]) => `<i title="${PRODUCTS[pk].name}">${P(pk)}</i>`).join('');
+      return n ? `<div class="card book-card">
+          <div class="decor-ico">${F(k)}</div><b>${f.name}</b><small>${f.note}</small>
+          <small class="charm">${where(f)} · ~${f.growMin} min · harvested ${n} · in basket ${S.flowers[k] || 0}</small>
+          <div class="book-uses">${uses}</div></div>`
+        : `<div class="card book-card unknown"><div class="decor-ico">${F(k)}</div><b>???</b><small>Harvest one to fill in this page.</small></div>`;
+    }).join('')}</div>`;
+  };
+  const draws = { shop: drawShop, book: drawBook };
   const show = (t) => {
-    tab = t;
     $$('.seg-btn', body).forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t));
     draws[t](); inner.scrollTop = 0;
   };
@@ -313,13 +326,15 @@ function openIpad(tab = 'seeds') {
     else if (buy && !buy.disabled) {
       const k = buy.dataset.buy, n = +buy.dataset.n, cost = FLOWERS[k].seedCost * n;
       if (S.coins < cost) return;
+      const top = inner.scrollTop;
       S.coins -= cost; add(S.seeds, k, n);
-      save(); sfx('coin'); game.refreshHud(); drawSeeds();
+      save(); sfx('coin'); game.refreshHud(); drawShop(); inner.scrollTop = top;
     } else if (up && !up.disabled) {
       const k = up.dataset.up, u = UPGRADES[k];
       if (S.coins < u.cost) return;
+      const top = inner.scrollTop;
       S.coins -= u.cost; S.upgrades[k] = true;
-      save(); sfx('chime'); game.refreshHud(); drawUp(); render();
+      save(); sfx('chime'); game.refreshHud(); drawShop(); inner.scrollTop = top; render();
       toast(`${u.name} — done ✿`);
     }
   });
@@ -331,33 +346,36 @@ function render() {
   if (!canvas) return;
   const now = Date.now();
   let dry = 0, ready = 0, empty = 0;
+  $$('.planter', canvas).forEach((el) => el.classList.toggle('locked', !!PLANTERS[+el.dataset.p].unlock && !S.upgrades[PLANTERS[+el.dataset.p].unlock]));
   PLOTS.forEach((_, i) => {
     const el = plotEl(i);
-    const open = plotUnlocked(i);
-    el.classList.toggle('locked', !open);
-    if (!open) { $('.plot-bar', el).style.display = 'none'; lastKey[i] = 'locked'; $('.plant', el).innerHTML = ''; $('.plot-badge', el).innerHTML = UPGRADES[PLOTS[i].unlock] ? '<span class="lock">Upgrade</span>' : ''; return; }
+    if (!plotUnlocked(i)) return;
     const st = plotStage(i, now), p = S.garden[i];
     const key = `${p.key}:${st}`;
     if (lastKey[i] !== key) {
-      $('.plant', el).innerHTML = st >= 0 ? plotArt(p.key, st).repeat(PLOTS[i].type === 'soil' ? 3 : 1) : '';
+      $('.plant', el).innerHTML = st >= 1 ? plotArt(p.key, st) : '';
       if (lastKey[i] !== undefined && st === 3) bump(el);
       lastKey[i] = key;
     }
     const wet = st >= 0 && isWet(i, now);
     const thirsty = st >= 0 && st < 3 && !wet;
+    el.classList.toggle('planted', st >= 0);
     el.classList.toggle('wet', wet);
     el.classList.toggle('ready', st === 3);
     el.classList.toggle('empty', st === -1);
-    $('.plot-badge', el).innerHTML = thirsty ? `<span class="b-drop">${dropArt()}</span>` : st === 3 ? '<span class="b-ready">✿</span>' : '';
+    el.classList.toggle('thirsty', thirsty);
+    $('.plot-badge', el).innerHTML = thirsty && PLOTS[i].type === 'pot' ? `<span class="b-drop">${dropArt()}</span>` : '';
     const bar = $('.plot-bar', el);
     bar.style.display = st >= 0 && st < 3 ? '' : 'none';
     if (st >= 0 && st < 3) $('i', bar).style.width = `${Math.round((p.grown / (p.grown + plotRemaining(i))) * 100)}%`;
     if (thirsty) dry++; if (st === 3) ready++; if (st === -1) empty++;
   });
+  // one water-drop bubble per thirsty planter (not per patch)
+  $$('.planter', canvas).forEach((pl) => pl.classList.toggle('thirsty', !!$('.plot.thirsty', pl)));
   $('.g-hint', view).textContent =
-    ready ? `Swipe across the ${ready > 1 ? `${ready} ripe plants` : 'ripe plant'} to harvest ✿`
-    : dry ? 'Drag the watering can over the thirsty plants'
-    : empty ? 'Tap an empty bed or pot to plant seeds'
+    ready ? `Swipe across the ripe ${ready > 1 ? `plants (${ready})` : 'plant'} to harvest ✿`
+    : dry ? 'Drag the watering can over the thirsty planters'
+    : empty ? 'Tap an empty patch or pot to plant seeds'
     : 'Everything is growing nicely ♪';
 }
 

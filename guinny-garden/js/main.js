@@ -87,7 +87,7 @@ function settingsSheet() {
 
 function helpSheet() {
   openSheet({ title: 'How to play', body: `<div class="help">
-    <div class="help-step"><b>1 · Garden</b><p>Tap an empty bed or pot to plant seeds. Drag the watering can from the work bench over thirsty plants, and swipe across ripe plants to harvest. Plants grow in real time, even while you’re away. The bench iPad sells seeds and upgrades and keeps your plant notes.</p></div>
+    <div class="help-step"><b>1 · Garden</b><p>Tap an empty patch in a planter (or a pot) to plant seeds. Drag the watering can from the work bench over a planter to water it, and swipe across ripe plants to harvest. Plants grow in real time, even while you’re away. The bench iPad sells seeds and upgrades and holds Guinny’s Flower Encyclopedia.</p></div>
     <div class="help-step"><b>2 · 作業場</b><p>Turn flowers into tea and perfume at the workbench.</p></div>
     <div class="help-step"><b>3 · Shop</b><p>Tap the <b>iPad</b> to choose today’s menu (it shows on the board) or buy decor. When a customer orders, tap the <b>wrapping table</b>: arrange the bouquet, pack the bag, spray some perfume. Then hand over the bag and collect the coins.</p></div>
     <div class="help-step"><b>★ Trend</b><p>One item is popular each real day and sells for more. Decor adds charm ✿ for more visitors and tips.</p></div></div>` });

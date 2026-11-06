@@ -29,7 +29,12 @@ export let S = load();
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) { const d = JSON.parse(raw); delete d.plots; return Object.assign(fresh(), d); }
+    if (raw) {
+      const d = JSON.parse(raw);
+      delete d.plots;
+      if (!d.garden || d.garden.length !== PLOTS.length) delete d.garden;   // garden layout changed
+      return Object.assign(fresh(), d);
+    }
   } catch (_) { /* storage unavailable */ }
   return fresh();
 }
@@ -75,7 +80,7 @@ export function growMs(key) {
   return FLOWERS[key].growMin * 60_000 * (S.settings.speedy ? 0.1 : 1) * (S.upgrades.compost ? 0.75 : 1);
 }
 export const wetMs = (key) => growMs(key) * (S.upgrades.bigcan ? 1.05 : 0.5);
-const autoWet = (i) => S.upgrades.sprinkler && PLOTS[i].type === 'soil';
+const autoWet = (i) => !!S.upgrades.sprinkler && PLOTS[i].type === 'soil';
 
 export function updatePlot(i, now = Date.now()) {
   const p = S.garden[i];

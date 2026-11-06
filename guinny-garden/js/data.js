@@ -4,36 +4,42 @@
 
 // Garden crops. `where`: which plots they grow in (soil bed / flower pot).
 export const FLOWERS = {
-  chamomile: { name: 'Chamomile',  seedCost: 5,  growMin: 3,  yield: 3, where: ['soil', 'pot'], petal: '#FBF6EA', center: '#F2C94C', petals: 10,
+  chamomile: { name: 'Chamomile',  seedCost: 5,  growMin: 3,  yield: 2, where: ['soil', 'pot'], petal: '#FBF6EA', center: '#F2C94C', petals: 10,
     note: 'Little apple-scented daisies. Dried flowers make the gentlest bedtime tea.' },
-  mint:      { name: 'Mint',       seedCost: 5,  growMin: 2,  yield: 3, where: ['pot'], petal: '#B9D9B4', center: '#8DB88A', petals: 0, leaf: true,
+  mint:      { name: 'Mint',       seedCost: 5,  growMin: 2,  yield: 2, where: ['pot', 'soil'], petal: '#B9D9B4', center: '#8DB88A', petals: 0, leaf: true,
     note: 'Grows so eagerly it is best kept in a pot. Fresh, cool and great in tea.' },
-  daisy:     { name: 'Daisy',      seedCost: 6,  growMin: 4,  yield: 3, where: ['soil'], petal: '#F7D9DE', center: '#F2C94C', petals: 8,
+  daisy:     { name: 'Daisy',      seedCost: 6,  growMin: 4,  yield: 2, where: ['soil'], petal: '#F7D9DE', center: '#F2C94C', petals: 8,
     note: 'Cheerful and easy. A bundle of daisies is the shop’s favourite bouquet.' },
-  lavender:  { name: 'Lavender',   seedCost: 10, growMin: 6,  yield: 3, where: ['soil', 'pot'], petal: '#C9BCE3', center: '#A897CF', petals: 0, spike: true,
+  lavender:  { name: 'Lavender',   seedCost: 10, growMin: 6,  yield: 2, where: ['soil', 'pot'], petal: '#C9BCE3', center: '#A897CF', petals: 0, spike: true,
     note: 'Loves sun and dry feet. Its calm scent goes into perfume and tea blends.' },
-  strawberry:{ name: 'Strawberry', seedCost: 8,  growMin: 5,  yield: 4, where: ['pot'], petal: '#F0A9A8', center: '#A9C79A', petals: 0, fruit: true,
+  strawberry:{ name: 'Strawberry', seedCost: 8,  growMin: 5,  yield: 3, where: ['pot', 'soil'], petal: '#F0A9A8', center: '#A9C79A', petals: 0, fruit: true,
     note: 'Sweet little berries that ripen in pots. Lovely in a fruity tea.' },
-  rose:      { name: 'Rose',       seedCost: 12, growMin: 8,  yield: 3, where: ['soil'], petal: '#EBA9AE', center: '#D98A92', petals: 5, rose: true,
+  rose:      { name: 'Rose',       seedCost: 12, growMin: 8,  yield: 2, where: ['soil'], petal: '#EBA9AE', center: '#D98A92', petals: 5, rose: true,
     note: 'Takes patience, but nothing smells sweeter. Pressed into Guinny’s best perfume.' },
-  hydrangea: { name: 'Hydrangea',  seedCost: 15, growMin: 10, yield: 3, where: ['soil'], petal: '#B8CDE8', center: '#E9B7CF', petals: 0, cluster: true,
+  hydrangea: { name: 'Hydrangea',  seedCost: 15, growMin: 10, yield: 2, where: ['soil'], petal: '#B8CDE8', center: '#E9B7CF', petals: 0, cluster: true,
     note: 'Big soft clusters of blue and pink. The star of the fanciest bouquet.' },
 };
 
-// Garden plots: soil beds and flower pots. Positions live in css/style.css (Garden section).
+// Garden plots: 8 wooden planters × 4 patches, plus 2 flower pots.
+// Planters 0–1 are open from the start; the rest unlock with upgrades.
+// Positions live in css/style.css ("Garden" section).
+const PLANTER_UNLOCK = [null, null, 'beds', 'beds', 'beds2', 'beds2', 'beds3', 'beds3'];
+export const PLANTERS = PLANTER_UNLOCK.map((unlock) => ({ unlock }));
 export const PLOTS = [
-  ...Array.from({ length: 6 }, (_, i) => ({ type: 'soil', unlock: i < 4 ? null : 'beds' })),
-  ...Array.from({ length: 4 }, (_, i) => ({ type: 'pot', unlock: i < 2 ? null : 'pots' })),
+  ...PLANTER_UNLOCK.flatMap((unlock, planter) => [0, 1, 2, 3].map((q) => ({ type: 'soil', planter, q, unlock }))),
+  { type: 'pot', pot: 'big', unlock: null },
+  { type: 'pot', pot: 'small', unlock: null },
 ];
 
-// Garden upgrades, bought on the garden iPad.
+// Garden upgrades, sold in the Shop on the garden iPad.
 export const UPGRADES = {
-  beds:      { name: 'Extra Soil Beds',   cost: 120, desc: 'Dig two more soil beds.' },
-  pots:      { name: 'More Flower Pots',  cost: 80,  desc: 'Two more pots by the path.' },
-  bigcan:    { name: 'Big Watering Can',  cost: 150, desc: 'One watering lasts until harvest.' },
-  compost:   { name: 'Compost Bin',       cost: 200, desc: 'Everything grows 25% faster.' },
-  basket:    { name: 'Woven Basket',      cost: 180, desc: '+1 harvest from every plot.' },
-  sprinkler: { name: 'Little Sprinkler',  cost: 400, desc: 'Soil beds water themselves.' },
+  beds:      { name: 'Two More Planters',   cost: 120, desc: 'Build two more four-patch planters.' },
+  beds2:     { name: 'Even More Planters',  cost: 260, desc: 'Two more planters.', requires: 'beds' },
+  beds3:     { name: 'A Full Garden',       cost: 420, desc: 'The last two planters.', requires: 'beds2' },
+  bigcan:    { name: 'Big Watering Can',    cost: 150, desc: 'One watering lasts until harvest.' },
+  compost:   { name: 'Compost Bin',         cost: 200, desc: 'Everything grows 25% faster.' },
+  basket:    { name: 'Woven Basket',        cost: 180, desc: '+1 harvest from every patch.' },
+  sprinkler: { name: 'Little Sprinkler',    cost: 400, desc: 'Planters water themselves.' },
 };
 
 export const CATEGORIES = {
