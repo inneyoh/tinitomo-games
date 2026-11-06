@@ -32,6 +32,9 @@ export function mount(el, api) {
       <div class="menu-board" aria-label="Today's menu"></div>
       <img class="guinny" src="assets/img/guinny-apron.webp" alt="Guinny" draggable="false">
       <img class="layer" data-layer="counter" alt="" draggable="false">
+      <img class="prop prop-paper" src="assets/img/shop/prop-paper.webp" alt="" draggable="false">
+      <img class="prop prop-ribbon" src="assets/img/shop/prop-ribbon.webp" alt="" draggable="false">
+      <img class="prop prop-ipad" src="assets/img/shop/prop-ipad.webp" alt="" draggable="false">
       <div class="decor-spot" data-spot="plush"></div>
       <div class="decor-spot" data-spot="rug"></div>
       <button class="hot hot-pack" aria-label="Packing area"><span class="hot-tag">Wrap ✿</span></button>
@@ -61,7 +64,7 @@ export function mount(el, api) {
 
 // Pick the landscape or portrait background to fit the view.
 // Keep the counter, packing table, iPad, menu board and customer spot on screen.
-const KEEP = { landscape: [0.06, 0.15, 0.97, 0.97], portrait: [0.02, 0.1, 0.98, 0.9] };
+const KEEP = { landscape: [0.06, 0.15, 0.97, 0.97], portrait: [0, 0.1, 1, 0.9] };
 function layout() {
   const vw = view.clientWidth, vh = view.clientHeight;
   if (!vw || !vh) return;
@@ -307,8 +310,10 @@ function finishPacking(key, scent) {
 function render() {
   const pack = $('.hot-pack', view), bag = $('.bag', view);
   pack.classList.toggle('attn', !!cust && cust.stage === 'waiting' && available(cust.want) > 0);
+  $$('.prop-paper, .prop-ribbon', canvas).forEach((el) => el.classList.toggle('glow', pack.classList.contains('attn')));
   bag.classList.toggle('attn', !!cust && cust.stage === 'ready');
   $('.hot-ipad', view).classList.toggle('attn', !S.lineup.length || (!cust && !sellable().length));
+  $('.prop-ipad', canvas).classList.toggle('glow', $('.hot-ipad', view).classList.contains('attn'));
   let t;
   if (!cust) {
     t = !S.lineup.length ? 'Tap the iPad to choose today’s menu'
