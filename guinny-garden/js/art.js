@@ -50,6 +50,11 @@ function flowerHead(key, cx = 50, cy = 46, scale = 1) {
     });
     return g(b);
   }
+  if (f.fruit) {
+    return g(`<path d="M50 78 C30 72 24 46 32 36 C40 28 60 28 68 36 C76 46 70 72 50 78Z" fill="${f.petal}" ${S}/>
+      ${[[40, 46], [56, 44], [48, 56], [38, 60], [60, 58], [50, 68]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="1.8" ry="2.6" fill="#F8E7B8"/>`).join('')}
+      <path d="M50 34 L38 24 L46 32 L40 18 L50 30 L60 18 L54 32 L62 24Z" fill="${f.center}" ${S} stroke-width="2.5"/>`);
+  }
   if (f.rose) {
     return g(`<circle cx="50" cy="46" r="27" fill="${f.petal}" ${S}/>
       <path d="M50 30 C64 30 68 46 58 54 C50 60 38 54 40 44 C42 36 52 36 54 44" fill="none" ${S}/>
@@ -98,6 +103,7 @@ export function productArt(key) {
   if (p.cat === 'tea') {
     const icon = key === 'chamomile_tea' ? flowerHead('chamomile', 50, 59, 0.3)
       : key === 'mint_tea' ? flowerHead('mint', 50, 60, 0.32)
+      : key === 'strawberry_tea' ? flowerHead('strawberry', 50, 60, 0.32)
       : flowerHead('lavender', 50, 60, 0.3);
     return svg(teaTin(p) + icon);
   }
@@ -162,6 +168,22 @@ export const decorArt = {
     <path d="M24 56 L22 36 L38 48Z M62 48 L74 34 L78 54Z" fill="#E9D8C4" ${S}/><path d="M30 64 Q34 67 38 64 M58 64 Q62 67 66 64" fill="none" ${S} stroke-width="2.5"/>
     <path d="M84 74 C96 70 96 56 88 54" fill="none" ${S}/><text x="76" y="30" font-size="16" fill="${OL}" font-family="sans-serif">z</text>`),
 };
+
+// --- Garden tools -------------------------------------------------------------
+export const ipadArt = () => svg(`<rect x="12" y="8" width="76" height="84" rx="10" fill="#FBF6EC" ${S}/>
+  <rect x="20" y="16" width="60" height="64" rx="4" fill="#BFD6AE" ${S} stroke-width="2.5"/>
+  ${flowerHead('daisy', 50, 46, 0.4)}<circle cx="50" cy="86" r="2.5" fill="${OL}"/>`);
+export const basketArt = (full = false) => svg(`
+  ${full ? `${flowerHead('daisy', 36, 40, 0.3)}${flowerHead('rose', 58, 36, 0.3)}${flowerHead('chamomile', 48, 44, 0.26)}` : ''}
+  <path d="M30 44 C30 14 70 14 70 44" fill="none" ${S} stroke-width="5"/><path d="M30 44 C30 14 70 14 70 44" fill="none" stroke="#E6C890" stroke-width="2"/>
+  <path d="M14 46 L86 46 L76 88 L24 88Z" fill="#E3C38F" ${S}/>
+  <path d="M18 60 L82 60 M21 74 L79 74 M34 46 L36 88 M50 46 L50 88 M66 46 L64 88" stroke="#C9A06A" stroke-width="2.5" fill="none"/>`);
+export const shearsArt = () => svg(`<path d="M50 52 L80 14 M50 52 L22 18" ${S} stroke-width="6"/><path d="M50 52 L80 14 M50 52 L22 18" stroke="#DCE3E8" stroke-width="2"/>
+  <circle cx="36" cy="72" r="13" fill="none" ${S} stroke-width="6"/><circle cx="36" cy="72" r="13" fill="none" stroke="#EBA9AE" stroke-width="2.5"/>
+  <circle cx="64" cy="72" r="13" fill="none" ${S} stroke-width="6"/><circle cx="64" cy="72" r="13" fill="none" stroke="#EBA9AE" stroke-width="2.5"/>
+  <path d="M44 62 L50 52 L56 62" fill="none" ${S}/>`);
+export const dropArt = () => svg(`<path d="M50 10 C64 32 78 46 78 62 C78 80 64 90 50 90 C36 90 22 80 22 62 C22 46 36 32 50 10Z" fill="#B9D6EA" ${S} stroke-width="5"/>
+  <path d="M36 62 C36 70 42 76 48 76" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`);
 
 // Plot art for each growth stage
 export function plotArt(key, stage) {

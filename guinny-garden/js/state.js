@@ -1,5 +1,5 @@
 // Save/load, real-world clock, and shared helpers.
-import { START, DECOR, PRODUCTS, FLOWERS } from './data.js';
+import { START, DECOR, PRODUCTS, FLOWERS, PLOTS } from './data.js';
 
 const KEY = 'guinny-garden-v1';
 
@@ -14,7 +14,9 @@ function fresh() {
     stock: { ...START.stock },
     lineup: [...START.lineup],
     decor: {},              // key -> { placed: bool }
-    plots: Array.from({ length: START.plots }, () => ({ key: null, plantedAt: 0, watered: false })),
+    garden: PLOTS.map(() => ({ key: null })),   // { key, grown(ms), t(last update), wetUntil }
+    upgrades: {},
+    harvested: {},          // crop -> total harvested (unlocks encyclopedia notes)
     day: { date: todayKey(), number: 1, earned: 0, served: 0 },
     lastDay: null,          // summary of previous day
     settings: { sound: true, speedy: false },
@@ -27,7 +29,7 @@ export let S = load();
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return Object.assign(fresh(), JSON.parse(raw));
+    if (raw) { const d = JSON.parse(raw); delete d.plots; return Object.assign(fresh(), d); }
   } catch (_) { /* storage unavailable */ }
   return fresh();
 }
@@ -66,19 +68,34 @@ export function available(key) {
 export const priceOf = (key) => Math.round(PRODUCTS[key].price * (trend() === key ? 1.3 : 1));
 
 // --- garden time ---------------------------------------------------------
+// Crops only grow while their soil is wet. Watering keeps a plot wet for half
+// the grow time (the whole time with the Big Watering Can), so most crops need
+// two waterings. Progress is stored as ms grown so it keeps going offline.
 export function growMs(key) {
-  return FLOWERS[key].growMin * 60_000 * (S.settings.speedy ? 0.1 : 1);
+  return FLOWERS[key].growMin * 60_000 * (S.settings.speedy ? 0.1 : 1) * (S.upgrades.compost ? 0.75 : 1);
 }
-// 0 = seeded (needs water), 1 = sprout, 2 = bud, 3 = ready
-export function plotStage(p, now = Date.now()) {
+export const wetMs = (key) => growMs(key) * (S.upgrades.bigcan ? 1.05 : 0.5);
+const autoWet = (i) => S.upgrades.sprinkler && PLOTS[i].type === 'soil';
+
+export function updatePlot(i, now = Date.now()) {
+  const p = S.garden[i];
+  if (!p.key) return p;
+  const wetEnd = autoWet(i) ? now : p.wetUntil || 0;
+  if (p.t < wetEnd) p.grown = Math.min(growMs(p.key), p.grown + Math.min(now, wetEnd) - p.t);
+  p.t = now;
+  return p;
+}
+export const isWet = (i, now = Date.now()) => autoWet(i) || (S.garden[i].wetUntil || 0) > now;
+// -1 empty · 0 seeded · 1 sprout · 2 bud · 3 ready
+export function plotStage(i, now = Date.now()) {
+  const p = updatePlot(i, now);
   if (!p.key) return -1;
-  if (!p.watered) return 0;
-  const t = (now - p.plantedAt) / growMs(p.key);
-  return t >= 1 ? 3 : t >= 0.45 ? 2 : 1;
+  const t = p.grown / growMs(p.key);
+  return t >= 1 ? 3 : t >= 0.45 ? 2 : t > 0 ? 1 : 0;
 }
-export function plotRemaining(p, now = Date.now()) {
-  return Math.max(0, p.plantedAt + growMs(p.key) - now);
-}
+export const needsWater = (i, now = Date.now()) => { const st = plotStage(i, now); return st >= 0 && st < 3 && !isWet(i, now); };
+export const plotRemaining = (i) => { const p = S.garden[i]; return Math.max(0, growMs(p.key) - p.grown); };
+export const plotUnlocked = (i) => !PLOTS[i].unlock || !!S.upgrades[PLOTS[i].unlock];
 
 // --- real-world clock ------------------------------------------------------
 export function timeOfDay(d = new Date()) {
