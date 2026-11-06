@@ -9,12 +9,12 @@
 import { FLOWERS, PRODUCTS, PLOTS, PLANTERS, UPGRADES } from '../data.js';
 import { S, save, add, plotStage, plotRemaining, plotUnlocked, isWet, needsWater, updatePlot, wetMs, fmtTime } from '../state.js';
 import { F, SEED, P, plotArt, coinArt, dropArt } from '../art.js';
-import { $, $$, h, openSheet, toast, floatText, bump, sfx } from '../ui.js';
+import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 
 const IMG = 'assets/img/garden/';
 const SIZE = { landscape: [1672, 941], portrait: [941, 1672] };
 // Part of the canvas that must stay visible (fractions); the rest is lawn that may be cropped.
-const KEEP = { landscape: [0.02, 0.03, 0.99, 0.88], portrait: [0.03, 0.02, 0.97, 0.93] };
+const KEEP = { landscape: [0.02, 0, 0.99, 0.88], portrait: [0.03, 0, 0.97, 0.92] };
 let root, view, canvas, game;
 let active = false;
 let orient = '';
@@ -36,14 +36,14 @@ export function mount(el, api) {
   <div class="view garden-view">
     <div class="canvas g-canvas">
       <img class="layer g-lawn" alt="" draggable="false">
-      <img class="guinny" src="assets/img/guinny-garden.webp" alt="Guinny" draggable="false">
+      <img class="layer g-lawn layer-ext" alt="" draggable="false">
       <img class="g-pot big" src="${IMG}pot-big.webp" alt="" draggable="false">
       <img class="g-pot small" src="${IMG}pot-small.webp" alt="" draggable="false">
       ${PLOTS.map((p, i) => (p.type === 'pot' ? plotMarkup(i).replace('class="plot pot', `class="plot pot ${p.pot}`) : '')).join('')}
       <img class="g-bench" src="${IMG}bench.webp" alt="" draggable="false">
       <img class="g-trowel" src="${IMG}trowel.webp" alt="" draggable="false">
-      <button class="tool tool-ipad" aria-label="Garden iPad"><img src="${IMG}ipad.webp" alt="" draggable="false"><span class="hot-tag">iPad</span></button>
-      <button class="tool tool-can" aria-label="Watering can — drag over plants"><img src="${IMG}can.webp" alt="" draggable="false"><span class="hot-tag">Drag to water</span></button>
+      <button class="tool tool-ipad" aria-label="Garden iPad"><img src="${IMG}ipad.webp" alt="" draggable="false"><span class="hot-tag">Buy seeds</span></button>
+      <button class="tool tool-can" aria-label="Watering can — drag over plants"><img src="${IMG}can.webp" alt="" draggable="false"></button>
       ${PLANTERS.map((_, n) => `
         <div class="planter" data-p="${n}">
           <img class="planter-img" src="${IMG}planter.webp" alt="" draggable="false">
@@ -66,17 +66,13 @@ export function mount(el, api) {
   render();
 }
 
-// Fit the canvas: cover the view as much as possible while keeping the play area visible.
 function layout() {
   const vw = view.clientWidth, vh = view.clientHeight;
   if (!vw || !vh) return;
   const o = vw >= vh ? 'landscape' : 'portrait';
-  if (o !== orient) { orient = o; canvas.dataset.o = o; $('.g-lawn', canvas).src = `${IMG}lawn-${o}.webp`; }
-  const [W, H] = SIZE[o], [x0, y0, x1, y1] = KEEP[o];
-  const s = Math.min(Math.max(vw / W, vh / H), vw / (W * (x1 - x0)), vh / (H * (y1 - y0)));
-  const cw = W * s, ch = H * s;
-  const fit = (v, c, a, b) => (c <= v ? (v - c) / 2 : Math.min(-a * c, Math.max(v - b * c, (v - c) / 2)));
-  Object.assign(canvas.style, { width: `${cw}px`, height: `${ch}px`, left: `${fit(vw, cw, x0, x1)}px`, top: `${fit(vh, ch, y0, y1)}px` });
+  if (o !== orient) { orient = o; canvas.dataset.o = o; $$('.g-lawn', canvas).forEach((img) => { img.src = `${IMG}lawn-${o}.webp`; }); }
+  // fence at the top edge; any spare height below continues as lawn
+  fitCanvas(view, canvas, ...SIZE[o], KEEP[o], 0);
 }
 
 export function enter() { active = true; layout(); render(); }
@@ -346,7 +342,12 @@ function render() {
   if (!canvas) return;
   const now = Date.now();
   let dry = 0, ready = 0, empty = 0;
-  $$('.planter', canvas).forEach((el) => el.classList.toggle('locked', !!PLANTERS[+el.dataset.p].unlock && !S.upgrades[PLANTERS[+el.dataset.p].unlock]));
+  $$('.planter', canvas).forEach((el) => {
+    const u = PLANTERS[+el.dataset.p].unlock;
+    el.classList.toggle('locked', !!u && !S.upgrades[u]);
+    // only the next planters you can buy get a label; the rest stay quietly faded
+    el.classList.toggle('next', !!u && !S.upgrades[u] && (!UPGRADES[u].requires || !!S.upgrades[UPGRADES[u].requires]));
+  });
   PLOTS.forEach((_, i) => {
     const el = plotEl(i);
     if (!plotUnlocked(i)) return;
@@ -372,11 +373,13 @@ function render() {
   });
   // one water-drop bubble per thirsty planter (not per patch)
   $$('.planter', canvas).forEach((pl) => pl.classList.toggle('thirsty', !!$('.plot.thirsty', pl)));
-  $('.g-hint', view).textContent =
+  $('.tool-can', view).classList.toggle('attn', dry > 0);
+  $('.tool-ipad', view).classList.toggle('attn', !Object.values(S.seeds).some(Boolean) && empty > 0);
+  hint($('.g-hint', view),
     ready ? `Swipe across the ripe ${ready > 1 ? `plants (${ready})` : 'plant'} to harvest ✿`
     : dry ? 'Drag the watering can over the thirsty planters'
     : empty ? 'Tap an empty patch or pot to plant seeds'
-    : 'Everything is growing nicely ♪';
+    : 'Everything is growing nicely ♪');
 }
 
 export const refresh = () => { lastKey.length = 0; render(); };

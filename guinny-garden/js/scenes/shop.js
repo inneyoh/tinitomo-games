@@ -6,7 +6,7 @@
 import { PRODUCTS, DECOR, CUSTOMERS, FLOWERS, GREETINGS, THANKS } from '../data.js';
 import { S, save, add, charm, lineupSlots, trend, priceOf, timeOfDay, available } from '../state.js';
 import { P, F, D, coinArt, bagArt, sprayArt, customerSrc } from '../art.js';
-import { $, $$, h, openSheet, toast, floatText, bump, sfx } from '../ui.js';
+import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const LAYERS = ['wall', 'floor', 'window', 'board'];
@@ -23,6 +23,7 @@ export function mount(el, api) {
   root.innerHTML = `
   <div class="view shop-view">
     <div class="canvas">
+      <img class="layer layer-ext" data-layer="floor" alt="" draggable="false">
       ${LAYERS.map((k) => `<img class="layer" data-layer="${k}" alt="" draggable="false">`).join('')}
       <div class="decor-spot" data-spot="painting"></div>
       <div class="decor-spot" data-spot="windowbox"></div>
@@ -59,16 +60,21 @@ export function mount(el, api) {
 }
 
 // Pick the landscape or portrait background to fit the view.
+// Keep the counter, packing table, iPad, menu board and customer spot on screen.
+const KEEP = { landscape: [0.06, 0.15, 0.97, 0.97], portrait: [0.02, 0.1, 0.98, 0.9] };
 function layout() {
-  const r = view.getBoundingClientRect();
-  const o = r.width >= r.height ? 'landscape' : 'portrait';
-  if (o === orient) return;
-  orient = o;
-  canvas.dataset.o = o;
-  $$('.layer', canvas).forEach((img) => { img.src = `assets/img/shop/${o}-${img.dataset.layer}.webp`; });
+  const vw = view.clientWidth, vh = view.clientHeight;
+  if (!vw || !vh) return;
+  const o = vw >= vh ? 'landscape' : 'portrait';
+  if (o !== orient) {
+    orient = o;
+    canvas.dataset.o = o;
+    $$('.layer', canvas).forEach((img) => { img.src = `assets/img/shop/${o}-${img.dataset.layer}.webp`; });
+  }
+  fitCanvas(view, canvas, o === 'landscape' ? 1672 : 941, o === 'landscape' ? 941 : 1672, KEEP[o], 0);
 }
 
-export function enter() { active = true; if (!cust) nextAt = Date.now() + 1500; renderBoard(); render(); }
+export function enter() { active = true; layout(); if (!cust) nextAt = Date.now() + 1500; renderBoard(); render(); }
 export function leave() { active = false; }
 export function tick(now) {
   if (!active) return;
@@ -299,7 +305,6 @@ function finishPacking(key, scent) {
 
 // ---------------------------------------------------------------------------
 function render() {
-  const hint = $('.shop-hint', view);
   const pack = $('.hot-pack', view), bag = $('.bag', view);
   pack.classList.toggle('attn', !!cust && cust.stage === 'waiting' && available(cust.want) > 0);
   bag.classList.toggle('attn', !!cust && cust.stage === 'ready');
@@ -320,7 +325,7 @@ function render() {
       leaving: `${who} is heading home`,
     }[cust.stage];
   }
-  hint.textContent = t;
+  hint($('.shop-hint', view), t);
 }
 
 function renderBoard() {

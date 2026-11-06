@@ -90,3 +90,28 @@ export function sfx(name) {
     }
   } catch (_) { /* audio unavailable */ }
 }
+
+// Hint bubble: shows when its text changes, then fades out after a few seconds.
+export function hint(el, text) {
+  if (!el || el.textContent === text) return;
+  el.textContent = text;
+  el.classList.remove('quiet');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.add('quiet'), 4500);
+}
+
+// Fit a fixed-ratio art canvas into a view: cover the view as much as possible
+// while keeping `keep` = [x0, y0, x1, y1] (fractions of the canvas) on screen.
+// alignY: where to put the canvas when it is shorter than the view (0 top ... 1 bottom).
+export function fitCanvas(view, canvas, W, H, keep, alignY = 0.5) {
+  const vw = view.clientWidth, vh = view.clientHeight;
+  if (!vw || !vh) return;
+  const [x0, y0, x1, y1] = keep;
+  const s = Math.min(Math.max(vw / W, vh / H), vw / (W * (x1 - x0)), vh / (H * (y1 - y0)));
+  const cw = W * s, ch = H * s;
+  const fit = (v, c, a, b, al) => (c <= v ? (v - c) * al : Math.min(-a * c, Math.max(v - b * c, (v - c) / 2)));
+  Object.assign(canvas.style, {
+    width: cw + 'px', height: ch + 'px', transform: 'none',
+    left: fit(vw, cw, x0, x1, 0.5) + 'px', top: fit(vh, ch, y0, y1, alignY) + 'px',
+  });
+}

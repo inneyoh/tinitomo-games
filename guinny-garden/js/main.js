@@ -24,13 +24,28 @@ function go(name) {
   current = name;
   $$('.scene').forEach(s => s.classList.toggle('active', s.dataset.scene === name));
   $$('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.go === name));
+  $('.nav-toggle').innerHTML = $('.tab[data-go="' + name + '"] svg').outerHTML;
+  setNav(false);
   scenes[name].enter();
   try { sessionStorage.setItem('gg-scene', name); } catch (_) { /* ignore */ }
 }
 
+let hudTimer = 0;
+function setHud(open) {
+  $('.float-hud').classList.toggle('open', open);
+  $('.hud-toggle').setAttribute('aria-expanded', open);
+  clearTimeout(hudTimer);
+  if (open) hudTimer = setTimeout(() => setHud(false), 5000);
+}
+function setNav(open) {
+  $('.float-nav').classList.toggle('open', open);
+  $('.nav-toggle').setAttribute('aria-expanded', open);
+  $('.nav-scrim').classList.toggle('on', open);
+}
+
 function refreshHud(pulse = false) {
-  $('.hud-coins b').textContent = S.coins;
-  if (pulse) bump($('.hud-coins'));
+  $('.hud-toggle b').textContent = S.coins;
+  if (pulse) bump($('.hud-toggle'));
 }
 
 function tickClock() {
@@ -95,10 +110,13 @@ function helpSheet() {
 
 // ---------------------------------------------------------------------------
 function boot() {
-  $('.hud-coins i').innerHTML = coinArt();
+  $('.hud-toggle i').innerHTML = coinArt();
+  $('.hud-toggle').addEventListener('click', () => { sfx('tap'); setHud(!$('.float-hud').classList.contains('open')); });
+  $('.nav-toggle').addEventListener('click', () => { sfx('tap'); setNav(!$('.float-nav').classList.contains('open')); });
+  $('.nav-scrim').addEventListener('click', () => setNav(false));
   for (const [name, mod] of Object.entries(scenes)) mod.mount($(`.scene[data-scene="${name}"]`), api);
-  $$('.tab').forEach(t => t.addEventListener('click', () => { sfx('tap'); go(t.dataset.go); }));
-  $('.hud-settings').addEventListener('click', () => { sfx('tap'); settingsSheet(); });
+  $$('.tab').forEach(t => t.addEventListener('click', () => { sfx('tap'); if (current === t.dataset.go) setNav(false); go(t.dataset.go); }));
+  $('.hud-settings').addEventListener('click', () => { sfx('tap'); setHud(false); settingsSheet(); });
 
   refreshHud();
   tickClock();

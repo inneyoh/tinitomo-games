@@ -133,45 +133,48 @@ b { font-weight: 800; }
 @keyframes float { 50% { transform: translateY(-6px); } }
 @keyframes wobble { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg) translateY(-3px); } }
 
-/* ---------- app shell ---------- */
-#app {
-  position: fixed; inset: 0; display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto; grid-template-areas: "hud" "stage" "tabs";
-  padding: var(--safe-t) var(--safe-r) 0 var(--safe-l);
-}
-.hud { grid-area: hud; display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
-.hud-coins {
-  display: flex; align-items: center; gap: 6px; height: 48px; padding: 0 16px 0 6px;
-  background: var(--paper); border: 2.5px solid var(--line); border-radius: 999px; box-shadow: var(--shadow);
-  font-size: 1.15rem;
-}
-.hud-coins i { width: 34px; height: 34px; }
-.hud-clock { flex: 1; text-align: center; line-height: 1.15; }
-.hud-time { font-size: 1.15rem; }
-.hud-day { font-size: .78rem; }
-
-.stage { grid-area: stage; position: relative; min-height: 0; }
-.scene {
-  position: absolute; inset: 0; display: none; container-type: size;
-  grid-template-rows: minmax(0, 1fr) auto; gap: 10px; padding: 0 12px 10px;
-}
-.scene.active { display: grid; animation: fadein .3s ease; }
+/* ---------- app shell: full-screen scenes + two small floating buttons ---------- */
+#app { position: fixed; inset: 0; overflow: hidden; }
+.stage { position: absolute; inset: 0; }
+.scene { position: absolute; inset: 0; display: none; container-type: size; }
+.scene.active { display: block; animation: fadein .3s ease; }
+.scene > .view { position: absolute; inset: 0; border: 0; border-radius: 0; }
 @keyframes fadein { from { opacity: 0; } }
 
-.tabs {
-  grid-area: tabs; display: flex; gap: 8px; padding: 8px 12px calc(8px + var(--safe-b));
-  background: var(--cream); border-top: 2.5px solid var(--line);
-  --tab-fill: var(--paper); --tab-accent: var(--pink);
+.float-btn {
+  display: flex; align-items: center; gap: 6px; height: 48px; min-width: 48px; padding: 0 14px 0 6px;
+  background: rgba(255, 252, 246, .92); border: 2.5px solid var(--line); border-radius: 999px;
+  box-shadow: var(--shadow); font-weight: 800; color: var(--ink); backdrop-filter: blur(4px);
 }
-.tab {
-  flex: 1; min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  border-radius: var(--r-md); font-weight: 800; font-size: .95rem; color: var(--ink-soft); line-height: 1.1;
-  border: 2.5px solid transparent;
-}
-.tab svg { width: 30px; height: 30px; }
-.tab small { font-size: .66rem; }
-.tab[aria-selected="true"] { background: var(--sage-l); color: var(--ink); border-color: var(--line); --tab-fill: #fff; --tab-accent: var(--rose); }
-.tab span { text-align: center; }
+.float-btn:active { transform: translateY(2px); box-shadow: none; }
+
+/* top-left: coins — tap to see the clock, day and settings */
+.float-hud { position: fixed; z-index: 30; left: calc(10px + var(--safe-l)); top: calc(10px + var(--safe-t)); display: flex; align-items: flex-start; gap: 8px; }
+.hud-toggle i { width: 34px; height: 34px; }
+.hud-toggle b { font-size: 1.1rem; min-width: 2ch; }
+.hud-panel { display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 6px 0 14px;
+  background: rgba(255, 252, 246, .95); border: 2.5px solid var(--line); border-radius: 999px; box-shadow: var(--shadow);
+  transform-origin: 0 50%; transition: transform .2s ease, opacity .2s; }
+.float-hud:not(.open) .hud-panel { transform: scaleX(.6); opacity: 0; pointer-events: none; }
+.hud-clock { line-height: 1.1; white-space: nowrap; }
+.hud-time { font-size: 1rem; } .hud-day { font-size: .72rem; }
+.hud-panel .btn-round { width: 38px; height: 38px; min-width: 38px; box-shadow: none; border-width: 2px; }
+.hud-panel .btn-round svg { width: 22px; height: 22px; }
+
+/* bottom-right: area switcher — tap to fan out the three areas */
+.float-nav { position: fixed; z-index: 30; right: calc(12px + var(--safe-r)); bottom: calc(12px + var(--safe-b)); display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  --tab-fill: var(--paper); --tab-accent: var(--pink); }
+.nav-toggle { width: 60px; height: 60px; padding: 0; justify-content: center; }
+.nav-toggle svg { width: 34px; height: 34px; }
+.nav-items { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+.float-nav .tab { height: 52px; padding: 0 16px 0 8px; gap: 8px; font-size: .95rem; transition: transform .2s ease, opacity .2s; }
+.float-nav .tab svg { width: 32px; height: 32px; }
+.float-nav .tab small { display: inline; font-size: .7rem; color: var(--ink-soft); margin-left: 4px; }
+.float-nav .tab[aria-selected="true"] { background: var(--sage-l); --tab-fill: #fff; --tab-accent: var(--rose); }
+.float-nav:not(.open) .tab { opacity: 0; transform: translateY(30px) scale(.8); pointer-events: none; }
+.float-nav .tab:nth-child(1) { transition-delay: .06s; } .float-nav .tab:nth-child(2) { transition-delay: .03s; }
+.nav-scrim { position: fixed; inset: 0; z-index: 29; display: none; }
+.nav-scrim.on { display: block; }
 
 /* ---------- scene view (the illustrated area) ---------- */
 .view {
@@ -328,48 +331,15 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .customer.bump, .plot.bump, .bag.bump { animation: pop .35s ease !important; }
 .bubble.bump { animation: none !important; }
 
-/* ---------- landscape ---------- */
-@media (orientation: landscape) and (min-aspect-ratio: 6/5) {
-  #app {
-    grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr);
-    grid-template-areas: "tabs hud" "tabs stage"; padding: 0 var(--safe-r) 0 0;
-  }
-  .tabs {
-    flex-direction: column; justify-content: center; width: calc(100px + var(--safe-l));
-    padding: calc(10px + var(--safe-t)) 10px calc(10px + var(--safe-b)) calc(10px + var(--safe-l));
-    border-top: 0; border-right: 2.5px solid var(--line);
-  }
-  .tab { flex: 0 1 96px; min-height: 76px; }
-  .hud { padding-top: calc(8px + var(--safe-t)); }
-  .scene { grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr) clamp(300px, 38cqw, 420px); padding-bottom: calc(10px + var(--safe-b)); }
-  .panel, .work-panel { max-height: none; height: auto; }
-}
-/* very short landscape phones: tighter chrome */
-@media (orientation: landscape) and (max-height: 480px) {
-  .hud { padding-top: calc(4px + var(--safe-t)); padding-bottom: 4px; }
-  .tab small { display: none; }
-  .tab { min-height: 64px; }
-  .btn-tile { min-height: 64px; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-
-/* narrow side panel: stack tile icon over label so nothing gets squeezed */
-@container (max-width: 760px) and (orientation: landscape) {
-  .scene .tile-row .btn-tile { flex-direction: column; justify-content: center; text-align: center; gap: 4px; padding: 8px 6px; font-size: .95rem; }
-  .scene .tile-row .tile-ico { width: 36px; height: 36px; }
 }
 
 /* ====================================================================
    Shop front — layered background art on a fixed-ratio canvas.
    All positions are % of the canvas, so they line up with the art.
    ==================================================================== */
-.scene.full { grid-template-rows: minmax(0, 1fr) !important; grid-template-columns: minmax(0, 1fr) !important; padding: 0 !important; }
-.scene.full .view { border-radius: 0; border: 0; border-top: 2.5px solid var(--line); }
-@media (orientation: landscape) and (min-aspect-ratio: 6/5) { .scene.full .view { border-top: 0; } }
-.shop-view { background: #F7DDC0; }
+.shop-view { background: #F0AF71; }
 .canvas { position: absolute; left: 50%; transform: translateX(-50%); container-type: size; }
 /* cover the view; crop more from the ceiling than from the floor */
 .canvas[data-o="landscape"] {
@@ -481,11 +451,17 @@ body[data-tod="night"] .cloud { opacity: .25; }
 [data-o="portrait"]  [data-spot="plush"]     { left: 26%; top: 38.5%; width: 11%; aspect-ratio: 1; z-index: 11; }
 
 /* Floating hint along the bottom of the shop */
+/* hint bubble: appears when something changes, then fades away */
 .shop-hint {
-  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); z-index: 20; width: max-content; max-width: calc(100% - 24px);
-  background: var(--paper); border: 2.5px solid var(--line); border-radius: 999px; padding: 8px 16px; text-align: center;
-  font-weight: 800; font-size: .92rem; box-shadow: var(--shadow); pointer-events: none;
+  position: absolute; z-index: 20; left: calc(12px + var(--safe-l)); right: calc(84px + var(--safe-r)); bottom: calc(18px + var(--safe-b));
+  width: max-content; max-width: calc(100% - 96px - var(--safe-l) - var(--safe-r)); margin: 0 auto;
+  background: rgba(255, 252, 246, .94); border: 2px solid var(--line); border-radius: 999px; padding: 7px 14px; text-align: center;
+  font-weight: 800; font-size: .86rem; box-shadow: var(--shadow); pointer-events: none; transition: opacity .5s, transform .5s;
 }
+.shop-hint.quiet { opacity: 0; transform: translateY(8px); }
+/* tool labels only show when the tool needs attention */
+.hot .hot-tag, .g-canvas .tool .hot-tag { opacity: 0; transition: opacity .3s; }
+.hot.attn .hot-tag, .g-canvas .tool.attn .hot-tag { opacity: 1; }
 
 /* --- Packing pop-up --- */
 .pack { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
@@ -526,9 +502,6 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .seg { display: flex; gap: 6px; padding: 5px; background: rgba(255, 255, 255, .55); border: 2.5px solid var(--line); border-radius: 999px; }
 .seg-btn { flex: 1; min-height: 50px; border-radius: 999px; font-weight: 800; color: var(--ink-soft); }
 .seg-btn[aria-selected="true"] { background: var(--sage); color: #fff; text-shadow: 0 1px 0 rgba(94, 69, 53, .3); box-shadow: inset 0 0 0 2px var(--line); }
-@media (orientation: landscape) and (min-aspect-ratio: 6/5) {
-  .shop-hint { left: 14px; transform: none; max-width: min(60%, 460px); text-align: left; border-radius: 22px; }
-}
 
 /* ====================================================================
    Garden — lawn background + prop sprites (assets/img/garden), laid out
@@ -539,9 +512,6 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .g-canvas { transform: none; touch-action: none; }
 .g-canvas img { pointer-events: none; user-select: none; -webkit-user-drag: none; }
 .g-lawn { inset: 0; width: 100%; height: 100%; }
-.g-canvas .guinny { z-index: 3; }
-.g-canvas[data-o="landscape"] .guinny { left: 71%; top: 4%; width: 14%; }
-.g-canvas[data-o="portrait"] .guinny { display: none; }
 
 /* props */
 .g-pot { z-index: 2; height: auto; }
@@ -551,6 +521,8 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .g-canvas .tool img { width: 100%; height: auto; display: block; }
 .g-canvas .tool .hot-tag { top: 100%; bottom: auto; margin-top: 2px; z-index: 5; }
 .tool-can { cursor: grab; touch-action: none; }
+.tool-can.attn img { animation: wiggle 1.6s ease-in-out infinite; transform-origin: 70% 90%; }
+@keyframes wiggle { 0%, 70%, 100% { transform: none; } 78% { transform: rotate(-8deg); } 86% { transform: rotate(6deg); } 94% { transform: rotate(-3deg); } }
 .tool-can.lifted img { opacity: .25; }
 .tool-ipad:active { transform: scale(.95); }
 [data-o="landscape"] .g-pot.big   { left: 12.9%; top: 10%;   width: 7.2%; }
@@ -590,7 +562,8 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .planter.locked .planter-img { filter: grayscale(.4) opacity(.55); }
 .planter.locked .plot { display: none; }
 .planter-lock { position: absolute; inset: 0; display: none; place-items: center; }
-.planter.locked .planter-lock { display: grid; }
+.planter.locked.next .planter-lock { display: grid; }
+.planter.locked:not(.next) .planter-img { filter: grayscale(.5) opacity(.4); }
 .planter-drop { position: absolute; left: 50%; top: -6%; transform: translate(-50%, -50%); display: none !important; z-index: 6; }
 .planter.thirsty .planter-drop { display: block !important; }
 
@@ -668,3 +641,18 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .book-uses { display: flex; gap: 4px; } .book-uses i { width: 30px; height: 30px; } .book-uses svg { width: 100%; height: 100%; }
 .plot.ready::before { content: "✦"; position: absolute; right: 2%; top: -6%; z-index: 4; color: #FFF6D8; font-size: 1rem; text-shadow: 0 0 4px #E8B04A, 0 0 2px #B98A2E; animation: twinkle 1.4s ease-in-out infinite; pointer-events: none; }
 .plot.ready:nth-child(odd)::before { animation-delay: -.7s; }
+
+/* --- 作業場: full screen, workbench opens the recipe pop-up --- */
+.work-view .hot-bench { left: 3%; width: 94%; bottom: 5%; height: 26%; border-radius: 14px; }
+.work-view .hot-bench .hot-tag { bottom: 100%; }
+.work-view .craft-spot { pointer-events: none; z-index: 13; }
+.work-pop { display: flex; flex-direction: column; gap: 12px; }
+.craft-pop { display: flex; flex-direction: column; gap: 14px; }
+.craft-stage { height: clamp(110px, 24dvh, 170px); display: flex; justify-content: center; align-items: center; gap: 2%; transition: transform .3s; }
+.craft-stage > span { height: 70%; aspect-ratio: 1; }
+.craft-stage svg { height: 100%; width: auto; aspect-ratio: 1; }
+.craft-stage.s1 { transform: scale(.9) rotate(-4deg); }
+.craft-stage.s2 svg { height: 100%; animation: pop .5s ease; }
+
+/* mirrored copy of the floor / lawn below the art, so tall screens continue seamlessly */
+.canvas .layer-ext { inset: auto; left: 0; top: 100%; width: 100%; height: 100%; transform: scaleY(-1); }

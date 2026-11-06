@@ -32,13 +32,15 @@
   </div>
 
   <div id="app" inert>
-    <header class="hud">
-      <div class="hud-coins" aria-label="Coins"><i></i><b>0</b></div>
-      <div class="hud-clock"><b class="hud-time">--:--</b><small class="hud-day">Day 1</small></div>
-      <button class="btn-round hud-settings" aria-label="Settings">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14.2 2.6h-4l-.4 2.5a7.4 7.4 0 0 0-2.6 1.5l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
-      </button>
-    </header>
+    <div class="float-hud">
+      <button class="float-btn hud-toggle" aria-expanded="false" aria-label="Coins — tap for clock and settings"><i></i><b>0</b></button>
+      <div class="hud-panel">
+        <div class="hud-clock"><b class="hud-time">--:--</b><small class="hud-day">Day 1</small></div>
+        <button class="btn-round hud-settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14.2 2.6h-4l-.4 2.5a7.4 7.4 0 0 0-2.6 1.5l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
 
     <main class="stage">
       <section class="scene" data-scene="shop" aria-label="Shop Front"></section>
@@ -46,19 +48,23 @@
       <section class="scene" data-scene="garden" aria-label="Garden"></section>
     </main>
 
-    <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" data-go="shop">
+    <div class="nav-scrim"></div>
+    <nav class="float-nav">
+      <div class="nav-items" role="tablist">
+      <button class="float-btn tab" role="tab" data-go="shop">
         <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 13h22v14H5z" fill="var(--tab-fill)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M3 13l3-7h20l3 7c0 2-2 3-4 3s-4-1-4-3c0 2-2 3-4 3s-4-1-4-3c0 2-2 3-4 3s-4-1-4-3Z" fill="var(--tab-accent)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M13 27v-7h6v7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
         <span>Shop<small>お店</small></span>
       </button>
-      <button class="tab" role="tab" data-go="workshop">
+      <button class="float-btn tab" role="tab" data-go="workshop">
         <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 14h18l-2 13H9z" fill="var(--tab-fill)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M5 14h22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 10c0-3 2-3 2-6M17 10c0-3 2-3 2-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="20" r="3" fill="var(--tab-accent)" stroke="currentColor" stroke-width="1.8"/></svg>
         <span>作業場<small>Workshop</small></span>
       </button>
-      <button class="tab" role="tab" data-go="garden">
+      <button class="float-btn tab" role="tab" data-go="garden">
         <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 28V15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16 22c-5 0-8-3-8-6 4 0 8 2 8 6ZM16 19c4 0 7-3 7-5-4 0-7 2-7 5Z" fill="var(--tab-fill)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="16" cy="9" r="5" fill="var(--tab-accent)" stroke="currentColor" stroke-width="2.2"/><circle cx="16" cy="9" r="1.8" fill="currentColor"/></svg>
         <span>Garden<small>お庭</small></span>
       </button>
+      </div>
+      <button class="float-btn nav-toggle" aria-expanded="false" aria-label="Change area"></button>
     </nav>
   </div>
 

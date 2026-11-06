@@ -6,6 +6,10 @@ tea, perfume and bouquets in her 作業場, and sells them at her little shop.
 Plain HTML/CSS/JS with no build step. It works in portrait and landscape, and
 can be added to the home screen as an app (PWA).
 
+Every area is full screen. The only on-screen controls are two small floating buttons:
+the **coin pill** (top-left; tap to show the clock, day and settings) and the **area button**
+(bottom-right; tap to open Shop / 作業場 / Garden). Hint bubbles fade out after a few seconds.
+
 ## Run it
 
 ES modules need a web server (opening the file directly won't work):
@@ -21,7 +25,7 @@ Then open http://localhost:8000. Any static host works (GitHub Pages, Netlify…
 | Scene | What happens |
 |---|---|
 | **Shop** (お店) | Layered shop-front background (separate art for portrait and landscape). Guinny stands behind the counter and customers walk in from the right. **Wrapping table** (paper + ribbon) opens the packing pop-up: arrange the bouquet (bouquet orders only, straight from the flower basket), put the item in a bag, spray perfume on the bag (up to 3 sprays, more sprays mean a better tip chance). Then tap the bag to hand it over and tap the coins. The **iPad** opens Today's Menu (the lineup, shown on the chalk menu board) and the Decor Shop. |
-| **作業場** (Workshop) | Turn flowers into tea and perfume. Each recipe has 3 tap steps. |
+| **作業場** (Workshop) | Tap the workbench to open the recipe pop-up and turn flowers into tea and perfume (3 tap steps). The jars on the shelf show your flowers. |
 | **Garden** (お庭) | Lawn background with 8 four-patch planters, 2 flower pots and a work bench (watering can, trowel, iPad). Planters 1–2 start open; the rest unlock with upgrades. **Tap** an empty patch or pot to choose a seed and how many to plant (that planter fills first). A planted patch gets the soil patch and dirt mound, and the sprout grows behind the mound. **Drag the watering can** over a planter (all 4 patches) or a pot. Crops only grow while wet, and one watering lasts half the grow time. **Swipe** across ripe plants to harvest (tap works too). The bench **iPad** has a **Shop** (seeds ×1/×5, garden upgrades) and **Guinny's Flower Encyclopedia** (a page fills in on first harvest). |
 
 Real-life time:
@@ -68,7 +72,7 @@ garden) are CSS in `css/style.css` under each scene's section.
 
 ### Garden layout
 
-`assets/img/garden/` holds the user's garden sprites (lawn for each orientation, planter, soil patch, dirt mound, pots, bench, can, trowel, iPad). They are placed to match the sample layouts, in % of a 1672×941 / 941×1672 canvas. The positions are in the "Garden" section at the end of `css/style.css`. `garden.js` sizes the canvas to cover the screen while keeping the play area visible (`KEEP`). Plants are still placeholder SVG (`plotArt` in `js/art.js`). Guinny appears in landscape only, since the portrait layout has no free spot.
+`assets/img/garden/` holds the user's garden sprites (lawn for each orientation, planter, soil patch, dirt mound, pots, bench, can, trowel, iPad). They are placed to match the sample layouts, in % of a 1672×941 / 941×1672 canvas. The positions are in the "Garden" section at the end of `css/style.css`. `garden.js` sizes the canvas to cover the screen while keeping the play area visible (`KEEP`). Plants are still placeholder SVG (`plotArt` in `js/art.js`).
 
 ### Shop-front layout
 
