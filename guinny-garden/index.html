@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Guinny's Garden Shop</title>
+  <meta name="description" content="A slow-life garden shop game. Grow flowers, make tea, perfume and bouquets, and run Guinny's little shop.">
+  <meta name="theme-color" content="#F6EEDF">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Guinny's Garden">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-tod="day">
+
+  <!-- Title screen -->
+  <div id="title">
+    <div class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="title-inner">
+      <img class="title-logo" src="assets/img/logo.webp" alt="Guinny's Garden Shop">
+      <img class="title-guinny" src="assets/img/guinny-garden.webp" alt="">
+      <button class="btn-primary title-start">Open the shop ♪</button>
+      <p class="title-note">Prototype · progress saves on this device</p>
+    </div>
+  </div>
+
+  <div id="app" inert>
+    <header class="hud">
+      <div class="hud-coins" aria-label="Coins"><i></i><b>0</b></div>
+      <div class="hud-clock"><b class="hud-time">--:--</b><small class="hud-day">Day 1</small></div>
+      <button class="btn-round hud-settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5a7.6 7.6 0 0 0 0-3l2-1.5-2-3.4-2.3 1a7.4 7.4 0 0 0-2.6-1.5L14.2 2.6h-4l-.4 2.5a7.4 7.4 0 0 0-2.6 1.5l-2.3-1-2 3.4 2 1.5a7.6 7.6 0 0 0 0 3l-2 1.5 2 3.4 2.3-1a7.4 7.4 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a7.4 7.4 0 0 0 2.6-1.5l2.3 1 2-3.4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <main class="stage">
+      <section class="scene" data-scene="shop" aria-label="Shop Front"></section>
+      <section class="scene" data-scene="workshop" aria-label="作業場 Workshop"></section>
+      <section class="scene" data-scene="garden" aria-label="Garden"></section>
+    </main>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" data-go="shop">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 13h22v14H5z" fill="var(--tab-fill)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M3 13l3-7h20l3 7c0 2-2 3-4 3s-4-1-4-3c0 2-2 3-4 3s-4-1-4-3c0 2-2 3-4 3s-4-1-4-3Z" fill="var(--tab-accent)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M13 27v-7h6v7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>
+        <span>Shop<small>お店</small></span>
+      </button>
+      <button class="tab" role="tab" data-go="workshop">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 14h18l-2 13H9z" fill="var(--tab-fill)" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M5 14h22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 10c0-3 2-3 2-6M17 10c0-3 2-3 2-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="20" r="3" fill="var(--tab-accent)" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>作業場<small>Workshop</small></span>
+      </button>
+      <button class="tab" role="tab" data-go="garden">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 28V15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16 22c-5 0-8-3-8-6 4 0 8 2 8 6ZM16 19c4 0 7-3 7-5-4 0-7 2-7 5Z" fill="var(--tab-fill)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="16" cy="9" r="5" fill="var(--tab-accent)" stroke="currentColor" stroke-width="2.2"/><circle cx="16" cy="9" r="1.8" fill="currentColor"/></svg>
+        <span>Garden<small>お庭</small></span>
+      </button>
+    </nav>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
