@@ -10,6 +10,7 @@ import { FLOWERS, PRODUCTS, PLOTS, PLANTERS, UPGRADES } from '../data.js';
 import { S, save, add, plotStage, plotRemaining, plotUnlocked, isWet, needsWater, updatePlot, wetMs, fmtTime } from '../state.js';
 import { F, SEED, P, plotArt, coinArt, dropArt } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
+import { openTablet } from '../tablet.js';
 
 const IMG = 'assets/img/garden/';
 const SIZE = { landscape: [1672, 941], portrait: [941, 1672] };
@@ -108,7 +109,7 @@ function setupSwipe() {
     const s = swipe; swipe = null;
     if (s.moved < 12 && s.start) {
       if (s.start.classList.contains('plot')) tapPlot(+s.start.dataset.i);
-      else if (!plotUnlocked(PLOTS.findIndex((p) => p.planter === +s.start.dataset.p))) { sfx('soft'); openIpad('shop'); }
+      else if (!plotUnlocked(PLOTS.findIndex((p) => p.planter === +s.start.dataset.p))) { sfx('soft'); openIpad('florist'); }
     } else if (s.got > 1) sfx('chime');
   });
   canvas.addEventListener('pointercancel', () => { swipe = null; });
@@ -122,7 +123,7 @@ function trail(x, y) {
 }
 
 function tapPlot(i) {
-  if (!plotUnlocked(i)) { sfx('soft'); openIpad('shop'); return; }
+  if (!plotUnlocked(i)) { sfx('soft'); openIpad('florist'); return; }
   const st = plotStage(i);
   const el = plotEl(i);
   if (st === -1) { sfx('tap'); openPlant(i); return; }
@@ -251,7 +252,7 @@ function openPlant(i) {
     if (opt && !opt.disabled) { pick = opt.dataset.k; qty = 1; sfx('tap'); draw(); }
     else if (d && !d.disabled) { qty += +d.dataset.d; sfx('tap'); draw(); }
     else if (e.target.closest('.qty-max')) { qty = 99; sfx('tap'); draw(); }
-    else if (e.target.closest('.buy-more')) { sheet.close(); setTimeout(() => openIpad('shop'), 230); }
+    else if (e.target.closest('.buy-more')) { sheet.close(); setTimeout(() => openIpad('florist'), 230); }
     else if (e.target.closest('.plant-go') && pick) {
       const spots = [i, ...empties().filter((n) => n !== i)].slice(0, qty);
       spots.forEach((n, k) => {
@@ -267,74 +268,65 @@ function openPlant(i) {
 }
 
 // --- Garden iPad: Shop (seeds + upgrades) · Flower Encyclopedia -------------------------
-function openIpad(tab = 'shop') {
-  const body = h(`<div class="ipad">
-    <div class="seg" role="tablist">
-      <button class="seg-btn" data-tab="shop">Shop</button>
-      <button class="seg-btn" data-tab="book">Flower Encyclopedia</button>
-    </div><div class="ipad-body"></div></div>`);
-  const sheet = openSheet({ title: 'Garden iPad', body, cls: 'wide', onClose: render });
-  const inner = $('.ipad-body', body);
+// Garden iPad (tablet pop-up): Florist Shop (seeds + upgrades) and Notepad (flower encyclopedia).
+// start: null = home screen, 'florist' or 'notepad' = open that app directly.
+function openIpad(start = null) {
   const where = (f) => f.where.map((w) => (w === 'pot' ? 'pot' : 'planter')).join(' · ');
-
-  const drawShop = () => {
-    sheet.setSub('Seeds grow in real time, even while you’re away');
-    const ups = Object.entries(UPGRADES).filter(([, u]) => !u.requires || S.upgrades[u.requires]);
-    inner.innerHTML = `<h3 class="ipad-h">Seeds</h3><div class="list">${Object.entries(FLOWERS).map(([k, f]) => `
-      <div class="row">
-        <div class="row-ico">${SEED(k)}</div>
-        <div class="row-main"><b>${f.name}</b><small>${where(f)} · ~${f.growMin} min · ${f.yield} per patch · have ${S.seeds[k] || 0}</small></div>
-        <div class="row-btns">
-          <button class="btn-buy" data-buy="${k}" data-n="1" ${S.coins < f.seedCost ? 'disabled' : ''}>${coinArt()} ${f.seedCost}</button>
-          <button class="btn-buy" data-buy="${k}" data-n="5" ${S.coins < f.seedCost * 5 ? 'disabled' : ''}>×5 · ${f.seedCost * 5}</button>
-        </div>
-      </div>`).join('')}</div>
-      <h3 class="ipad-h">Garden upgrades</h3><div class="grid">${ups.map(([k, u]) => `
-      <div class="card decor-card ${S.upgrades[k] ? 'selected' : ''}">
-        <b>${u.name}</b><small>${u.desc}</small>
-        ${S.upgrades[k] ? '<button class="btn-toggle on" disabled>Owned ✓</button>'
-          : `<button class="btn-buy" data-up="${k}" ${S.coins < u.cost ? 'disabled' : ''}>${coinArt()} ${u.cost}</button>`}
-      </div>`).join('')}</div>`;
+  const florist = {
+    id: 'florist', name: 'Florist Shop', icon: 'florist',
+    render(body, ctx) {
+      ctx.sub('Seeds grow in real time, even while you’re away');
+      const ups = Object.entries(UPGRADES).filter(([, u]) => !u.requires || S.upgrades[u.requires]);
+      body.innerHTML = `<h3 class="ipad-h">Seeds</h3><div class="list">${Object.entries(FLOWERS).map(([k, f]) => `
+        <div class="row">
+          <div class="row-ico">${SEED(k)}</div>
+          <div class="row-main"><b>${f.name}</b><small>${where(f)} · ~${f.growMin} min · ${f.yield} per patch · have ${S.seeds[k] || 0}</small></div>
+          <div class="row-btns">
+            <button class="btn-buy" data-buy="${k}" data-n="1" ${S.coins < f.seedCost ? 'disabled' : ''}>${coinArt()} ${f.seedCost}</button>
+            <button class="btn-buy" data-buy="${k}" data-n="5" ${S.coins < f.seedCost * 5 ? 'disabled' : ''}>×5 · ${f.seedCost * 5}</button>
+          </div>
+        </div>`).join('')}</div>
+        <h3 class="ipad-h">Garden upgrades</h3><div class="grid">${ups.map(([k, u]) => `
+        <div class="card decor-card ${S.upgrades[k] ? 'selected' : ''}">
+          <b>${u.name}</b><small>${u.desc}</small>
+          ${S.upgrades[k] ? '<button class="btn-toggle on" disabled>Owned ✓</button>'
+            : `<button class="btn-buy" data-up="${k}" ${S.coins < u.cost ? 'disabled' : ''}>${coinArt()} ${u.cost}</button>`}
+        </div>`).join('')}</div>`;
+      body.onclick = (e) => {
+        const buy = e.target.closest('[data-buy]');
+        const up = e.target.closest('[data-up]');
+        if (buy && !buy.disabled) {
+          const k = buy.dataset.buy, n = +buy.dataset.n, cost = FLOWERS[k].seedCost * n;
+          if (S.coins < cost) return;
+          S.coins -= cost; add(S.seeds, k, n);
+          save(); sfx('coin'); game.refreshHud(); ctx.redraw();
+        } else if (up && !up.disabled) {
+          const k = up.dataset.up, u = UPGRADES[k];
+          if (S.coins < u.cost) return;
+          S.coins -= u.cost; S.upgrades[k] = true;
+          save(); sfx('chime'); game.refreshHud(); ctx.redraw(); render();
+          toast(`${u.name} — done ✿`);
+        }
+      };
+    },
   };
-  const drawBook = () => {
-    const known = Object.keys(FLOWERS).filter((k) => S.harvested[k]).length;
-    sheet.setSub(`Guinny’s notes · ${known} / ${Object.keys(FLOWERS).length} pages filled`);
-    inner.innerHTML = `<div class="grid book">${Object.entries(FLOWERS).map(([k, f]) => {
-      const n = S.harvested[k] || 0;
-      const uses = Object.entries(PRODUCTS).filter(([, p]) => p.needs[k]).map(([pk]) => `<i title="${PRODUCTS[pk].name}">${P(pk)}</i>`).join('');
-      return n ? `<div class="card book-card">
-          <div class="decor-ico">${F(k)}</div><b>${f.name}</b><small>${f.note}</small>
-          <small class="charm">${where(f)} · ~${f.growMin} min · harvested ${n} · in basket ${S.flowers[k] || 0}</small>
-          <div class="book-uses">${uses}</div></div>`
-        : `<div class="card book-card unknown"><div class="decor-ico">${F(k)}</div><b>???</b><small>Harvest one to fill in this page.</small></div>`;
-    }).join('')}</div>`;
+  const notepad = {
+    id: 'notepad', name: 'Notepad', icon: 'notepad',
+    render(body, ctx) {
+      const known = Object.keys(FLOWERS).filter((k) => S.harvested[k]).length;
+      ctx.sub(`Guinny’s Flower Encyclopedia · ${known} / ${Object.keys(FLOWERS).length} pages filled`);
+      body.innerHTML = `<div class="grid book">${Object.entries(FLOWERS).map(([k, f]) => {
+        const n = S.harvested[k] || 0;
+        const uses = Object.entries(PRODUCTS).filter(([, p]) => p.needs[k]).map(([pk]) => `<i title="${PRODUCTS[pk].name}">${P(pk)}</i>`).join('');
+        return n ? `<div class="card book-card">
+            <div class="decor-ico">${F(k)}</div><b>${f.name}</b><small>${f.note}</small>
+            <small class="charm">${where(f)} · ~${f.growMin} min · harvested ${n} · in basket ${S.flowers[k] || 0}</small>
+            <div class="book-uses">${uses}</div></div>`
+          : `<div class="card book-card unknown"><div class="decor-ico">${F(k)}</div><b>???</b><small>Harvest one to fill in this page.</small></div>`;
+      }).join('')}</div>`;
+    },
   };
-  const draws = { shop: drawShop, book: drawBook };
-  const show = (t) => {
-    $$('.seg-btn', body).forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t));
-    draws[t](); inner.scrollTop = 0;
-  };
-  body.addEventListener('click', (e) => {
-    const seg = e.target.closest('.seg-btn');
-    const buy = e.target.closest('[data-buy]');
-    const up = e.target.closest('[data-up]');
-    if (seg) { sfx('tap'); show(seg.dataset.tab); }
-    else if (buy && !buy.disabled) {
-      const k = buy.dataset.buy, n = +buy.dataset.n, cost = FLOWERS[k].seedCost * n;
-      if (S.coins < cost) return;
-      const top = inner.scrollTop;
-      S.coins -= cost; add(S.seeds, k, n);
-      save(); sfx('coin'); game.refreshHud(); drawShop(); inner.scrollTop = top;
-    } else if (up && !up.disabled) {
-      const k = up.dataset.up, u = UPGRADES[k];
-      if (S.coins < u.cost) return;
-      const top = inner.scrollTop;
-      S.coins -= u.cost; S.upgrades[k] = true;
-      save(); sfx('chime'); game.refreshHud(); drawShop(); inner.scrollTop = top; render();
-      toast(`${u.name} — done ✿`);
-    }
-  });
-  show(tab);
+  openTablet({ theme: 'garden', apps: [florist, notepad], start, onClose: render });
 }
 
 // --- Render -----------------------------------------------------------------------------

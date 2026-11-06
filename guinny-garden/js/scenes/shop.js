@@ -7,6 +7,7 @@ import { PRODUCTS, DECOR, CUSTOMERS, FLOWERS, GREETINGS, THANKS } from '../data.
 import { S, save, add, charm, lineupSlots, trend, priceOf, timeOfDay, available } from '../state.js';
 import { P, F, D, coinArt, bagArt, sprayArt, customerSrc } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
+import { openTablet } from '../tablet.js';
 
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const LAYERS = ['wall', 'floor', 'window', 'board'];
@@ -351,78 +352,68 @@ function renderDecor() {
   });
 }
 
-// --- iPad: Today's Menu + Decor Shop ------------------------------------------
-function openIpad(tab = 'menu') {
-  const body = h(`<div class="ipad">
-    <div class="seg" role="tablist">
-      <button class="seg-btn" data-tab="menu">Today’s Menu</button>
-      <button class="seg-btn" data-tab="decor">Decor Shop</button>
-    </div>
-    <div class="ipad-body"></div></div>`);
-  const sheet = openSheet({ title: 'Guinny’s iPad', body, cls: 'wide', onClose: () => { renderBoard(); render(); } });
-  const inner = $('.ipad-body', body);
-
-  const drawMenu = () => {
-    const slots = lineupSlots();
-    sheet.setSub(`${S.lineup.length} / ${slots} spots on the menu board · ★ trend sells for more today`);
-    const keys = Object.keys(PRODUCTS).sort((a, b) => available(b) - available(a));
-    inner.innerHTML = `<div class="list">${keys.map((k) => {
-      const p = PRODUCTS[k], on = S.lineup.includes(k), n = available(k);
-      const full = !on && S.lineup.length >= slots;
-      return `<div class="row ${on ? 'selected' : ''}">
-        <div class="row-ico">${P(k)}</div>
-        <div class="row-main"><b>${p.name}${trend() === k ? ' <span class="pill star">★ Trend</span>' : ''}</b>
-          <small>${priceOf(k)} coins · ${n ? `${n} ${p.fresh ? 'can be arranged' : 'in stock'}` : `<span class="muted">${p.fresh ? 'needs flowers' : 'none made yet'}</span>`}</small></div>
-        <button class="btn-toggle ${on ? 'on' : ''}" data-k="${k}" ${full ? 'disabled' : ''}>${on ? 'On menu ✓' : full ? 'Board full' : 'Add'}</button>
-      </div>`;
-    }).join('')}</div>`;
+// --- iPad (tablet pop-up): Guinny Line Up + Furniture Shop ---------------------
+function openIpad(start = null) {
+  const lineupApp = {
+    id: 'lineup', name: 'Guinny Line Up', icon: 'lineup',
+    render(body, ctx) {
+      const slots = lineupSlots();
+      ctx.sub(`${S.lineup.length} / ${slots} spots on the menu board · ★ trend sells for more today`);
+      const keys = Object.keys(PRODUCTS).sort((a, b) => available(b) - available(a));
+      body.innerHTML = `<div class="list">${keys.map((k) => {
+        const p = PRODUCTS[k], on = S.lineup.includes(k), n = available(k);
+        const full = !on && S.lineup.length >= slots;
+        return `<div class="row ${on ? 'selected' : ''}">
+          <div class="row-ico">${P(k)}</div>
+          <div class="row-main"><b>${p.name}${trend() === k ? ' <span class="pill star">★</span>' : ''}</b>
+            <small>${priceOf(k)} coins · ${n ? `${n} ${p.fresh ? 'can be arranged' : 'in stock'}` : `<span class="muted">${p.fresh ? 'needs flowers' : 'none made yet'}</span>`}</small></div>
+          <button class="btn-toggle ${on ? 'on' : ''}" data-k="${k}" ${full ? 'disabled' : ''}>${on ? 'On ✓' : full ? 'Full' : 'Add'}</button>
+        </div>`;
+      }).join('')}</div>`;
+      body.onclick = (e) => {
+        const k = e.target.closest('[data-k]');
+        if (!k || k.disabled) return;
+        const key = k.dataset.k;
+        if (S.lineup.includes(key)) S.lineup = S.lineup.filter((x) => x !== key);
+        else S.lineup.push(key);
+        sfx('pop'); save(); ctx.redraw(); renderBoard(); render();
+      };
+    },
   };
-  const drawDecor = () => {
-    sheet.setSub(`Charm ✿ ${charm()} — more charm brings more visitors & tips`);
-    inner.innerHTML = `<div class="grid">${Object.entries(DECOR).map(([k, d]) => {
-      const own = S.decor[k];
-      const btn = !own
-        ? `<button class="btn-buy" data-buy="${k}" ${S.coins < d.cost ? 'disabled' : ''}>${coinArt()} ${d.cost}</button>`
-        : `<button class="btn-toggle ${own.placed ? 'on' : ''}" data-place="${k}">${own.placed ? 'Placed ✓' : 'Place'}</button>`;
-      return `<div class="card decor-card ${own?.placed ? 'selected' : ''}">
-        <div class="decor-ico">${D(k)}</div>
-        <b>${d.name}</b><small>${d.desc}</small><small class="charm">✿ +${d.charm} charm</small>${btn}</div>`;
-    }).join('')}</div>`;
+  const furnitureApp = {
+    id: 'furniture', name: 'Furniture Shop', icon: 'furniture',
+    render(body, ctx) {
+      ctx.sub(`Charm ✿ ${charm()} · more charm brings more visitors & tips`);
+      body.innerHTML = `<div class="grid">${Object.entries(DECOR).map(([k, d]) => {
+        const own = S.decor[k];
+        const btn = !own
+          ? `<button class="btn-buy" data-buy="${k}" ${S.coins < d.cost ? 'disabled' : ''}>${coinArt()} ${d.cost}</button>`
+          : `<button class="btn-toggle ${own.placed ? 'on' : ''}" data-place="${k}">${own.placed ? 'Placed ✓' : 'Place'}</button>`;
+        return `<div class="card decor-card ${own?.placed ? 'selected' : ''}">
+          <div class="decor-ico">${D(k)}</div>
+          <b>${d.name}</b><small>${d.desc}</small><small class="charm">✿ +${d.charm} charm</small>${btn}</div>`;
+      }).join('')}</div>`;
+      body.onclick = (e) => {
+        const buy = e.target.closest('[data-buy]');
+        const place = e.target.closest('[data-place]');
+        if (buy && !buy.disabled) {
+          const key = buy.dataset.buy, d = DECOR[key];
+          if (S.coins < d.cost) return;
+          S.coins -= d.cost;
+          S.decor[key] = { placed: true };
+          sfx('chime'); toast(`${d.name} placed in the shop ♡`);
+          game.refreshHud();
+        } else if (place) {
+          const key = place.dataset.place;
+          S.decor[key].placed = !S.decor[key].placed;
+          while (S.lineup.length > lineupSlots()) S.lineup.pop();
+          sfx('pop');
+        } else return;
+        save(); ctx.redraw(); renderDecor(); renderBoard();
+      };
+    },
   };
-  const show = (t) => {
-    tab = t;
-    $$('.seg-btn', body).forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === t));
-    (t === 'menu' ? drawMenu : drawDecor)();
-    inner.scrollTop = 0;
-  };
-
-  body.addEventListener('click', (e) => {
-    const seg = e.target.closest('.seg-btn');
-    if (seg) { sfx('tap'); show(seg.dataset.tab); return; }
-    const k = e.target.closest('[data-k]');
-    const buy = e.target.closest('[data-buy]');
-    const place = e.target.closest('[data-place]');
-    if (k && !k.disabled) {
-      const key = k.dataset.k;
-      if (S.lineup.includes(key)) S.lineup = S.lineup.filter((x) => x !== key);
-      else S.lineup.push(key);
-      sfx('pop'); save(); drawMenu(); renderBoard(); render();
-    } else if (buy && !buy.disabled) {
-      const key = buy.dataset.buy, d = DECOR[key];
-      if (S.coins < d.cost) return;
-      S.coins -= d.cost;
-      S.decor[key] = { placed: true };
-      sfx('chime'); toast(`${d.name} placed in the shop ♡`);
-      game.refreshHud();
-      save(); drawDecor(); renderDecor();
-    } else if (place) {
-      const key = place.dataset.place;
-      S.decor[key].placed = !S.decor[key].placed;
-      while (S.lineup.length > lineupSlots()) S.lineup.pop();
-      sfx('pop'); save(); drawDecor(); renderDecor(); renderBoard();
-    }
-  });
-  show(tab);
+  openTablet({ theme: 'shop', apps: [furnitureApp, lineupApp], start, onClose: () => { renderBoard(); render(); } });
 }
 
 export const refresh = () => { if (root) { renderBoard(); render(); } };

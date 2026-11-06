@@ -44,7 +44,8 @@ js/main.js            boot, navigation, HUD clock, day rollover, settings
 js/state.js           save/load (localStorage), real-time helpers
 js/data.js            flowers, products, decor, customers, start values ← balance here
 js/art.js             placeholder SVG art + ASSET_OVERRIDES ← swap in real art here
-js/ui.js              sheets, toasts, sounds
+js/ui.js              sheets, toasts, sounds, hint bubbles, canvas fitting
+js/tablet.js          iPad pop-up: home screen with app icons, apps open on the tablet screen
 js/scenes/*.js        shop, workshop, garden
 assets/img/           Guinny sprites, logo
 assets/icons/         app icon sizes
@@ -77,3 +78,12 @@ garden) are CSS in `css/style.css` under each scene's section.
 ### Shop-front layout
 
 The shop layers are drawn on a canvas with the art's own aspect ratio (1672×941 or 941×1672) that covers the view. Guinny, the customers, the menu board text, the tap areas (wrapping table, iPad), the bag/coins and the decor are all placed in **% of that canvas**, in the "Shop front" section at the end of `css/style.css` (`[data-o="landscape"]` / `[data-o="portrait"]`). If new background art moves the counter or iPad, update those numbers. The draw order is wall → floor → window → board → Guinny → counter → counter props (`prop-ipad`, `prop-paper`, `prop-ribbon`) → customers. The original roll and spool were painted out of the `*-counter.webp` layers so the new props sit on a clean counter. Props that need attention glow along their outline (`.prop.glow`).
+
+### iPad pop-up
+
+Tapping an iPad opens `js/tablet.js`: a tablet (the user's art) with a home screen of app icons. Tapping an icon opens that app on the tablet's screen. The bezel home button or "‹ Home" goes back, and ✕ or a tap outside closes it. On landscape screens the tablet turns sideways and the wallpaper stays upright.
+
+- **Shop iPad:** background 3 (sage), with the apps **Furniture Shop** (decor) and **Guinny Line Up** (today's menu).
+- **Garden iPad:** background 1 (carnation), with the apps **Florist Shop** (seeds + garden upgrades) and **Notepad** (Guinny's Flower Encyclopedia).
+
+To add an app, add `{ id, name, icon, render(body, ctx) }` to the `apps` list in `openIpad()` (shop.js or garden.js) and put its icon at `assets/img/ipad/icon-<icon>.webp`.
