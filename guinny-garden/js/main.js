@@ -40,6 +40,7 @@ function setHud(open) {
 function setNav(open) {
   $('.float-nav').classList.toggle('open', open);
   $('.nav-toggle').setAttribute('aria-expanded', open);
+  document.body.classList.toggle('nav-open', open);
   $('.nav-scrim').classList.toggle('on', open);
 }
 

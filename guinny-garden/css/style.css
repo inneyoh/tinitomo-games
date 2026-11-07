@@ -161,18 +161,23 @@ b { font-weight: 800; }
 .hud-panel .btn-round { width: 38px; height: 38px; min-width: 38px; box-shadow: none; border-width: 2px; }
 .hud-panel .btn-round svg { width: 22px; height: 22px; }
 
-/* bottom-right: area switcher — tap to fan out the three areas */
-.float-nav { position: fixed; z-index: 30; right: calc(12px + var(--safe-r)); bottom: calc(12px + var(--safe-b)); display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+/* bottom-right: area switcher — tap to open a row of areas to the LEFT of the button.
+   The area you're in shows its icon + name; the others show just the icon. */
+.float-nav { position: fixed; z-index: 30; right: calc(12px + var(--safe-r)); bottom: calc(12px + var(--safe-b)); display: flex; flex-direction: row; align-items: center; gap: 10px;
   --tab-fill: var(--paper); --tab-accent: var(--pink); }
-.nav-toggle { width: 60px; height: 60px; padding: 0; justify-content: center; }
+.nav-toggle { width: 60px; height: 60px; padding: 0; justify-content: center; flex: none; }
 .nav-toggle svg { width: 34px; height: 34px; }
-.nav-items { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
-.float-nav .tab { height: 52px; padding: 0 16px 0 8px; gap: 8px; font-size: .95rem; transition: transform .2s ease, opacity .2s; }
-.float-nav .tab svg { width: 32px; height: 32px; }
+.nav-items { display: flex; flex-direction: row; gap: 8px; align-items: center; }
+.float-nav .tab { height: 56px; min-width: 56px; padding: 0; justify-content: center; gap: 8px; font-size: .95rem; white-space: nowrap;
+  transition: transform .22s ease, opacity .22s; }
+.float-nav .tab svg { width: 34px; height: 34px; flex: none; }
+.float-nav .tab span { display: none; }
+.float-nav .tab[aria-selected="true"] { padding: 0 16px 0 10px; background: var(--sage-l); --tab-fill: #fff; --tab-accent: var(--rose); }
+.float-nav .tab[aria-selected="true"] span { display: inline; }
 .float-nav .tab small { display: inline; font-size: .7rem; color: var(--ink-soft); margin-left: 4px; }
-.float-nav .tab[aria-selected="true"] { background: var(--sage-l); --tab-fill: #fff; --tab-accent: var(--rose); }
-.float-nav:not(.open) .tab { opacity: 0; transform: translateY(30px) scale(.8); pointer-events: none; }
-.float-nav .tab:nth-child(1) { transition-delay: .06s; } .float-nav .tab:nth-child(2) { transition-delay: .03s; }
+.float-nav:not(.open) .tab { opacity: 0; transform: translateX(40px) scale(.8); pointer-events: none; }
+/* items nearest the button appear first */
+.float-nav .tab:nth-child(1) { transition-delay: .08s; } .float-nav .tab:nth-child(2) { transition-delay: .04s; }
 .nav-scrim { position: fixed; inset: 0; z-index: 29; display: none; }
 .nav-scrim.on { display: block; }
 
@@ -931,3 +936,6 @@ body[data-tod="night"] .cloud { opacity: .25; }
 .float-nav, .nav-items { pointer-events: none; }
 .nav-toggle, .float-nav.open .tab { pointer-events: auto; }
 .float-hud { pointer-events: none; } .hud-toggle, .float-hud.open .hud-panel { pointer-events: auto; }
+
+/* hints step aside while the area menu is open */
+body.nav-open .shop-hint { opacity: 0; transform: translateY(8px); }
