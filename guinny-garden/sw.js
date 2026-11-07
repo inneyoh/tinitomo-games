@@ -1,5 +1,5 @@
 // Offline cache for the prototype. Bump VERSION when files change.
-const VERSION = 'gg-v10';
+const VERSION = 'gg-v11';
 const FILES = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/main.js', 'js/state.js', 'js/data.js', 'js/art.js', 'js/ui.js',
@@ -16,7 +16,8 @@ self.addEventListener('activate', (e) => e.waitUntil(
 // Network first so updates show up right away; cache when offline.
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
-  e.respondWith(fetch(e.request).then((r) => {
+  // no-cache: always ask the server for a newer file, so updates show up right away
+  e.respondWith(fetch(e.request, { cache: 'no-cache' }).then((r) => {
     const copy = r.clone(); caches.open(VERSION).then((c) => c.put(e.request, copy)); return r;
   }).catch(() => caches.match(e.request)));
 });
