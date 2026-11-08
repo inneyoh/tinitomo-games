@@ -64,13 +64,14 @@ export function mount(el, api) {
   <div class="view work-view">
     <div class="canvas w-canvas">
       ${img('wall', 'layer w-wall')}
-      ${img('floor', 'layer w-floor')}${img('floor', 'layer layer-ext w-floor')}
+      ${img('floor', 'layer w-floor')}
       <div class="w-item w-art" data-k="frame"><img class="w-pic" src="${IMG}picture.webp" alt=""><img class="w-frame" src="${IMG}frame.webp" alt=""></div>
       ${img('bench')}
       ${station('alchemy')}${station('urn')}${station('rack')}
-      ${img('rug')}${img('plant')}${img('stool')}${img('basket')}
-      <div class="w-warm"></div>
+      ${img('rug')}${img('stool')}${img('plant')}${img('basket')}
     </div>
+    <img class="w-below" data-k="floor" alt="" draggable="false">
+    <div class="w-warm"></div>
     <div class="shop-hint w-hint" role="status"></div>
   </div>`;
   view = $('.view', root);
@@ -98,12 +99,16 @@ function layout() {
     renderDecor();
   }
   fitCanvas(view, canvas, ...SIZE[o], KEEP[o], 0);
+  // on screens taller than the art, continue the floor below it (mirrored, so the planks line up)
+  const below = $('.w-below', view);
+  Object.assign(below.style, { left: canvas.style.left, width: canvas.style.width,
+    top: (parseFloat(canvas.style.top) + parseFloat(canvas.style.height)) + 'px', height: canvas.style.height });
 }
 
 // Apply the placed furniture styles (and the per-orientation sprites)
 function renderDecor() {
   if (!orient) return;   // not laid out yet (scene hidden)
-  $$('img[data-k]', canvas).forEach((el) => {
+  $$('img[data-k]', view).forEach((el) => {
     const k = el.dataset.k;
     const slot = WORKSHOP_DECOR[k];
     const base = `${IMG}${PER_ORIENT.includes(k) ? `${orient}-` : ''}${k}.webp`;

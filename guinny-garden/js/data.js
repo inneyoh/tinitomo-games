@@ -82,7 +82,7 @@ export const THANKS = ['Thank you!', 'Lovely~', 'See you tomorrow!', 'Perfect â™
 
 export const START = {
   coins: 120,
-  flowers: { chamomile: 4, mint: 2, daisy: 8 },
+  flowers: { chamomile: 5, mint: 5, daisy: 5, lavender: 5, strawberry: 5, rose: 5, hydrangea: 5 },   // 5 of each to start
   seeds: { chamomile: 3, daisy: 3, mint: 2 },
   stock: { chamomile_tea: 3, mint_tea: 2 },
   lineup: ['chamomile_tea', 'daisy_bouquet', 'mint_tea'],

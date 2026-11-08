@@ -954,7 +954,9 @@ body.nav-open .shop-hint { opacity: 0; transform: translateY(8px); }
 .w-art .w-pic { position: absolute; left: 19%; top: 27.7%; width: 62%; height: 66%; }
 .w-art .w-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* warm grade so the sprites match the painted samples; time of day tints on top */
-.w-warm { position: absolute; inset: 0 0 -100% 0; background: #FFE8CD; mix-blend-mode: multiply; pointer-events: none; z-index: 20; }
+.w-warm { position: absolute; inset: 0; background: #FFE8CD; mix-blend-mode: multiply; pointer-events: none; z-index: 19; }
+.w-below { position: absolute; max-width: none; transform: scaleY(-1); pointer-events: none; }
+.work-view .w-hint { z-index: 20; }
 .w-canvas::after { z-index: 21; }
 
 /* workable stations: always outlined + labelled; pulse when something can be made */
