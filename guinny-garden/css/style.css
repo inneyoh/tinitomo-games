@@ -939,3 +939,40 @@ body[data-tod="night"] .cloud { opacity: .25; }
 
 /* hints step aside while the area menu is open */
 body.nav-open .shop-hint { opacity: 0; transform: translateY(8px); }
+
+/* ====================================================================
+   作業場 — layered art (assets/img/workshop); positions in workshop.js LAYOUT
+   ==================================================================== */
+.work-view { background: #E8B27A; }
+.work-view::after { display: none; }
+.w-canvas .w-item, .w-canvas .w-station { position: absolute; }
+.w-canvas img { pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.w-canvas img.w-item:not(.layer) { height: auto; }
+.w-canvas img.w-item[style*="height"] { object-fit: fill; }
+.w-canvas .w-wall-fit { inset: 0 0 auto 0; height: auto; }
+.w-art { aspect-ratio: 220 / 339; }
+.w-art .w-pic { position: absolute; left: 19%; top: 27.7%; width: 62%; height: 66%; }
+.w-art .w-frame { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* warm grade so the sprites match the painted samples; time of day tints on top */
+.w-warm { position: absolute; inset: 0 0 -100% 0; background: #FFE8CD; mix-blend-mode: multiply; pointer-events: none; z-index: 20; }
+.w-canvas::after { z-index: 21; }
+
+/* workable stations: always outlined + labelled; pulse when something can be made */
+.w-station { z-index: 5; padding: 0; border-radius: 16px; }
+.w-station img { display: block; width: 100%; height: auto;
+  filter: drop-shadow(1.5px 0 0 #FFFBEA) drop-shadow(-1.5px 0 0 #FFFBEA) drop-shadow(0 1.5px 0 #FFFBEA) drop-shadow(0 -1.5px 0 #FFFBEA); }
+.w-station.attn img { animation: outline-glow 1.4s ease-in-out infinite; }
+.w-station:active { transform: scale(.97); }
+.w-label { position: absolute; left: 50%; top: 0; transform: translate(-50%, -70%); z-index: 22; white-space: nowrap;
+  background: var(--paper); border: 2px solid var(--line); border-radius: 999px; padding: 1px 10px; font-size: .74rem; font-weight: 800;
+  box-shadow: var(--shadow); pointer-events: none; }
+.w-station.attn .w-label { background: var(--butter); }
+.w-station[data-st="urn"] .w-label { left: 30%; }
+
+/* Furniture Shop: 作業場 styles */
+.fs-seg { margin-bottom: 8px; }
+.fs-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)) !important; }
+.fs-ico { height: 64px !important; }
+.fs-ico img { max-width: 100%; max-height: 64px; object-fit: contain; border-radius: 6px; }
+.fs-none { font-size: 1.6rem; color: var(--ink-soft); }
+.w-canvas [hidden] { display: none !important; }

@@ -16,6 +16,7 @@ function fresh() {
     decor: {},              // key -> { placed: bool }
     garden: PLOTS.map(() => ({ key: null })),   // { key, grown(ms), t(last update), wetUntil }
     upgrades: {},
+    workshop: { owned: {}, placed: {} },   // 作業場 furniture: slot -> [style ids] / style id
     harvested: {},          // crop -> total harvested (unlocks encyclopedia notes)
     journal: {},            // crop -> { planted, watered, harvested, first: { planted, harvest } } for the encyclopedia
     sold: {},               // product -> number sold

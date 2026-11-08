@@ -3,7 +3,7 @@
 //  - Packing area (wrapping paper + ribbon) opens the packing pop-up:
 //      make bouquet (bouquet orders) → pack into bag → spray perfume on the bag
 //  - iPad opens: Today's Menu (lineup, shown on the menu board) and Decor Shop
-import { PRODUCTS, DECOR, CUSTOMERS, FLOWERS, GREETINGS, THANKS } from '../data.js';
+import { PRODUCTS, DECOR, WORKSHOP_DECOR, CUSTOMERS, FLOWERS, GREETINGS, THANKS } from '../data.js';
 import { S, save, add, charm, lineupSlots, trend, priceOf, timeOfDay, available } from '../state.js';
 import { P, F, D, coinArt, bagArt, sprayArt, customerSrc } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
@@ -381,20 +381,58 @@ function openIpad(start = null) {
       };
     },
   };
+  let room = 'shop';   // Furniture Shop section: 'shop' (shop front) or 'workshop' (作業場)
   const furnitureApp = {
     id: 'furniture', name: 'Furniture Shop', icon: 'furniture',
     render(body, ctx) {
-      ctx.sub(`Charm ✿ ${charm()} · more charm brings more visitors & tips`);
-      body.innerHTML = `<div class="grid">${Object.entries(DECOR).map(([k, d]) => {
-        const own = S.decor[k];
-        const btn = !own
-          ? `<button class="btn-buy" data-buy="${k}" ${S.coins < d.cost ? 'disabled' : ''}>${coinArt()} ${d.cost}</button>`
-          : `<button class="btn-toggle ${own.placed ? 'on' : ''}" data-place="${k}">${own.placed ? 'Placed ✓' : 'Place'}</button>`;
-        return `<div class="card decor-card ${own?.placed ? 'selected' : ''}">
-          <div class="decor-ico">${D(k)}</div>
-          <b>${d.name}</b><small>${d.desc}</small><small class="charm">✿ +${d.charm} charm</small>${btn}</div>`;
-      }).join('')}</div>`;
+      const seg = `<div class="seg fs-seg"><button class="seg-btn" data-room="shop" aria-selected="${room === 'shop'}">Shop front</button>
+        <button class="seg-btn" data-room="workshop" aria-selected="${room === 'workshop'}">作業場</button></div>`;
+      if (room === 'shop') {
+        ctx.sub(`Charm ✿ ${charm()} · more charm brings more visitors & tips`);
+        body.innerHTML = seg + `<div class="grid">${Object.entries(DECOR).map(([k, d]) => {
+          const own = S.decor[k];
+          const btn = !own
+            ? `<button class="btn-buy" data-buy="${k}" ${S.coins < d.cost ? 'disabled' : ''}>${coinArt()} ${d.cost}</button>`
+            : `<button class="btn-toggle ${own.placed ? 'on' : ''}" data-place="${k}">${own.placed ? 'Placed ✓' : 'Place'}</button>`;
+          return `<div class="card decor-card ${own?.placed ? 'selected' : ''}">
+            <div class="decor-ico">${D(k)}</div>
+            <b>${d.name}</b><small>${d.desc}</small><small class="charm">✿ +${d.charm} charm</small>${btn}</div>`;
+        }).join('')}</div>`;
+      } else {
+        ctx.sub('Buy a style once, then switch between your styles any time');
+        const W = S.workshop;
+        body.innerHTML = seg + Object.entries(WORKSHOP_DECOR).map(([slot, d]) => {
+          const placed = W.placed[slot] || 'default';
+          return `<h3 class="ipad-h">${d.name}</h3><div class="grid fs-grid">${Object.entries(d.styles).map(([id, st]) => {
+            const owned = !st.cost || (W.owned[slot] || []).includes(id);
+            const on = placed === id;
+            const btn = on ? '<button class="btn-toggle on" disabled>Placed ✓</button>'
+              : owned ? `<button class="btn-toggle" data-wplace="${slot}:${id}">Place</button>`
+              : `<button class="btn-buy" data-wbuy="${slot}:${id}" ${S.coins < st.cost ? 'disabled' : ''}>${coinArt()} ${st.cost}</button>`;
+            const pic = id === 'none' ? '<span class="fs-none">✕</span>'
+              : `<img src="${st.src || `assets/img/workshop/${d.thumb}.webp`}" alt="" style="filter:${st.src ? '' : st.filter || ''}">`;
+            return `<div class="card decor-card ${on ? 'selected' : ''}"><div class="decor-ico fs-ico">${pic}</div><b>${st.name}</b>${btn}</div>`;
+          }).join('')}</div>`;
+        }).join('');
+      }
       body.onclick = (e) => {
+        const r = e.target.closest('[data-room]');
+        if (r) { room = r.dataset.room; sfx('tap'); ctx.redraw(); body.scrollTop = 0; return; }
+        const wb = e.target.closest('[data-wbuy]'), wp = e.target.closest('[data-wplace]');
+        if ((wb && !wb.disabled) || wp) {
+          const [slot, id] = (wb || wp).dataset[wb ? 'wbuy' : 'wplace'].split(':');
+          const st = WORKSHOP_DECOR[slot].styles[id];
+          if (wb) {
+            if (S.coins < st.cost) return;
+            S.coins -= st.cost;
+            (S.workshop.owned[slot] = S.workshop.owned[slot] || []).push(id);
+            sfx('chime'); toast(`${st.name} placed in the 作業場 ♡`);
+            game.refreshHud();
+          } else sfx('pop');
+          S.workshop.placed[slot] = id;
+          save(); ctx.redraw(); game.refreshWorkshop();
+          return;
+        }
         const buy = e.target.closest('[data-buy]');
         const place = e.target.closest('[data-place]');
         if (buy && !buy.disabled) {

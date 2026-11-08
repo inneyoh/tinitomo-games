@@ -1,25 +1,45 @@
-// Scene 2: 作業場 (Workshop) — two stations, each launching mini-games:
-//   Alchemy table → perfume (Weigh → Sort → Mix)
-//   Kitchen       → tea: blends are brewed (fit the flowers into the brewing tank),
-//                   single-flower teas are packed (Chop → Dry → Pour)
-// Flowers are only used when a mini-game is finished; quitting costs nothing.
-// 3 stars = one bonus item.
-import { PRODUCTS, FLOWERS } from '../data.js';
+// Scene 2: 作業場 (Workshop) — layered art laid out like the user's samples.
+// Three workable stations, each highlighted with a glowing outline and a label:
+//   Perfume alchemy set → perfume (Weigh → Sort → Mix)
+//   Tea urn             → tea blends (fit the flowers into the brewing tank)
+//   Tea leaf rack       → loose-leaf tea (Chop → Dry → Pour)
+// Wall & ceiling, floor, rug, stool, flower basket and potted plant are customisable:
+// styles are bought in the Furniture Shop app on the shop iPad (WORKSHOP_DECOR in data.js).
+// Flowers are only used when a mini-game is finished; quitting costs nothing. 3 stars = 1 bonus.
+import { PRODUCTS, WORKSHOP_DECOR } from '../data.js';
 import { S, save, add, trend } from '../state.js';
-import { P, F, alchemyArt, kitchenArt } from '../art.js';
-import { $, h, openSheet, toast, floatText, bump, sfx, hint } from '../ui.js';
+import { P, F } from '../art.js';
+import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 import { openGame, starsFor } from '../minigames/shell.js';
 import { weighPhase, sortPhase, mixPhase } from '../minigames/perfume.js';
 import { brewPhase } from '../minigames/brew.js';
 import { chopPhase, dryPhase, pourPhase } from '../minigames/pack.js';
 
-let root, view, game;
-let busy = false;
+const IMG = 'assets/img/workshop/';
+const SIZE = { landscape: [1671, 941], portrait: [941, 1671] };
+// part of the canvas that must stay on screen (fractions); the rest may be cropped
+const KEEP = { landscape: [0.06, 0.16, 0.97, 0.94], portrait: [0.03, 0.14, 0.97, 0.9] };
+// [left %, top %, width %, height % (optional)] in canvas units, measured from the samples
+const LAYOUT = {
+  landscape: {
+    frame: [90.2, 20.6, 8.2], bench: [13.8, 52, 77.9], alchemy: [19.8, 39.3, 21.2], urn: [46, 35.5, 22.6], rack: [73.3, 38.5, 13.7],
+    plant: [-2.2, 50, 18.6], rug: [23, 80.5, 38.2, 16.5], stool: [62.5, 71, 10.4], basket: [88, 65.5, 10.8],
+  },
+  portrait: {
+    frame: [87.6, 20.5, 10.4], bench: [0, 42, 100], alchemy: [3.5, 32, 34.5], urn: [41, 33, 21.8], rack: [69, 33.5, 26],
+    plant: [-17, 63, 44], rug: [16, 73.5, 67], stool: [9.5, 59.5, 19.5], basket: [76.5, 62, 23.5],
+  },
+};
+// which sprites differ between orientations
+const PER_ORIENT = ['wall', 'floor', 'bench', 'alchemy', 'urn', 'rack'];
 
-const canMake = (k) => Object.entries(PRODUCTS[k].needs).every(([f, n]) => (S.flowers[f] || 0) >= n);
 const STATIONS = {
-  alchemy: { name: 'Alchemy Table', sub: 'Weigh, sort and mix flower essences into perfume', keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'perfume') },
-  kitchen: { name: 'Kitchen', sub: 'Brew tea blends in the tank, or chop, dry and pack loose-leaf tea', keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea') },
+  alchemy: { name: 'Perfume Alchemy Set', label: 'Perfume', sub: 'Weigh, sort and mix flower essences into perfume',
+    keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'perfume') },
+  urn:     { name: 'Tea Urn', label: 'Tea Brewing', sub: 'Fit the flowers into the brewing tank to brew a blend',
+    keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea' && PRODUCTS[k].method === 'brew') },
+  rack:    { name: 'Tea Leaf Rack', label: 'Tea Leaves', sub: 'Chop, dry and pack loose-leaf tea into tins',
+    keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea' && PRODUCTS[k].method !== 'brew') },
 };
 const PLANS = {
   perfume: { theme: 'alchemy', steps: ['Weigh', 'Sort', 'Mix'], phases: [weighPhase, sortPhase, mixPhase] },
@@ -27,28 +47,77 @@ const PLANS = {
   pack:    { theme: 'kitchen', steps: ['Chop', 'Dry', 'Pour'], phases: [chopPhase, dryPhase, pourPhase] },
 };
 const planFor = (p) => PLANS[p.cat === 'perfume' ? 'perfume' : p.method || 'pack'];
+const stationFor = (p) => (p.cat === 'perfume' ? 'alchemy' : p.method === 'brew' ? 'urn' : 'rack');
+const canMake = (k) => Object.entries(PRODUCTS[k].needs).every(([f, n]) => (S.flowers[f] || 0) >= n);
+
+let root, view, canvas, game, orient = '';
+let busy = false;
 
 export function mount(el, api) {
   game = api;
   root = el;
+  root.classList.add('full');
+  const img = (k, cls = '') => `<img class="w-item ${cls}" data-k="${k}" alt="" draggable="false">`;
+  const station = (k) => `<button class="w-station" data-st="${k}" aria-label="${STATIONS[k].name}">
+      <img data-k="${k}" alt="" draggable="false"><span class="w-label">${STATIONS[k].label}</span></button>`;
   root.innerHTML = `
   <div class="view work-view">
-    <div class="wall wood"></div>
-    <div class="work-window"><div class="sky"><div class="sun"></div></div></div>
-    <div class="jar-shelf"><div class="jars"></div><div class="shelf-board"></div></div>
-    <div class="hanging-herbs">${['lavender', 'mint', 'chamomile', 'rose'].map((k) => `<div class="herb">${F(k)}</div>`).join('')}</div>
-    <div class="floor wood-floor"></div>
-    <img class="guinny" src="assets/img/guinny-apron.webp" alt="Guinny" draggable="false">
-    <button class="station st-alchemy" data-st="alchemy" aria-label="Alchemy table — perfume">${alchemyArt()}<span class="hot-tag">Perfume</span></button>
-    <button class="station st-kitchen" data-st="kitchen" aria-label="Kitchen — tea">${kitchenArt()}<span class="hot-tag">Tea</span></button>
+    <div class="canvas w-canvas">
+      ${img('wall', 'layer w-wall')}
+      ${img('floor', 'layer w-floor')}${img('floor', 'layer layer-ext w-floor')}
+      <div class="w-item w-art" data-k="frame"><img class="w-pic" src="${IMG}picture.webp" alt=""><img class="w-frame" src="${IMG}frame.webp" alt=""></div>
+      ${img('bench')}
+      ${station('alchemy')}${station('urn')}${station('rack')}
+      ${img('rug')}${img('plant')}${img('stool')}${img('basket')}
+      <div class="w-warm"></div>
+    </div>
     <div class="shop-hint w-hint" role="status"></div>
   </div>`;
   view = $('.view', root);
-  view.querySelectorAll('.station').forEach((b) => b.addEventListener('click', () => { sfx('tap'); openStation(b.dataset.st); }));
+  canvas = $('.canvas', view);
+  $$('.w-station', canvas).forEach((b) => b.addEventListener('click', () => { sfx('tap'); openStation(b.dataset.st); }));
+  new ResizeObserver(layout).observe(view);
+  layout();
   render();
 }
 
-export function enter() { render(); }
+function layout() {
+  const vw = view.clientWidth, vh = view.clientHeight;
+  if (!vw || !vh) return;
+  const o = vw >= vh ? 'landscape' : 'portrait';
+  if (o !== orient) {
+    orient = o;
+    canvas.dataset.o = o;
+    for (const [k, [l, t, w, hh]] of Object.entries(LAYOUT[o])) {
+      $$(`[data-k="${k}"]`, canvas).forEach((el) => {
+        const box = el.closest('.w-station') || el;
+        Object.assign(box.style, { left: `${l}%`, top: `${t}%`, width: `${w}%`, height: hh ? `${hh}%` : '' });
+      });
+    }
+    $$('.w-wall', canvas).forEach((el) => { el.classList.toggle('w-wall-fit', o === 'portrait'); });
+    renderDecor();
+  }
+  fitCanvas(view, canvas, ...SIZE[o], KEEP[o], 0);
+}
+
+// Apply the placed furniture styles (and the per-orientation sprites)
+function renderDecor() {
+  if (!orient) return;   // not laid out yet (scene hidden)
+  $$('img[data-k]', canvas).forEach((el) => {
+    const k = el.dataset.k;
+    const slot = WORKSHOP_DECOR[k];
+    const base = `${IMG}${PER_ORIENT.includes(k) ? `${orient}-` : ''}${k}.webp`;
+    if (!slot) { if (!el.src.endsWith(base)) el.src = base; return; }
+    const id = S.workshop.placed[k] || 'default';
+    const style = slot.styles[id] || slot.styles.default;
+    const src = style.src || base;
+    if (!el.src.endsWith(src)) el.src = src;
+    el.style.filter = style.src ? '' : style.filter || '';
+    el.hidden = id === 'none';
+  });
+}
+
+export function enter() { layout(); render(); }
 export function leave() {}
 export function tick() {}
 
@@ -99,7 +168,7 @@ async function play(k) {
   await g.result({ product: k, stars, made: p.makes + bonus, bonus });
   busy = false;
   render();
-  const st = $(p.cat === 'perfume' ? '.st-alchemy' : '.st-kitchen', view);
+  const st = $(`.w-station[data-st="${stationFor(p)}"]`, canvas);
   bump(st); floatText(st, `+${p.makes + bonus} ${p.name}`);
   game.refreshShop();
   if (!S.lineup.includes(k)) setTimeout(() => { if (!document.querySelector('.mg')) toast(`Tip: add ${p.name} to the menu on the shop iPad`); }, 900);
@@ -107,13 +176,15 @@ async function play(k) {
 
 function render() {
   if (!view) return;
-  $('.jars', view).innerHTML = Object.keys(FLOWERS).map((f) =>
-    `<div class="jar ${S.flowers[f] ? '' : 'empty'}"><div class="jar-ico">${F(f)}</div><span>${S.flowers[f] || 0}</span></div>`).join('');
-  const can = (st) => STATIONS[st].keys().some(canMake);
-  $('.st-alchemy', view).classList.toggle('attn', can('alchemy') && !busy);
-  $('.st-kitchen', view).classList.toggle('attn', can('kitchen') && !busy);
-  hint($('.w-hint', view), can('alchemy') || can('kitchen')
-    ? 'Tap the alchemy table for perfume, or the kitchen for tea'
+  renderDecor();
+  let any = false;
+  $$('.w-station', canvas).forEach((b) => {
+    const ok = STATIONS[b.dataset.st].keys().some(canMake) && !busy;
+    b.classList.toggle('attn', ok);
+    any = any || ok;
+  });
+  hint($('.w-hint', view), any
+    ? 'Tap a glowing station to start making something'
     : 'Not enough flowers — grow more in the garden');
 }
 

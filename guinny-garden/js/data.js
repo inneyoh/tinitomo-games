@@ -88,3 +88,45 @@ export const START = {
   lineup: ['chamomile_tea', 'daisy_bouquet', 'mint_tea'],
   baseSlots: 3,
 };
+
+// 作業場 furniture: each slot has styles bought in the Furniture Shop (shop iPad) and
+// placed in the 作業場. Until real art exists for a style, `filter` recolours the
+// default sprite; give a style `src: 'assets/img/workshop/<file>.webp'` to use real art.
+// 'none' (where offered) leaves the spot empty.
+export const WORKSHOP_DECOR = {
+  wall: { name: 'Wall & Ceiling', thumb: 'thumb-wall', styles: {
+    default:  { name: 'Cream Plaster',   cost: 0 },
+    blush:    { name: 'Blush Plaster',   cost: 140, filter: 'sepia(.25) hue-rotate(-25deg) saturate(1.25)' },
+    sage:     { name: 'Sage Plaster',    cost: 160, filter: 'hue-rotate(45deg) saturate(.75)' },
+    lavender: { name: 'Lavender Mist',   cost: 180, filter: 'hue-rotate(230deg) saturate(.55) brightness(1.04)' },
+  } },
+  floor: { name: 'Floor', thumb: 'thumb-floor', styles: {
+    default:  { name: 'Honey Planks',    cost: 0 },
+    walnut:   { name: 'Walnut Planks',   cost: 120, filter: 'brightness(.78) saturate(1.15)' },
+    white:    { name: 'Whitewashed Oak', cost: 140, filter: 'brightness(1.12) saturate(.45)' },
+  } },
+  rug: { name: 'Rug', thumb: 'rug', styles: {
+    default:  { name: 'Sage Vine Rug',   cost: 0 },
+    rose:     { name: 'Rose Vine Rug',   cost: 60,  filter: 'hue-rotate(250deg) saturate(1.1)' },
+    sky:      { name: 'Sky Vine Rug',    cost: 70,  filter: 'hue-rotate(110deg) saturate(.9)' },
+    none:     { name: 'No rug',          cost: 0 },
+  } },
+  stool: { name: 'Stool', thumb: 'stool', styles: {
+    default:  { name: 'Honey Stool',     cost: 0 },
+    sage:     { name: 'Sage Painted',    cost: 40,  filter: 'hue-rotate(55deg) saturate(.6)' },
+    cream:    { name: 'Cream Painted',   cost: 40,  filter: 'saturate(.25) brightness(1.15)' },
+    none:     { name: 'No stool',        cost: 0 },
+  } },
+  basket: { name: 'Flower Basket', thumb: 'basket', styles: {
+    default:  { name: 'Lavender & Daisy', cost: 0 },
+    rose:     { name: 'Rosy Bunch',      cost: 50,  filter: 'hue-rotate(-60deg) saturate(1.1)' },
+    sunny:    { name: 'Sunny Bunch',     cost: 50,  filter: 'hue-rotate(-110deg) saturate(.9)' },
+    none:     { name: 'No basket',       cost: 0 },
+  } },
+  plant: { name: 'Potted Plant', thumb: 'plant', styles: {
+    default:  { name: 'Leafy Pothos',    cost: 0 },
+    autumn:   { name: 'Autumn Leaves',   cost: 70,  filter: 'hue-rotate(-55deg) saturate(1.2)' },
+    frosty:   { name: 'Frosted Fern',    cost: 70,  filter: 'hue-rotate(60deg) saturate(.6) brightness(1.08)' },
+    none:     { name: 'No plant',        cost: 0 },
+  } },
+};
