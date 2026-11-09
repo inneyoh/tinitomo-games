@@ -1160,3 +1160,11 @@ body.rb-open .mg-hint { opacity: 0; }
   .rb-ing img { height: 5.6cqh; }
   .rb-info b { font-size: 4.2cqh; }
 }
+
+/* Brew button: always visible; greyed with a counter until the urn is full */
+.urn-brew:disabled { background: rgba(255, 252, 246, .92); color: var(--ink-soft); box-shadow: 0 4px 0 rgba(107, 74, 54, .18); text-shadow: none; animation: none; }
+.urn-brew:not(:disabled) { animation: pop .4s ease, glow-btn 1.6s ease-in-out .4s infinite; }
+@keyframes glow-btn { 50% { box-shadow: 0 5px 0 var(--sage-d), 0 0 0 6px rgba(175, 195, 155, .45); } }
+@media (orientation: landscape) {
+  .mg-urn .mg-hint { left: 50%; transform: translateX(-50%); bottom: auto; top: calc(14px + var(--safe-t)); max-width: calc(100% - 360px); font-size: .78rem; }
+}

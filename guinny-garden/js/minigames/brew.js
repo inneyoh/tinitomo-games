@@ -87,7 +87,7 @@ export function brewPhase(g, have, opts = {}) {
       <div class="urn-scene">
         <div class="urn-canvas"><img class="urn-bg" alt="" draggable="false">
           <div class="urn-grid">${Array.from({ length: COLS * ROWS }, (_, i) => `<i data-c="${i}"></i>`).join('')}<div class="urn-pieces"></div><div class="urn-steam"></div></div>
-          <button class="btn-primary urn-brew hidden">Brew ✿</button>
+          <button class="btn-primary urn-brew" disabled>Brew ✿</button>
           <div class="urn-tray">
             <button class="tray-arrow prev" aria-label="Previous">◀</button>
             <div class="tray-track"></div>
@@ -231,7 +231,7 @@ export function brewPhase(g, have, opts = {}) {
       if (!d.moved) {
         if (d.fromIdx !== null) { unplace(d.fromIdx); sfx('soft'); }
         else { rot[d.k] = (rot[d.k] + 1) % 4; sfx('tap'); }
-        drawPlaced(); drawTray(); return;
+        drawPlaced(); drawTray(); checkDone(); return;
       }
       d.ghost.remove();
       const [ax, ay] = d.target || [-9, -9];
@@ -244,10 +244,15 @@ export function brewPhase(g, have, opts = {}) {
 
     let finished = false;
     const brewBtn = $('.urn-brew', scene);
-    // when the urn is full, show the Brew button (pieces can still be moved until then)
+    // Brew is always on screen: greyed out with a counter until every square is filled
+    let wasFull = false;
     function checkDone() {
-      const full = grid.every((c) => c !== -1);
-      brewBtn.classList.toggle('hidden', !full || finished);
+      const filledN = grid.filter((c) => c !== -1).length, full = filledN === grid.length;
+      brewBtn.disabled = !full || finished;
+      brewBtn.classList.toggle('hidden', finished);
+      brewBtn.textContent = full ? 'Brew ✿' : `Brew · ${filledN} / ${grid.length}`;
+      if (full === wasFull) return;
+      wasFull = full;
       if (full && !finished) {
         const id = opts.preview ? opts.preview(used()) : null;
         g.hint(id ? `Smells like ${id}… tap Brew!` : 'The urn is full! Tap Brew to see what tea it makes.');
@@ -300,7 +305,7 @@ export function brewPhase(g, have, opts = {}) {
     }
 
     new ResizeObserver(layout).observe(scene);
-    drawTray(); drawPlaced();
+    drawTray(); drawPlaced(); checkDone();
     requestAnimationFrame(layout);
   });
 }
