@@ -56,7 +56,7 @@ export function notepadApp() {
 
       const k = page, f = FLOWERS[k], e = ENCYCLOPEDIA[k] || {}, r = rec(k), rk = rank(r.harvested);
       const known = r.harvested > 0;
-      const sold = Object.entries(PRODUCTS).filter(([, p]) => p.needs[k]).map(([pk, p]) => ({ pk, p, n: S.sold[pk] || 0 }));
+      const sold = Object.entries(PRODUCTS).filter(([pk, p]) => p.needs[k] && (!p.urn || S.recipes[pk])).map(([pk, p]) => ({ pk, p, n: S.sold[pk] || 0 }));
       const soldTotal = sold.reduce((a, s) => a + s.n, 0);
       const next = MILESTONES.find((m) => r.harvested < m.at);
       const locked = (text) => `<p class="nb-locked">${text}</p>`;

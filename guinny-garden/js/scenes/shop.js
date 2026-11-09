@@ -359,7 +359,7 @@ function openIpad(start = null) {
     render(body, ctx) {
       const slots = lineupSlots();
       ctx.sub(`${S.lineup.length} / ${slots} spots on the menu board · ★ trend sells for more today`);
-      const keys = Object.keys(PRODUCTS).sort((a, b) => available(b) - available(a));
+      const keys = Object.keys(PRODUCTS).filter((k) => !PRODUCTS[k].urn || S.recipes[k]).sort((a, b) => available(b) - available(a));
       body.innerHTML = `<div class="list">${keys.map((k) => {
         const p = PRODUCTS[k], on = S.lineup.includes(k), n = available(k);
         const full = !on && S.lineup.length >= slots;

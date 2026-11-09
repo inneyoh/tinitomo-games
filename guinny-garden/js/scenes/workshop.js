@@ -12,7 +12,10 @@ import { P, F } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 import { openGame, starsFor } from '../minigames/shell.js';
 import { weighPhase, sortPhase, mixPhase } from '../minigames/perfume.js';
-import { brewPhase } from '../minigames/brew.js';
+import { brewPhase, canFill } from '../minigames/brew.js';
+import { BREW_INGREDIENTS, classify, TEAS } from '../teas.js';
+import { openRecipeBook } from '../recipebook.js';
+import { showBrewTutorial } from '../brewtutorial.js';
 import { chopPhase, dryPhase, pourPhase } from '../minigames/pack.js';
 
 const IMG = 'assets/img/workshop/';
@@ -36,18 +39,17 @@ const PER_ORIENT = ['wall', 'floor', 'bench', 'alchemy', 'urn', 'rack'];
 const STATIONS = {
   alchemy: { name: 'Perfume Alchemy Set', label: 'Perfume', sub: 'Weigh, sort and mix flower essences into perfume',
     keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'perfume') },
-  urn:     { name: 'Tea Urn', label: 'Tea Brewing', sub: 'Fit the flowers into the brewing tank to brew a blend',
-    keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea' && PRODUCTS[k].method === 'brew') },
+  urn:     { name: 'Tea Urn', label: 'Tea Brewing', sub: 'Fill the urn with any ingredients and see what tea it makes',
+    keys: () => [] },   // no recipe list: the urn opens the brewing game straight away
   rack:    { name: 'Tea Leaf Rack', label: 'Tea Leaves', sub: 'Chop, dry and pack loose-leaf tea into tins',
-    keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea' && PRODUCTS[k].method !== 'brew') },
+    keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea' && PRODUCTS[k].method === 'pack') },
 };
 const PLANS = {
   perfume: { theme: 'alchemy', steps: ['Weigh', 'Sort', 'Mix'], phases: [weighPhase, sortPhase, mixPhase] },
-  brew:    { theme: 'kitchen', steps: ['Fill the tank'], phases: [brewPhase] },
   pack:    { theme: 'kitchen', steps: ['Chop', 'Dry', 'Pour'], phases: [chopPhase, dryPhase, pourPhase] },
 };
 const planFor = (p) => PLANS[p.cat === 'perfume' ? 'perfume' : p.method || 'pack'];
-const stationFor = (p) => (p.cat === 'perfume' ? 'alchemy' : p.method === 'brew' ? 'urn' : 'rack');
+const stationFor = (p) => (p.cat === 'perfume' ? 'alchemy' : p.urn ? 'urn' : 'rack');
 const canMake = (k) => Object.entries(PRODUCTS[k].needs).every(([f, n]) => (S.flowers[f] || 0) >= n);
 
 let root, view, canvas, game, orient = '';
@@ -76,7 +78,7 @@ export function mount(el, api) {
   </div>`;
   view = $('.view', root);
   canvas = $('.canvas', view);
-  $$('.w-station', canvas).forEach((b) => b.addEventListener('click', () => { sfx('tap'); openStation(b.dataset.st); }));
+  $$('.w-station', canvas).forEach((b) => b.addEventListener('click', () => { sfx('tap'); if (b.dataset.st === 'urn') playUrn(); else openStation(b.dataset.st); }));
   new ResizeObserver(layout).observe(view);
   layout();
   render();
@@ -170,7 +172,7 @@ async function play(k) {
   const bonus = stars === 3 ? 1 : 0;
   add(S.stock, k, p.makes + bonus);
   save();
-  await g.result({ product: k, stars, made: p.makes + bonus, bonus });
+  await g.result({ product: k, name: p.name, stars, made: p.makes + bonus, bonus });
   busy = false;
   render();
   const st = $(`.w-station[data-st="${stationFor(p)}"]`, canvas);
@@ -179,12 +181,55 @@ async function play(k) {
   if (!S.lineup.includes(k)) setTimeout(() => { if (!document.querySelector('.mg')) toast(`Tip: add ${p.name} to the menu on the shop iPad`); }, 900);
 }
 
+// ----- Tea urn: free brewing ------------------------------------------------------
+const pantry = () => Object.fromEntries(BREW_INGREDIENTS.map((k) => [k, S.flowers[k] || 0]));
+let fillCache = { key: '', ok: false };
+function urnReady() {
+  const have = pantry(), key = JSON.stringify(have);
+  if (fillCache.key !== key) fillCache = { key, ok: canFill(have) };
+  return fillCache.ok;
+}
+
+async function playUrn() {
+  if (busy) return;
+  if (!urnReady()) { toast('Not enough ingredients to fill the urn — grow flowers or buy tea leaves'); return; }
+  busy = true; render();
+  const g = openGame({ title: 'Tea Urn', steps: ['Fill the urn'], theme: 'kitchen' });
+  g.step(0);
+  setTimeout(() => showBrewTutorial(), 350);
+  const r = await Promise.race([
+    brewPhase(g, pantry(), {
+      onBook: openRecipeBook,
+      onHelp: () => showBrewTutorial(true),
+      preview: (used) => { const id = classify(used); return S.recipes[id] ? TEAS[id].name : null; },
+    }),
+    g.closed,
+  ]);
+  if (r === false) { busy = false; render(); return; }   // quit: nothing used up
+  const id = classify(r.used), p = PRODUCTS[id];
+  for (const [k, c] of Object.entries(r.used)) add(S.flowers, k, -c);
+  const isNew = !S.recipes[id];
+  S.recipes[id] = { n: (S.recipes[id]?.n || 0) + 1, first: S.recipes[id]?.first || Date.now() };
+  const stars = starsFor([r.score]);
+  const bonus = stars === 3 ? 1 : 0;
+  add(S.stock, id, p.makes + bonus);
+  save();
+  await g.result({ product: id, name: p.name, stars, made: p.makes + bonus, bonus, isNew,
+    note: 'Tea has been recorded in the recipe book' });
+  busy = false;
+  render();
+  const st = $('.w-station[data-st="urn"]', canvas);
+  bump(st); floatText(st, `+${p.makes + bonus} ${p.name}`);
+  game.refreshShop();
+  if (!S.lineup.includes(id)) setTimeout(() => { if (!document.querySelector('.mg')) toast(`Tip: add ${p.name} to the menu on the shop iPad`); }, 900);
+}
+
 function render() {
   if (!view) return;
   renderDecor();
   let any = false;
   $$('.w-station', canvas).forEach((b) => {
-    const ok = STATIONS[b.dataset.st].keys().some(canMake) && !busy;
+    const ok = !busy && (b.dataset.st === 'urn' ? urnReady() : STATIONS[b.dataset.st].keys().some(canMake));
     b.classList.toggle('attn', ok);
     any = any || ok;
   });

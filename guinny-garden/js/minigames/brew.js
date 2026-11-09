@@ -1,7 +1,7 @@
 // Tea brewing at the tea urn: a packing puzzle on the user's urn art.
-// Drag the ingredient pieces from the tray into the urn's 4×5 grid until every square is
-// filled. Tap a piece in the tray to turn it; tap a placed piece to take it back out.
-// Each recipe's `needs` (data.js) is a mix of pieces that is known to fill the grid.
+// The tray holds every brewing ingredient the player owns. Drag pieces into the urn's 4×5
+// grid until every square is filled, then tap Brew. The mix decides the tea (js/teas.js).
+// Tap a piece in the tray to turn it; tap a placed piece to take it back out.
 // Portrait: tray along the bottom with ◀ ▶. Landscape: tray on the right with ▲ ▼.
 import { ING } from '../data.js';
 import { $, $$, h, sfx } from '../ui.js';
@@ -33,8 +33,38 @@ const norm = (c) => { const mx = Math.min(...c.map((p) => p[0])), my = Math.min(
 const rotCells = (c, r) => { let o = c; for (let i = 0; i < r; i++) o = norm(o.map(([x, y]) => [-y, x])); return o; };
 const dims = (k, r) => (r % 2 ? [PIECES[k].h, PIECES[k].w] : [PIECES[k].w, PIECES[k].h]);
 
-export function brewPhase(g, recipe) {
-  const counts = { ...recipe.needs };
+// Can these ingredients fill the urn at all? (used before opening the game)
+export function canFill(have) {
+  const grid = Array(COLS * ROWS).fill(0), left = { ...have };
+  const rec = () => {
+    const f = grid.indexOf(0);
+    if (f < 0) return true;
+    const fx = f % COLS, fy = Math.floor(f / COLS);
+    for (const k of Object.keys(left)) {
+      if (!left[k] || !PIECES[k]) continue;
+      const seen = new Set();
+      for (let r = 0; r < 4; r++) {
+        const c = rotCells(PIECES[k].cells, r), key = JSON.stringify(c);
+        if (seen.has(key)) continue; seen.add(key);
+        const [ax, ay] = c.reduce((m, q) => (q[1] < m[1] || (q[1] === m[1] && q[0] < m[0]) ? q : m));
+        const pts = c.map(([x, y]) => [fx - ax + x, fy - ay + y]);
+        if (pts.every(([x, y]) => x >= 0 && y >= 0 && x < COLS && y < ROWS && !grid[y * COLS + x])) {
+          pts.forEach(([x, y]) => { grid[y * COLS + x] = 1; }); left[k]--;
+          if (rec()) return true;
+          left[k]++; pts.forEach(([x, y]) => { grid[y * COLS + x] = 0; });
+        }
+      }
+    }
+    return false;
+  };
+  return rec();
+}
+
+// have: { ingredient: count owned }. opts.onBook / opts.onHelp: top-bar buttons.
+// Resolves with { score (0–1), used: { ingredient: pieces } }.
+export function brewPhase(g, have, opts = {}) {
+  const counts = Object.fromEntries(Object.keys(PIECES).filter((k) => have[k] > 0).map((k) => [k, have[k]]));
+  const order = Object.keys(counts);
   const rot = Object.fromEntries(Object.keys(counts).map((k) => [k, 0]));   // tray orientation per ingredient
   const placed = [];          // { k, r, x, y }
   const grid = Array(COLS * ROWS).fill(-1);
@@ -43,11 +73,21 @@ export function brewPhase(g, recipe) {
 
   g.el.classList.add('mg-urn');
   return new Promise((resolve) => {
-    g.hint('Fill every square of the urn. Tap a piece in the tray to turn it.');
+    g.hint('Fill every square of the urn with any ingredients you like, then brew!');
+    // recipe book + help buttons in the top bar
+    const top = $('.mg-top', g.el);
+    if (!$('.mg-book', top)) {
+      top.insertBefore(h(`<div class="mg-tools">
+        <button class="mg-book" aria-label="Recipe book"><img src="assets/img/book/icon.webp" alt="" draggable="false"></button>
+        <button class="btn-round mg-help" aria-label="How to brew">?</button></div>`), $('.mg-close', top));
+      $('.mg-book', top).addEventListener('click', () => { sfx('pop'); opts.onBook && opts.onBook(); });
+      $('.mg-help', top).addEventListener('click', () => { sfx('tap'); opts.onHelp && opts.onHelp(); });
+    }
     g.stage.innerHTML = `
       <div class="urn-scene">
         <div class="urn-canvas"><img class="urn-bg" alt="" draggable="false">
           <div class="urn-grid">${Array.from({ length: COLS * ROWS }, (_, i) => `<i data-c="${i}"></i>`).join('')}<div class="urn-pieces"></div><div class="urn-steam"></div></div>
+          <button class="btn-primary urn-brew hidden">Brew ✿</button>
           <div class="urn-tray">
             <button class="tray-arrow prev" aria-label="Previous">◀</button>
             <div class="tray-track"></div>
@@ -85,12 +125,11 @@ export function brewPhase(g, recipe) {
         <img src="${IMG}piece-${k}.webp" alt="" draggable="false"></div>`;
     };
     const drawTray = () => {
-      const keys = Object.keys(counts).filter((k) => counts[k] > 0);
-      track.innerHTML = keys.map((k) => `<div class="tray-item" data-k="${k}">
+      track.innerHTML = order.map((k) => `<div class="tray-item ${counts[k] ? '' : 'used-up'}" data-k="${k}">
           <div class="tray-piece">${pieceHTML(k, rot[k])}</div>
           <span class="tray-label">${ING(k).name.replace(/ Leaves$/, '').toLowerCase()}</span>
-          ${counts[k] > 1 ? `<b class="tray-count">×${counts[k]}</b>` : ''}</div>`).join('')
-        || '<p class="tray-empty">All in! ✿</p>';
+          <b class="tray-count">×${counts[k]}</b></div>`).join('')
+        || '<p class="tray-empty">No ingredients…</p>';
       sizeTray();
       arrows();
     };
@@ -155,7 +194,7 @@ export function brewPhase(g, recipe) {
     let drag = null;
     scene.addEventListener('pointerdown', (e) => {
       const el = e.target.closest('.bp');
-      if (!el || e.target.closest('.tray-arrow')) return;
+      if (!el || e.target.closest('.tray-arrow') || finished || el.closest('.used-up')) return;
       e.preventDefault();
       const fromIdx = el.dataset.i !== undefined ? +el.dataset.i : null;
       const k = el.dataset.k, r = fromIdx !== null ? placed[fromIdx].r : rot[k];
@@ -204,21 +243,36 @@ export function brewPhase(g, recipe) {
     scene.addEventListener('pointercancel', () => { if (drag?.ghost) drag.ghost.remove(); drag = null; preview(null, 0, null); drawTray(); });
 
     let finished = false;
-    async function checkDone() {
+    const brewBtn = $('.urn-brew', scene);
+    // when the urn is full, show the Brew button (pieces can still be moved until then)
+    function checkDone() {
+      const full = grid.every((c) => c !== -1);
+      brewBtn.classList.toggle('hidden', !full || finished);
+      if (full && !finished) {
+        const id = opts.preview ? opts.preview(used()) : null;
+        g.hint(id ? `Smells like ${id}… tap Brew!` : 'The urn is full! Tap Brew to see what tea it makes.');
+        sfx('chime');
+      } else if (!finished) g.hint('Fill every square of the urn with any ingredients you like, then brew!');
+    }
+    const used = () => placed.reduce((u, p) => { u[p.k] = (u[p.k] || 0) + 1; return u; }, {});
+    brewBtn.addEventListener('click', async () => {
       if (finished || !grid.every((c) => c !== -1)) return;
-      finished = true;
+      finished = true; brewBtn.classList.add('hidden');
       g.hint('Brewing… ✿'); sfx('chime');
       scene.classList.add('brewing');
       $('.urn-steam', scene).innerHTML = Array.from({ length: 14 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 7) * 0.18}s"></i>`).join('');
       await wait(1700);
       const secs = (Date.now() - t0) / 1000;
-      resolve(secs < 60 ? 1 : secs < 120 ? 0.8 : 0.65);
-    }
+      resolve({ score: secs < 90 ? 1 : secs < 180 ? 0.8 : 0.65, used: used() });
+    });
 
     // testing shortcut, only with ?debug in the address: solve the urn
     if (location.search.includes('debug')) {
-      window.__brewSolve = () => {
+      // __brewSolve({ rose: 2, ... }) fills the urn with exactly that mix (or any mix if omitted)
+      window.__brewSolve = (only) => {
         while (placed.length) unplace(0);
+        const saved = { ...counts };
+        if (only) for (const k of Object.keys(counts)) counts[k] = Math.min(counts[k], only[k] || 0);
         const sol = [];
         const rec = () => {
           const f = grid.indexOf(-1);
@@ -238,7 +292,9 @@ export function brewPhase(g, recipe) {
           }
           return false;
         };
-        const ok = rec(); drawPlaced(); drawTray(); checkDone();
+        const ok = rec();
+        for (const k of Object.keys(counts)) counts[k] = saved[k] - placed.filter((q) => q.k === k).length;
+        drawPlaced(); drawTray(); checkDone();
         return ok;
       };
     }

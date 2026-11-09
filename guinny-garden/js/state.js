@@ -17,6 +17,8 @@ function fresh() {
     garden: PLOTS.map(() => ({ key: null })),   // { key, grown(ms), t(last update), wetUntil }
     upgrades: {},
     workshop: { owned: {}, placed: {} },   // 作業場 furniture: slot -> [style ids] / style id
+    recipes: {},            // urn tea id -> { n: times brewed, first: timestamp } (the recipe book)
+    tutorials: {},          // tutorial id -> true once seen
     harvested: {},          // crop -> total harvested (unlocks encyclopedia notes)
     journal: {},            // crop -> { planted, watered, harvested, first: { planted, harvest } } for the encyclopedia
     sold: {},               // product -> number sold
@@ -36,6 +38,9 @@ function load() {
       const d = JSON.parse(raw);
       delete d.plots;
       if (!d.garden || d.garden.length !== PLOTS.length) delete d.garden;   // garden layout changed
+      // drop goods that no longer exist (older versions had other teas)
+      if (d.lineup) d.lineup = d.lineup.filter((k) => PRODUCTS[k]);
+      for (const bag of [d.stock, d.sold]) if (bag) for (const k of Object.keys(bag)) if (!PRODUCTS[k]) delete bag[k];
       return Object.assign(fresh(), d);
     }
   } catch (_) { /* storage unavailable */ }
@@ -62,7 +67,7 @@ export const lineupSlots = () => 3 + Object.keys(S.decor).filter(k => S.decor[k]
 
 // Today's trending product: same for everyone on a given date.
 export function trend(date = S.day.date) {
-  const keys = Object.keys(PRODUCTS);
+  const keys = Object.keys(PRODUCTS).filter((k) => !PRODUCTS[k].urn || S.recipes[k]);
   let h = 0;
   for (const ch of date) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return keys[h % keys.length];

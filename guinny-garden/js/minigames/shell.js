@@ -41,14 +41,17 @@ export function openGame({ title, steps, theme = 'kitchen' }) {
       this.stage = fresh;
       this.hint(hintText);
     },
-    result({ product, stars, made, bonus }) {
+    result({ product, name, stars, made, bonus, note = '', isNew = false }) {
       this.step(steps.length, '');
-      this.stage.innerHTML = `<div class="mg-result">
+      this.hint('');
+      this.stage.innerHTML = `<div class="mg-result-wrap"><div class="mg-result">
+        ${isNew ? '<span class="mg-new">New recipe!</span>' : ''}
         <div class="mg-result-art">${P(product)}</div>
+        <b class="mg-result-name">${name || ''}</b>
         <div class="mg-stars">${[1, 2, 3].map((n) => `<span class="${n <= stars ? 'on' : ''}" style="--d:${n * 150}ms">★</span>`).join('')}</div>
-        <b>${['', 'Not bad!', 'Lovely work!', 'Perfect!'][stars]}</b>
         <p>+${made} made${bonus ? ' (a bonus one for 3 stars!)' : ''}</p>
-        <button class="btn-primary mg-done">Done ✿</button></div>`;
+        ${note ? `<small class="mg-note">${note}</small>` : ''}
+        <button class="btn-primary mg-done">Done ✿</button></div></div>`;
       sfx('chime');
       return new Promise((res) => {
         $('.mg-done', this.stage).addEventListener('click', () => { sfx('tap'); close(); res(true); });

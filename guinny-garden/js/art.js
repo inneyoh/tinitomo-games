@@ -3,7 +3,10 @@
 // ASSET_OVERRIDES below, e.g. 'product:rose_perfume': 'assets/img/rose-perfume.webp'.
 import { FLOWERS, PRODUCTS } from './data.js';
 
+import { TEAS, teaSprite } from './teas.js';
+
 export const ASSET_OVERRIDES = {
+  ...Object.fromEntries(Object.keys(TEAS).map((id) => [`product:${id}`, teaSprite(id)])),
   // ingredient icons cut from the user's brewing-piece art
   ...Object.fromEntries(['chamomile', 'mint', 'lavender', 'rose', 'camellia', 'butterfly_pea', 'earl_grey', 'darjeeling', 'lapsang', 'chai']
     .map((k) => [`flower:${k}`, `assets/img/ingredients/${k}.webp`])),

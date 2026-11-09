@@ -104,3 +104,13 @@ To add an app, add `{ id, name, icon, render(body, ctx) }` to the `apps` list in
 - **Tea leaves** (bought in the Florist Shop, `LEAVES` in `js/data.js`): Earl Grey, Darjeeling, Lapsang, Chai.
 - New games start with 5 of each. Ingredient icons are cut from the brewing-piece art (`assets/img/ingredients/`).
 - **Brewed teas:** Garden Blend, Earl Grey Lavender, Darjeeling Rose, Smoky Camellia, Rose Chai, Blue Butterfly Tea, Camellia Blossom Tea. **Packed teas:** Chamomile, Mint, Strawberry.
+
+### Tea urn brewing & recipe book
+
+- Tapping the tea urn opens the brewing game straight away. The tray holds every brewing ingredient you own. Fill the urn's 4×5 grid with any mix, then tap **Brew**. Ingredients are only used when you brew.
+- The mix decides the tea (`js/teas.js`, rules explained at the top of the file):
+  - **Special teas** come first, in priority order: Guinny's Special, Flower Tea, Serenity Brew, Butterfly Rose, Camellia Mint, Lavender Earl Grey, Chai Mint, Rose Darjeeling, Camellia Rose, Healing Brew.
+  - Otherwise you get the **general tea** of the ingredient used most.
+- Every one of the 20 teas can be brewed. This was checked by trying every mix that fills the urn exactly. Guinny's Special has only one mix: 3 butterfly pea, 1 mint, 2 camellia, 1 darjeeling.
+- The result shows in the shop pop-up frame with the cup sprite (`assets/img/teas/`) and its name. A tea is recorded in the **recipe book** (`js/recipebook.js`, art in `assets/img/book/`) the first time it's brewed. Only recorded teas appear on the shop menu.
+- A tutorial (`js/brewtutorial.js`) shows the first time and from the "?" button.

@@ -1,10 +1,10 @@
 // Offline cache for the prototype. Bump VERSION when files change.
-const VERSION = 'gg-v17';
+const VERSION = 'gg-v18';
 const FILES = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/main.js', 'js/state.js', 'js/data.js', 'js/art.js', 'js/ui.js',
   'js/minigames/shell.js', 'js/minigames/perfume.js', 'js/minigames/brew.js', 'js/minigames/pack.js',
-  'js/tablet.js', 'js/notepad.js', 'js/encyclopedia.js', 'js/scenes/shop.js', 'js/scenes/workshop.js', 'js/scenes/garden.js',
+  'js/tablet.js', 'js/teas.js', 'js/recipebook.js', 'js/brewtutorial.js', 'js/notepad.js', 'js/encyclopedia.js', 'js/scenes/shop.js', 'js/scenes/workshop.js', 'js/scenes/garden.js',
   'assets/img/guinny-apron.webp', 'assets/img/guinny-garden.webp', 'assets/img/logo.webp',
   'assets/img/ui-panel.webp',
   ...['wall', 'floor', 'window', 'board', 'counter'].flatMap((k) => [`assets/img/shop/landscape-${k}.webp`, `assets/img/shop/portrait-${k}.webp`]),

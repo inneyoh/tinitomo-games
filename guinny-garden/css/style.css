@@ -1053,3 +1053,95 @@ body.nav-open .shop-hint { opacity: 0; transform: translateY(8px); }
 .urn-scene[data-o="landscape"] .urn-canvas .urn-tray { left: 50%; right: 4%; top: 9%; bottom: 9%; width: auto; }
 .urn-canvas .tray-label { font-size: clamp(.58rem, 1.6vmin, .74rem); }
 .urn-canvas .tray-count { min-width: 22px; height: 22px; font-size: .7rem; }
+
+/* brewing: top-bar tools, brew button, used-up tray items */
+.mg-tools { display: flex; gap: 8px; align-items: center; margin-left: auto; pointer-events: auto; }
+.mg-urn .mg-close { margin-left: 8px; }
+.mg-book { width: 46px; height: 56px; padding: 0; filter: drop-shadow(0 3px 0 rgba(107, 74, 54, .25)); }
+.mg-book img { width: 100%; height: 100%; object-fit: contain; }
+.mg-book:active { transform: scale(.94); }
+.mg-help { width: 44px; height: 44px; min-width: 44px; font-size: 1.2rem; }
+.urn-brew { position: absolute; z-index: 6; width: auto; min-width: 150px; left: 50%; transform: translateX(-50%); animation: pop .4s ease; }
+.urn-scene[data-o="portrait"] .urn-brew { top: 60%; }
+.urn-scene[data-o="landscape"] .urn-brew { top: 78%; left: 27.6%; }
+.tray-item.used-up .bp { opacity: .3; filter: grayscale(.6); cursor: default; }
+.tray-item.used-up .tray-count { background: var(--cream); color: var(--ink-soft); }
+
+/* pop-ups can open over a mini-game */
+.sheet-wrap { z-index: 56; }
+
+/* ====================================================================
+   Mini-game result: the shop pop-up frame
+   ==================================================================== */
+.mg-result-wrap { flex: 1; display: grid; place-items: center; width: 100%; height: 100%; padding: 16px; }
+.mg .mg-result { position: relative; width: min(88vw, 360px); margin: 0; padding: 6px 8px 8px; background: none; box-shadow: none;
+  border: 30px solid transparent; border-image: url(../assets/img/ui-panel.webp) 80 fill / 30px stretch;
+  filter: drop-shadow(0 6px 0 rgba(107, 74, 54, .2)); animation: up .3s cubic-bezier(.2, .9, .3, 1.2); }
+.mg-urn .mg-result-wrap { position: absolute; inset: 0; z-index: 7; }
+.mg-result-art { width: min(150px, 22dvh); height: min(150px, 22dvh); }
+.mg-result-art img, .mg-result-art svg { width: 100%; height: 100%; object-fit: contain; }
+.mg-result-name { font-size: 1.3rem; }
+.mg-stars { font-size: 2rem; }
+.mg-note { display: block; font-size: .74rem; color: var(--ink-soft); margin-top: -2px; }
+.mg-new { position: absolute; top: -8px; left: 50%; transform: translateX(-50%) rotate(-3deg); background: var(--rose); color: #fff; font-weight: 800; font-size: .8rem;
+  padding: 2px 12px; border-radius: 999px; border: 2px solid var(--line); white-space: nowrap; }
+
+/* ====================================================================
+   Recipe book (js/recipebook.js) — user art in assets/img/book
+   ==================================================================== */
+.rb-wrap { position: fixed; inset: 0; z-index: 57; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: calc(10px + var(--safe-t)) 10px calc(10px + var(--safe-b)); }
+.rb-backdrop { position: absolute; inset: 0; background: rgba(94, 69, 53, .35); animation: fadein .2s; }
+.rb-wrap.closing { opacity: 0; transition: opacity .2s; }
+.rb-book { position: relative; container-type: size; animation: up .3s cubic-bezier(.2, .9, .3, 1.15); filter: drop-shadow(0 8px 14px rgba(94, 69, 53, .3)); }
+.rb-book[data-mode="spread"] { aspect-ratio: 1400 / 909; width: min(94vw, calc((100dvh - 24px) * 1400 / 909)); }
+.rb-book[data-mode="single"] { aspect-ratio: 700 / 909; width: min(94vw, calc((100dvh - 120px) * 700 / 909)); overflow: hidden; }
+.rb-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; max-width: none; pointer-events: none; }
+.rb-book[data-mode="single"] .rb-bg { width: 200%; }
+.rb-book[data-half="right"] .rb-bg { left: -100%; }
+.rb-page { position: absolute; top: 13%; height: 72%; display: flex; flex-direction: column; gap: 1.2cqh; overflow: hidden; }
+.rb-book[data-mode="spread"] .rb-page[data-side="0"] { left: 6.5%; width: 39%; }
+.rb-book[data-mode="spread"] .rb-page[data-side="1"] { left: 54.5%; width: 39%; }
+.rb-book[data-mode="single"] .rb-page { left: 12%; width: 78%; }
+.rb-book[data-half="right"] .rb-page { left: 9%; }
+.rb-page h3 { margin: 0 0 .4cqh; font-size: clamp(.8rem, 4.2cqh, 1.25rem); color: var(--sage-d); display: flex; align-items: baseline; gap: 8px; }
+.rb-page h3 small { font-size: .6em; color: var(--ink-soft); font-weight: 700; }
+.rb-row { flex: 1; min-height: 0; display: flex; align-items: center; gap: 3%; border-bottom: 1.5px dashed rgba(107, 74, 54, .22); }
+.rb-row:last-child { border-bottom: 0; }
+.rb-cup { height: 92%; max-height: 13cqh; aspect-ratio: 1; object-fit: contain; flex: none; }
+.rb-row.locked .rb-cup { filter: brightness(0) opacity(.16); }
+.rb-info { min-width: 0; flex: 1; line-height: 1.15; }
+.rb-info b { display: block; font-size: clamp(.68rem, 3.1cqh, 1rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-info small { display: block; font-size: clamp(.55rem, 2.2cqh, .74rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-ings { display: flex; flex-wrap: wrap; gap: 0 6px; margin: .3cqh 0; }
+.rb-ing { display: inline-flex; align-items: center; gap: 1px; font-weight: 800; font-size: clamp(.6rem, 2.4cqh, .8rem); }
+.rb-ing img { height: clamp(14px, 4.2cqh, 28px); width: auto; }
+.rb-row.locked .rb-ing img { filter: brightness(0) opacity(.2); }
+.rb-row.locked b { color: var(--ink-soft); }
+.rb-page[hidden] { display: none; }
+.rb-nav { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(8px + var(--safe-b)); z-index: 2; display: flex; align-items: center; gap: 14px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
+.rb-nav .btn-round:disabled { opacity: .35; }
+.rb-close { position: absolute; top: calc(10px + var(--safe-t)); right: calc(10px + var(--safe-r)); }
+
+/* ====================================================================
+   Brewing tutorial (js/brewtutorial.js)
+   ==================================================================== */
+.tut { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.tut-art { min-height: 130px; display: grid; place-items: center; width: 100%; background: #F3E3C8; border-radius: 16px; padding: 10px; }
+.tut-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.tut-row img { display: block; }
+.tut-urn { position: relative; width: 84px; height: 105px; display: grid; grid-template-columns: repeat(4, 1fr); border: 3px solid #8FA474; border-radius: 8px; background: #FBF1DE; }
+.tut-urn i { border: 1px solid rgba(139, 94, 60, .4); }
+.tut-piece { position: absolute; object-fit: cover; }
+.tut-arrow { font-size: 1.8rem; font-weight: 800; color: var(--rose-d); }
+.tut-btn { background: var(--sage); color: #fff; font-weight: 800; border: 2px solid var(--line); border-radius: 999px; padding: 6px 14px; }
+.tut-ings { display: inline-flex; align-items: center; gap: 4px; font-weight: 800; }
+.tut-ings img { height: 40px; width: auto; }
+.tut-cup { height: 96px; }
+.tut-title { font-size: 1.1rem; }
+.tut-text { margin: 0; color: var(--ink); max-width: 340px; }
+.tut-dots { display: flex; gap: 6px; } .tut-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--sage-l); border: 1.5px solid var(--sage-d); }
+.tut-dots i.on { background: var(--sage-d); }
+.tut-btns { display: flex; gap: 10px; width: 100%; justify-content: center; }
+.tut-btns .btn-primary { width: auto; min-width: 160px; }
+body.rb-open .mg-hint { opacity: 0; }

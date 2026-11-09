@@ -63,20 +63,13 @@ export const CATEGORIES = {
   bouquet: { name: 'Bouquet', steps: ['Gather stems', 'Arrange', 'Tie a ribbon'] },
 };
 
+import { GENERAL, SPECIAL, LEAF as TEA_LEAVES } from './teas.js';
+
 export const PRODUCTS = {
-  chamomile_tea:     { name: 'Chamomile Tea',     cat: 'tea',     price: 18, makes: 2, method: 'pack', needs: { chamomile: 2 }, color: '#F4E3A6' },
-  mint_tea:          { name: 'Mint Tea',          cat: 'tea',     price: 16, makes: 2, method: 'pack', needs: { mint: 2 },      color: '#C4E0C0' },
-  // Brewed teas: `needs` are the pieces in the brewing urn and always fill its 4×5 grid exactly
-  // (counts found with a tiling solver; pieces may be turned). Change them only to another tiling mix.
-  garden_blend:       { name: 'Garden Blend Tea',     cat: 'tea', price: 34, makes: 3, method: 'brew', icon: 'lavender',      needs: { chamomile: 2, mint: 2, lavender: 2 }, color: '#D9CFEA' },
-  earl_grey_lavender: { name: 'Earl Grey Lavender',   cat: 'tea', price: 36, makes: 3, method: 'brew', icon: 'lavender',      needs: { earl_grey: 4, lavender: 4 }, color: '#CFC3B8' },
-  darjeeling_rose:    { name: 'Darjeeling Rose',      cat: 'tea', price: 40, makes: 3, method: 'brew', icon: 'rose',          needs: { darjeeling: 2, rose: 4 }, color: '#E9C2A6' },
-  lapsang_camellia:   { name: 'Smoky Camellia',       cat: 'tea', price: 38, makes: 3, method: 'brew', icon: 'camellia',      needs: { lapsang: 4, camellia: 4 }, color: '#C9A68E' },
-  rose_chai:          { name: 'Rose Chai',            cat: 'tea', price: 38, makes: 3, method: 'brew', icon: 'rose',          needs: { chai: 2, rose: 2, chamomile: 2 }, color: '#D9B08C' },
-  butterfly_pea_tea:  { name: 'Blue Butterfly Tea',   cat: 'tea', price: 34, makes: 3, method: 'brew', icon: 'butterfly_pea', needs: { butterfly_pea: 2, chamomile: 2, mint: 2 }, color: '#AEB9E6' },
-  camellia_blossom:   { name: 'Camellia Blossom Tea', cat: 'tea', price: 38, makes: 3, method: 'brew', icon: 'camellia',      needs: { camellia: 4, chamomile: 1, rose: 1 }, color: '#F2C9CC' },
+  chamomile_tea:     { name: 'Chamomile Tea Tin',     cat: 'tea',     price: 18, makes: 2, method: 'pack', needs: { chamomile: 2 }, color: '#F4E3A6' },
+  mint_tea:          { name: 'Mint Tea Tin',          cat: 'tea',     price: 16, makes: 2, method: 'pack', needs: { mint: 2 },      color: '#C4E0C0' },
   lavender_perfume:  { name: 'Lavender Perfume',  cat: 'perfume', price: 48, makes: 1, needs: { lavender: 3 }, color: '#CFC3EA' },
-  strawberry_tea:    { name: 'Strawberry Tea',    cat: 'tea',     price: 26, makes: 2, method: 'pack', needs: { strawberry: 2, chamomile: 1 }, color: '#F4CFCB' },
+  strawberry_tea:    { name: 'Strawberry Tea Tin', cat: 'tea',    price: 26, makes: 2, method: 'pack', needs: { strawberry: 2, chamomile: 1 }, color: '#F4CFCB' },
   rose_perfume:      { name: 'Rose Perfume',      cat: 'perfume', price: 60, makes: 1, needs: { rose: 3 },     color: '#F2BFC4' },
   daisy_bouquet:     { name: 'Daisy Bouquet',     cat: 'bouquet', price: 30, makes: 1, fresh: true, needs: { daisy: 4 },    color: '#F7D9DE', flowers: ['daisy', 'chamomile', 'daisy'] },
   hydrangea_bouquet: { name: 'Hydrangea Bouquet', cat: 'bouquet', price: 72, makes: 1, fresh: true, needs: { hydrangea: 2, daisy: 2 }, color: '#B8CDE8', flowers: ['hydrangea', 'daisy', 'hydrangea'] },
@@ -85,6 +78,16 @@ export const PRODUCTS = {
 // Bouquets are `fresh`: arranged to order at the packing counter, straight from the flower basket.
 
 // Decor: each item has its own spot in the shop scene.
+// Teas brewed in the tea urn (js/teas.js). They're secret until first brewed: hidden from the
+// menu and the trend until they're in the recipe book. Brewing makes 3 cups (+1 for 3 stars).
+for (const [id, t] of Object.entries(GENERAL)) {
+  PRODUCTS[id] = { name: t.name, cat: 'tea', method: 'urn', urn: true, price: t.price, makes: 3, color: t.color,
+    needs: { [t.main]: TEA_LEAVES.includes(t.main) ? 1 : 2 } };
+}
+for (const [id, t] of Object.entries(SPECIAL)) {
+  PRODUCTS[id] = { name: t.name, cat: 'tea', method: 'urn', urn: true, special: true, price: t.price, makes: 3, color: t.color, needs: { ...t.recipe } };
+}
+
 export const DECOR = {
   bunting:   { name: 'Petal Bunting',    cost: 40,  charm: 2, desc: 'Little flags across the ceiling.' },
   fern:      { name: 'Potted Fern',      cost: 30,  charm: 1, desc: 'A leafy friend by the door.' },
