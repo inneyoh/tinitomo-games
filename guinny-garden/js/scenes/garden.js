@@ -6,7 +6,7 @@
 //  - Work bench iPad → Shop (seeds + garden upgrades) and Guinny's Flower Encyclopedia
 // Background + props are the user's art (assets/img/garden). Plants are placeholder SVG.
 // Positions are % of the garden canvas (css: "Garden" section).
-import { FLOWERS, PRODUCTS, PLOTS, PLANTERS, UPGRADES } from '../data.js';
+import { FLOWERS, LEAVES, PRODUCTS, PLOTS, PLANTERS, UPGRADES } from '../data.js';
 import { S, save, add, jot, plotStage, plotRemaining, plotUnlocked, isWet, needsWater, updatePlot, wetMs, fmtTime } from '../state.js';
 import { F, SEED, P, plotArt, coinArt, dropArt } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
@@ -292,6 +292,15 @@ function openIpad(start = null) {
             <button class="btn-buy" data-buy="${k}" data-n="5" ${S.coins < f.seedCost * 5 ? 'disabled' : ''}>×5 · ${f.seedCost * 5}</button>
           </div>
         </div>`).join('')}</div>
+        <h3 class="ipad-h">Tea leaves</h3><div class="list">${Object.entries(LEAVES).map(([k, l]) => `
+        <div class="row">
+          <div class="row-ico">${F(k)}</div>
+          <div class="row-main"><b>${l.name}</b><small>${l.note} · have ${S.flowers[k] || 0}</small></div>
+          <div class="row-btns">
+            <button class="btn-buy" data-leaf="${k}" data-n="1" ${S.coins < l.cost ? 'disabled' : ''}>${coinArt()} ${l.cost}</button>
+            <button class="btn-buy" data-leaf="${k}" data-n="5" ${S.coins < l.cost * 5 ? 'disabled' : ''}>×5 · ${l.cost * 5}</button>
+          </div>
+        </div>`).join('')}</div>
         <h3 class="ipad-h">Garden upgrades</h3><div class="grid">${ups.map(([k, u]) => `
         <div class="card decor-card ${S.upgrades[k] ? 'selected' : ''}">
           <b>${u.name}</b><small>${u.desc}</small>
@@ -299,12 +308,13 @@ function openIpad(start = null) {
             : `<button class="btn-buy" data-up="${k}" ${S.coins < u.cost ? 'disabled' : ''}>${coinArt()} ${u.cost}</button>`}
         </div>`).join('')}</div>`;
       body.onclick = (e) => {
-        const buy = e.target.closest('[data-buy]');
+        const buy = e.target.closest('[data-buy], [data-leaf]');
         const up = e.target.closest('[data-up]');
         if (buy && !buy.disabled) {
-          const k = buy.dataset.buy, n = +buy.dataset.n, cost = FLOWERS[k].seedCost * n;
+          const k = buy.dataset.buy || buy.dataset.leaf, n = +buy.dataset.n, leaf = !!buy.dataset.leaf;
+          const cost = (leaf ? LEAVES[k].cost : FLOWERS[k].seedCost) * n;
           if (S.coins < cost) return;
-          S.coins -= cost; add(S.seeds, k, n);
+          S.coins -= cost; add(leaf ? S.flowers : S.seeds, k, n);
           save(); sfx('coin'); game.refreshHud(); ctx.redraw();
         } else if (up && !up.disabled) {
           const k = up.dataset.up, u = UPGRADES[k];

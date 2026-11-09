@@ -4,6 +4,9 @@
 import { FLOWERS, PRODUCTS } from './data.js';
 
 export const ASSET_OVERRIDES = {
+  // ingredient icons cut from the user's brewing-piece art
+  ...Object.fromEntries(['chamomile', 'mint', 'lavender', 'rose', 'camellia', 'butterfly_pea', 'earl_grey', 'darjeeling', 'lapsang', 'chai']
+    .map((k) => [`flower:${k}`, `assets/img/ingredients/${k}.webp`])),
   // 'product:chamomile_tea': 'assets/img/chamomile-tea.webp',
   // 'flower:rose': 'assets/img/rose.webp',
   // 'customer:bunny': 'assets/img/bunny.webp',
@@ -101,10 +104,8 @@ function bouquet(p) {
 export function productArt(key) {
   const p = PRODUCTS[key];
   if (p.cat === 'tea') {
-    const icon = key === 'chamomile_tea' ? flowerHead('chamomile', 50, 59, 0.3)
-      : key === 'mint_tea' ? flowerHead('mint', 50, 60, 0.32)
-      : key === 'strawberry_tea' ? flowerHead('strawberry', 50, 60, 0.32)
-      : flowerHead('lavender', 50, 60, 0.3);
+    const k = p.icon || Object.keys(p.needs).find((n) => FLOWERS[n]) || 'lavender';
+    const icon = flowerHead(k, 50, 60, ['mint', 'strawberry'].includes(k) ? 0.32 : 0.3);
     return svg(teaTin(p) + icon);
   }
   if (p.cat === 'perfume') return svg(perfumeBottle(p));

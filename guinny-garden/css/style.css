@@ -988,3 +988,60 @@ body.nav-open .shop-hint { opacity: 0; transform: translateY(8px); }
 /* garden patches: front row (q2, q3) above back row (q0, q1), each patch its own layer */
 .plot.soil { z-index: 1; }
 .plot.q2, .plot.q3 { z-index: 2; }
+
+/* ====================================================================
+   Tea brewing urn (js/minigames/brew.js) — user art in assets/img/brew
+   ==================================================================== */
+.mg-urn { padding: 0; background: #DA8E4E; }
+.mg-urn .mg-stage { position: absolute; inset: 0; display: block; padding: 0; }
+.mg-urn .mg-top { position: absolute; z-index: 5; left: calc(10px + var(--safe-l)); right: calc(10px + var(--safe-r)); top: calc(8px + var(--safe-t)); pointer-events: none; align-items: center; }
+.mg-urn .mg-title { flex: 0 1 auto; background: rgba(255, 252, 246, .92); border: 2px solid var(--line); border-radius: 18px; padding: 4px 12px 6px; box-shadow: var(--shadow); pointer-events: auto; }
+.mg-urn .mg-close { margin-left: auto; pointer-events: auto; }
+.mg-urn .mg-hint { position: absolute; z-index: 5; left: 50%; transform: translateX(-50%); top: calc(64px + var(--safe-t)); margin: 0; min-height: 0; width: max-content; max-width: calc(100% - 24px);
+  background: rgba(255, 252, 246, .9); border-radius: 999px; padding: 4px 14px; font-size: .82rem; box-shadow: var(--shadow); pointer-events: none; }
+.mg-urn .mg-hint:empty { display: none; }
+
+.urn-scene { position: absolute; inset: 0; overflow: hidden; touch-action: none; }
+.urn-canvas { position: absolute; }
+.urn-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* mirrored copy so the desk continues past the art */
+.urn-ext { position: absolute; width: 100%; height: 100%; max-width: none; }
+.urn-scene[data-o="portrait"] .urn-ext { left: 0; top: 100%; transform: scaleY(-1); }
+.urn-scene[data-o="landscape"] .urn-ext { left: 100%; top: 0; transform: scaleX(-1); }
+.urn-grid { position: absolute; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr); }
+.urn-grid > i { transition: background .15s; }
+.urn-grid > i.ok { background: rgba(175, 195, 155, .55); } .urn-grid > i.bad { background: rgba(227, 167, 168, .55); }
+.urn-pieces { position: absolute; inset: 0; }
+
+/* a piece: container sized to its (turned) cells; the art turns inside it */
+.bp { position: relative; width: calc(var(--w) * var(--cell)); height: calc(var(--h) * var(--cell)); touch-action: none; cursor: grab; flex: none; }
+.bp img { position: absolute; left: 50%; top: 50%; width: calc(var(--iw) * var(--cell)); height: calc(var(--ih) * var(--cell)); max-width: none;
+  transform: translate(-50%, -50%) rotate(var(--r)); pointer-events: none; filter: drop-shadow(0 2px 2px rgba(94, 69, 53, .25)); }
+.bp.placed { position: absolute; }
+.bp.ghost { position: fixed; z-index: 60; pointer-events: none; opacity: .92; }
+.bp.ghost img { filter: drop-shadow(0 8px 8px rgba(94, 69, 53, .3)); }
+
+/* tray: the shop pop-up frame. Portrait = bottom with ◀ ▶; landscape = right side with ▲ ▼ */
+.urn-tray { position: absolute; z-index: 4; display: flex; align-items: center; gap: 4px;
+  border: 26px solid transparent; border-image: url(../assets/img/ui-panel.webp) 80 fill / 26px stretch; padding: 0;
+  filter: drop-shadow(0 6px 0 rgba(107, 74, 54, .2)); }
+.urn-scene[data-o="portrait"] .urn-tray { left: calc(8px + var(--safe-l)); right: calc(8px + var(--safe-r)); bottom: calc(8px + var(--safe-b)); height: clamp(170px, 25dvh, 240px); }
+.urn-scene[data-o="landscape"] .urn-tray { flex-direction: column; right: calc(8px + var(--safe-r)); top: calc(62px + var(--safe-t)); bottom: calc(8px + var(--safe-b)); width: min(42vw, 400px); }
+.tray-track { flex: 1; min-width: 0; min-height: 0; align-self: stretch; overflow: hidden; display: flex; gap: 10px; scroll-snap-type: x mandatory; }
+.urn-scene[data-o="landscape"] .tray-track { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: calc(50% - 5px); scroll-snap-type: y mandatory; width: 100%; }
+.tray-item { position: relative; min-width: 0; flex: 0 0 calc((100% - 20px) / 3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; scroll-snap-align: start; min-height: 0; }
+.tray-piece { flex: 1; min-height: 0; width: 100%; display: grid; place-items: center; --cell: 30px; }
+.tray-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: .7rem; font-weight: 800; padding: 1px 6px; border: 1.5px solid var(--rose-d); border-radius: 4px; background: #FFFCF6; white-space: nowrap; color: var(--ink); }
+.tray-count { position: absolute; right: 4px; top: 2px; min-width: 26px; height: 26px; border-radius: 999px; background: var(--butter); border: 2px solid var(--line); display: grid; place-items: center; font-size: .78rem; }
+.tray-empty { margin: auto; font-weight: 800; color: var(--sage-d); }
+.tray-arrow { flex: none; width: 28px; height: 48px; border-radius: 12px; color: var(--rose-d); font-size: 1.1rem; }
+.urn-scene[data-o="landscape"] .tray-arrow { width: 56px; height: 34px; }
+.tray-arrow.off { opacity: .2; pointer-events: none; }
+.tray-arrow:active { background: rgba(227, 167, 168, .2); }
+
+.urn-steam i { position: absolute; bottom: 0; left: var(--x); width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .95); animation: bubble 1.4s var(--d) ease-in infinite; }
+.urn-scene.brewing .urn-pieces { transition: filter 1.6s; filter: sepia(.35) saturate(1.2) brightness(1.04); }
+.mg-urn .mg-result { margin: 15vh auto 0; background: rgba(255, 252, 246, .95); border: 2.5px solid var(--line); border-radius: 22px; padding: 18px; box-shadow: var(--shadow); }
+@media (orientation: landscape) {
+  .mg-urn .mg-hint { left: calc(10px + var(--safe-l)); transform: none; top: auto; bottom: calc(10px + var(--safe-b)); max-width: 50vw; }
+}

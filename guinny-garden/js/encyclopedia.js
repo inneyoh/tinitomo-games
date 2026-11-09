@@ -100,6 +100,36 @@ export const ENCYCLOPEDIA = {
       'Roses taught me to be patient. And to wear gloves.',
     ],
   },
+  camellia: {
+    jp: 'ツバキ', family: 'Tea family', origin: 'Japan, China & Korea', season: 'Winter – spring',
+    language: 'Pink camellia: longing (控えめな美)',
+    care: 'Likes dappled shade and slightly acidic soil. Keep the roots cool and moist.',
+    trivia: [
+      'The tea plant, Camellia sinensis, is a camellia, so every cup of black or green tea is a camellia tea.',
+      'Camellia flowers often fall off whole instead of losing their petals one by one.',
+      'Tsubaki oil, pressed from camellia seeds, has been used for centuries to care for hair in Japan.',
+    ],
+    notes: [
+      'My first camellia opened on a chilly morning. So pretty against the dark leaves!',
+      'Found out the tea plant is a camellia too. Everything in the shop is family!',
+      'A whole flower dropped onto the path, perfectly whole. I floated it in a bowl of water.',
+    ],
+  },
+  butterfly_pea: {
+    jp: 'バタフライピー', family: 'Pea family', origin: 'Tropical Asia', season: 'Summer',
+    language: 'Peaceful days (穏やかな日々)',
+    care: 'A climbing vine that loves warmth. Give it something to climb and keep picking the flowers.',
+    trivia: [
+      'Its flowers brew a deep blue tea that turns purple when you add lemon.',
+      'The colour comes from anthocyanins, the same kind of pigment that colours blueberries.',
+      'In parts of Southeast Asia it is used to dye rice and desserts a lovely blue.',
+    ],
+    notes: [
+      'Blue tea! I made a cup just to watch it change colour with a squeeze of lemon.',
+      'The vine climbed right up the fence overnight. Or it felt like overnight.',
+      'Customers love the blue tea for parties. It looks like a little bit of sky.',
+    ],
+  },
   hydrangea: {
     jp: 'アジサイ', family: 'Hydrangea family', origin: 'Japan & East Asia', season: 'Rainy season (June)',
     language: 'Family togetherness (家族団らん); also fickleness (移り気)',

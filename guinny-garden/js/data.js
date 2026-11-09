@@ -4,21 +4,36 @@
 
 // Garden crops. `where`: which plots they grow in (soil bed / flower pot).
 export const FLOWERS = {
-  chamomile: { name: 'Chamomile',  seedCost: 5,  growMin: 3,  yield: 2, where: ['soil', 'pot'], petal: '#FBF6EA', center: '#F2C94C', petals: 10,
+  chamomile: { name: 'Chamomile',  seedCost: 5,  growMin: 3,  yield: 3, where: ['soil', 'pot'], petal: '#FBF6EA', center: '#F2C94C', petals: 10,
     note: 'Little apple-scented daisies. Dried flowers make the gentlest bedtime tea.' },
-  mint:      { name: 'Mint',       seedCost: 5,  growMin: 2,  yield: 2, where: ['pot', 'soil'], petal: '#B9D9B4', center: '#8DB88A', petals: 0, leaf: true,
+  mint:      { name: 'Mint',       seedCost: 5,  growMin: 2,  yield: 3, where: ['pot', 'soil'], petal: '#B9D9B4', center: '#8DB88A', petals: 0, leaf: true,
     note: 'Grows so eagerly it is best kept in a pot. Fresh, cool and great in tea.' },
   daisy:     { name: 'Daisy',      seedCost: 6,  growMin: 4,  yield: 2, where: ['soil'], petal: '#F7D9DE', center: '#F2C94C', petals: 8,
     note: 'Cheerful and easy. A bundle of daisies is the shop’s favourite bouquet.' },
-  lavender:  { name: 'Lavender',   seedCost: 10, growMin: 6,  yield: 2, where: ['soil', 'pot'], petal: '#C9BCE3', center: '#A897CF', petals: 0, spike: true,
+  lavender:  { name: 'Lavender',   seedCost: 10, growMin: 6,  yield: 3, where: ['soil', 'pot'], petal: '#C9BCE3', center: '#A897CF', petals: 0, spike: true,
     note: 'Loves sun and dry feet. Its calm scent goes into perfume and tea blends.' },
   strawberry:{ name: 'Strawberry', seedCost: 8,  growMin: 5,  yield: 3, where: ['pot', 'soil'], petal: '#F0A9A8', center: '#A9C79A', petals: 0, fruit: true,
     note: 'Sweet little berries that ripen in pots. Lovely in a fruity tea.' },
-  rose:      { name: 'Rose',       seedCost: 12, growMin: 8,  yield: 2, where: ['soil'], petal: '#EBA9AE', center: '#D98A92', petals: 5, rose: true,
+  rose:      { name: 'Rose',       seedCost: 12, growMin: 8,  yield: 3, where: ['soil'], petal: '#EBA9AE', center: '#D98A92', petals: 5, rose: true,
     note: 'Takes patience, but nothing smells sweeter. Pressed into Guinny’s best perfume.' },
+  camellia:  { name: 'Camellia',   seedCost: 12, growMin: 7,  yield: 3, where: ['soil'], petal: '#F2B8C0', center: '#F2C94C', petals: 6,
+    note: 'Glossy leaves and soft pink blooms. Its cousin is the tea plant itself!' },
+  butterfly_pea: { name: 'Butterfly Pea', seedCost: 10, growMin: 5, yield: 3, where: ['soil', 'pot'], petal: '#8E9BDB', center: '#F4E3A6', petals: 5,
+    note: 'Little blue flowers that brew a sky-blue tea, which turns purple with a squeeze of lemon.' },
   hydrangea: { name: 'Hydrangea',  seedCost: 15, growMin: 10, yield: 2, where: ['soil'], petal: '#B8CDE8', center: '#E9B7CF', petals: 0, cluster: true,
     note: 'Big soft clusters of blue and pink. The star of the fanciest bouquet.' },
 };
+
+// Tea leaves: bought in the Florist Shop (garden iPad), not grown. They live in the
+// same basket as flowers (S.flowers) so recipes can use them.
+export const LEAVES = {
+  earl_grey:  { name: 'Earl Grey Leaves',  cost: 4, note: 'Black tea scented with bergamot.' },
+  darjeeling: { name: 'Darjeeling Leaves', cost: 5, note: 'A light, flowery black tea from the hills.' },
+  lapsang:    { name: 'Lapsang Leaves',    cost: 5, note: 'Smoked over pinewood for a cosy, campfire taste.' },
+  chai:       { name: 'Chai Spice Leaves', cost: 6, note: 'Black tea with cinnamon, cardamom and clove.' },
+};
+// Any basket ingredient (flower or tea leaf)
+export const ING = (k) => FLOWERS[k] || LEAVES[k];
 
 // Garden plots: 8 wooden planters × 4 patches, plus 2 flower pots.
 // Planters 0–1 are open from the start; the rest unlock with upgrades.
@@ -51,9 +66,17 @@ export const CATEGORIES = {
 export const PRODUCTS = {
   chamomile_tea:     { name: 'Chamomile Tea',     cat: 'tea',     price: 18, makes: 2, method: 'pack', needs: { chamomile: 2 }, color: '#F4E3A6' },
   mint_tea:          { name: 'Mint Tea',          cat: 'tea',     price: 16, makes: 2, method: 'pack', needs: { mint: 2 },      color: '#C4E0C0' },
-  garden_blend:      { name: 'Garden Blend Tea',  cat: 'tea',     price: 28, makes: 2, method: 'brew', needs: { chamomile: 1, mint: 1, lavender: 1 }, color: '#D9CFEA' },
+  // Brewed teas: `needs` are the pieces in the brewing urn and always fill its 4×5 grid exactly
+  // (counts found with a tiling solver; pieces may be turned). Change them only to another tiling mix.
+  garden_blend:       { name: 'Garden Blend Tea',     cat: 'tea', price: 34, makes: 3, method: 'brew', icon: 'lavender',      needs: { chamomile: 2, mint: 2, lavender: 2 }, color: '#D9CFEA' },
+  earl_grey_lavender: { name: 'Earl Grey Lavender',   cat: 'tea', price: 36, makes: 3, method: 'brew', icon: 'lavender',      needs: { earl_grey: 4, lavender: 4 }, color: '#CFC3B8' },
+  darjeeling_rose:    { name: 'Darjeeling Rose',      cat: 'tea', price: 40, makes: 3, method: 'brew', icon: 'rose',          needs: { darjeeling: 2, rose: 4 }, color: '#E9C2A6' },
+  lapsang_camellia:   { name: 'Smoky Camellia',       cat: 'tea', price: 38, makes: 3, method: 'brew', icon: 'camellia',      needs: { lapsang: 4, camellia: 4 }, color: '#C9A68E' },
+  rose_chai:          { name: 'Rose Chai',            cat: 'tea', price: 38, makes: 3, method: 'brew', icon: 'rose',          needs: { chai: 2, rose: 2, chamomile: 2 }, color: '#D9B08C' },
+  butterfly_pea_tea:  { name: 'Blue Butterfly Tea',   cat: 'tea', price: 34, makes: 3, method: 'brew', icon: 'butterfly_pea', needs: { butterfly_pea: 2, chamomile: 2, mint: 2 }, color: '#AEB9E6' },
+  camellia_blossom:   { name: 'Camellia Blossom Tea', cat: 'tea', price: 38, makes: 3, method: 'brew', icon: 'camellia',      needs: { camellia: 4, chamomile: 1, rose: 1 }, color: '#F2C9CC' },
   lavender_perfume:  { name: 'Lavender Perfume',  cat: 'perfume', price: 48, makes: 1, needs: { lavender: 3 }, color: '#CFC3EA' },
-  strawberry_tea:    { name: 'Strawberry Tea',    cat: 'tea',     price: 26, makes: 2, method: 'brew', needs: { strawberry: 2, chamomile: 1 }, color: '#F4CFCB' },
+  strawberry_tea:    { name: 'Strawberry Tea',    cat: 'tea',     price: 26, makes: 2, method: 'pack', needs: { strawberry: 2, chamomile: 1 }, color: '#F4CFCB' },
   rose_perfume:      { name: 'Rose Perfume',      cat: 'perfume', price: 60, makes: 1, needs: { rose: 3 },     color: '#F2BFC4' },
   daisy_bouquet:     { name: 'Daisy Bouquet',     cat: 'bouquet', price: 30, makes: 1, fresh: true, needs: { daisy: 4 },    color: '#F7D9DE', flowers: ['daisy', 'chamomile', 'daisy'] },
   hydrangea_bouquet: { name: 'Hydrangea Bouquet', cat: 'bouquet', price: 72, makes: 1, fresh: true, needs: { hydrangea: 2, daisy: 2 }, color: '#B8CDE8', flowers: ['hydrangea', 'daisy', 'hydrangea'] },
@@ -82,7 +105,6 @@ export const THANKS = ['Thank you!', 'Lovely~', 'See you tomorrow!', 'Perfect �
 
 export const START = {
   coins: 120,
-  flowers: { chamomile: 5, mint: 5, daisy: 5, lavender: 5, strawberry: 5, rose: 5, hydrangea: 5 },   // 5 of each to start
   seeds: { chamomile: 3, daisy: 3, mint: 2 },
   stock: { chamomile_tea: 3, mint_tea: 2 },
   lineup: ['chamomile_tea', 'daisy_bouquet', 'mint_tea'],
@@ -130,3 +152,6 @@ export const WORKSHOP_DECOR = {
     none:     { name: 'No plant',        cost: 0 },
   } },
 };
+
+// Start with 5 of every flower and tea leaf
+START.flowers = Object.fromEntries([...Object.keys(FLOWERS), ...Object.keys(LEAVES)].map((k) => [k, 5]));
