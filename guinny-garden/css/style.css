@@ -992,7 +992,8 @@ body.nav-open .shop-hint { opacity: 0; transform: translateY(8px); }
 /* ====================================================================
    Tea brewing urn (js/minigames/brew.js) — user art in assets/img/brew
    ==================================================================== */
-.mg-urn { padding: 0; background: #DA8E4E; }
+/* the art is never extended: around it, the 作業場 shows through blurred under a 70% overlay */
+.mg-urn { padding: 0; background: rgba(94, 69, 53, .7); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .mg-urn .mg-stage { position: absolute; inset: 0; display: block; padding: 0; }
 .mg-urn .mg-top { position: absolute; z-index: 5; left: calc(10px + var(--safe-l)); right: calc(10px + var(--safe-r)); top: calc(8px + var(--safe-t)); pointer-events: none; align-items: center; }
 .mg-urn .mg-title { flex: 0 1 auto; background: rgba(255, 252, 246, .92); border: 2px solid var(--line); border-radius: 18px; padding: 4px 12px 6px; box-shadow: var(--shadow); pointer-events: auto; }
@@ -1045,3 +1046,10 @@ body.nav-open .shop-hint { opacity: 0; transform: translateY(8px); }
 @media (orientation: landscape) {
   .mg-urn .mg-hint { left: calc(10px + var(--safe-l)); transform: none; top: auto; bottom: calc(10px + var(--safe-b)); max-width: 50vw; }
 }
+
+/* tray sits on the desk inside the art */
+.urn-canvas .urn-tray { border-width: clamp(14px, 2.4vmin, 26px); border-image-width: clamp(14px, 2.4vmin, 26px); }
+.urn-scene[data-o="portrait"] .urn-canvas .urn-tray { left: 7.2%; right: 7%; top: 73%; bottom: 2.2%; height: auto; }
+.urn-scene[data-o="landscape"] .urn-canvas .urn-tray { left: 50%; right: 4%; top: 9%; bottom: 9%; width: auto; }
+.urn-canvas .tray-label { font-size: clamp(.58rem, 1.6vmin, .74rem); }
+.urn-canvas .tray-count { min-width: 22px; height: 22px; font-size: .7rem; }

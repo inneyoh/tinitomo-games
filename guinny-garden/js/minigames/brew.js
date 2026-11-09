@@ -24,8 +24,8 @@ export const PIECES = {
 };
 // Where the grid sits on each background (% of the image), measured from the art
 const BG = {
-  portrait:  { src: `${IMG}bg-portrait.webp`,  W: 1086, H: 1448, grid: [25.18, 14.54, 49.45, 46.82], keep: [0.08, 0, 0.92, 0.74] },
-  landscape: { src: `${IMG}bg-landscape.webp`, W: 1672, H: 941,  grid: [13.99, 19.14, 27.47, 61.64], keep: [0, 0.01, 0.5, 0.93] },
+  portrait:  { src: `${IMG}bg-portrait.webp`,  W: 1086, H: 1448, grid: [25.18, 14.54, 49.45, 46.82] },
+  landscape: { src: `${IMG}bg-landscape.webp`, W: 1672, H: 941,  grid: [14.83, 19.71, 25.57, 57.65] },
 };
 
 // rotate a shape 90° clockwise (screen coordinates), keeping it in the top-left corner
@@ -46,13 +46,13 @@ export function brewPhase(g, recipe) {
     g.hint('Fill every square of the urn. Tap a piece in the tray to turn it.');
     g.stage.innerHTML = `
       <div class="urn-scene">
-        <div class="urn-canvas"><img class="urn-bg" alt="" draggable="false"><img class="urn-ext" alt="" draggable="false">
+        <div class="urn-canvas"><img class="urn-bg" alt="" draggable="false">
           <div class="urn-grid">${Array.from({ length: COLS * ROWS }, (_, i) => `<i data-c="${i}"></i>`).join('')}<div class="urn-pieces"></div><div class="urn-steam"></div></div>
-        </div>
-        <div class="urn-tray">
-          <button class="tray-arrow prev" aria-label="Previous">◀</button>
-          <div class="tray-track"></div>
-          <button class="tray-arrow next" aria-label="Next">▶</button>
+          <div class="urn-tray">
+            <button class="tray-arrow prev" aria-label="Previous">◀</button>
+            <div class="tray-track"></div>
+            <button class="tray-arrow next" aria-label="Next">▶</button>
+          </div>
         </div>
       </div>`;
     const scene = $('.urn-scene', g.stage), canvas = $('.urn-canvas', scene), gridEl = $('.urn-grid', scene);
@@ -63,15 +63,12 @@ export function brewPhase(g, recipe) {
       const W = scene.clientWidth, H = scene.clientHeight;
       if (!W || !H) return;
       const no = W >= H * 1.15 ? 'landscape' : 'portrait';
-      if (no !== o) { o = no; scene.dataset.o = o; $$('.urn-bg, .urn-ext', scene).forEach((im) => { im.src = BG[o].src; }); }
-      const b = BG[o], tr = tray.getBoundingClientRect(), sr = scene.getBoundingClientRect();
-      // free area for the urn (not covered by the tray)
-      const area = o === 'portrait' ? { w: W, h: tr.top - sr.top } : { w: tr.left - sr.left, h: H };
-      const [x0, y0, x1, y1] = b.keep;
-      const s = Math.min(area.w / (b.W * (x1 - x0)), area.h / (b.H * (y1 - y0)), Math.max(W / b.W, H / b.H));
+      if (no !== o) { o = no; scene.dataset.o = o; $('.urn-bg', scene).src = BG[o].src; }
+      // the whole background fits on screen (never cropped or extended);
+      // the space around it shows the blurred 作業場 behind the mini-game
+      const b = BG[o], s = Math.min(W / b.W, H / b.H);
       const cw = b.W * s, ch = b.H * s;
-      const left = o === 'portrait' ? (W - cw) / 2 : Math.min(0, area.w / 2 - ((x0 + x1) / 2) * cw);
-      const top = Math.min(0, area.h / 2 - ((y0 + y1) / 2) * ch) + (o === 'portrait' ? Math.max(0, (area.h - (y1 - y0) * ch) / 2) : 0);
+      const left = (W - cw) / 2, top = (H - ch) / 2;
       Object.assign(canvas.style, { width: `${cw}px`, height: `${ch}px`, left: `${left}px`, top: `${top}px` });
       const [gl, gt, gw, gh] = b.grid;
       Object.assign(gridEl.style, { left: `${gl}%`, top: `${gt}%`, width: `${gw}%`, height: `${gh}%` });
