@@ -33,9 +33,8 @@ export function mount(el, api) {
       <div class="menu-board" aria-label="Today's menu"></div>
       <img class="guinny" src="assets/img/guinny-apron.webp" alt="Guinny" draggable="false">
       <img class="layer" data-layer="counter" alt="" draggable="false">
-      <img class="prop prop-paper" src="assets/img/shop/prop-paper.webp" alt="" draggable="false">
-      <img class="prop prop-ribbon" src="assets/img/shop/prop-ribbon.webp" alt="" draggable="false">
-      <img class="prop prop-ipad" src="assets/img/shop/prop-ipad.webp" alt="" draggable="false">
+      ${['paper', 'ribbon', 'ipad'].map((k) => `<img class="prop prop-${k} glow-copy" src="assets/img/shop/prop-${k}.webp" alt="" draggable="false">`).join('')}
+      ${['paper', 'ribbon', 'ipad'].map((k) => `<img class="prop prop-${k}" src="assets/img/shop/prop-${k}.webp" alt="" draggable="false">`).join('')}
       <div class="decor-spot" data-spot="plush"></div>
       <div class="decor-spot" data-spot="rug"></div>
       <button class="hot hot-pack" aria-label="Packing area"><span class="hot-tag">Wrap ✿</span></button>
@@ -312,10 +311,10 @@ function finishPacking(key, scent) {
 function render() {
   const pack = $('.hot-pack', view), bag = $('.bag', view);
   pack.classList.toggle('attn', !!cust && cust.stage === 'waiting' && available(cust.want) > 0);
-  $$('.prop-paper, .prop-ribbon', canvas).forEach((el) => el.classList.toggle('glow', pack.classList.contains('attn')));
+  $$('.prop-paper, .prop-ribbon', canvas).forEach((el) => el.classList.toggle('lit', pack.classList.contains('attn')));
   bag.classList.toggle('attn', !!cust && cust.stage === 'ready');
   $('.hot-ipad', view).classList.toggle('attn', !S.lineup.length || (!cust && !sellable().length));
-  $('.prop-ipad', canvas).classList.toggle('glow', $('.hot-ipad', view).classList.contains('attn'));
+  $$('.prop-ipad', canvas).forEach((el) => el.classList.toggle('lit', $('.hot-ipad', view).classList.contains('attn')));
   let t;
   if (!cust) {
     t = !S.lineup.length ? 'Tap the iPad to choose today’s menu'

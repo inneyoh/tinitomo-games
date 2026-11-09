@@ -59,7 +59,7 @@ export function mount(el, api) {
   root.classList.add('full');
   const img = (k, cls = '') => `<img class="w-item ${cls}" data-k="${k}" alt="" draggable="false">`;
   const station = (k) => `<button class="w-station" data-st="${k}" aria-label="${STATIONS[k].name}">
-      <img data-k="${k}" alt="" draggable="false"><span class="w-label">${STATIONS[k].label}</span></button>`;
+      <img class="glow-copy" data-k="${k}" alt="" draggable="false"><img data-k="${k}" alt="" draggable="false"><span class="w-label">${STATIONS[k].label}</span></button>`;
   root.innerHTML = `
   <div class="view work-view">
     <div class="canvas w-canvas">
