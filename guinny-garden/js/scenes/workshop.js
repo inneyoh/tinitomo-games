@@ -12,7 +12,7 @@ import { P, F } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 import { openGame, starsFor } from '../minigames/shell.js';
 import { weighPhase, sortPhase, mixPhase } from '../minigames/perfume.js';
-import { brewPhase, canFill } from '../minigames/brew.js';
+import { brewPhase, cupsFor } from '../minigames/brew.js';
 import { BREW_INGREDIENTS, classify, TEAS } from '../teas.js';
 import { openRecipeBook } from '../recipebook.js';
 import { showBrewTutorial } from '../brewtutorial.js';
@@ -183,16 +183,12 @@ async function play(k) {
 
 // ----- Tea urn: free brewing ------------------------------------------------------
 const pantry = () => Object.fromEntries(BREW_INGREDIENTS.map((k) => [k, S.flowers[k] || 0]));
-let fillCache = { key: '', ok: false };
-function urnReady() {
-  const have = pantry(), key = JSON.stringify(have);
-  if (fillCache.key !== key) fillCache = { key, ok: canFill(have) };
-  return fillCache.ok;
-}
+// any brewing ingredient is enough: one piece already covers the 2 squares needed to brew
+const urnReady = () => Object.values(pantry()).some((n) => n > 0);
 
 async function playUrn() {
   if (busy) return;
-  if (!urnReady()) { toast('Not enough ingredients to fill the urn — grow flowers or buy tea leaves'); return; }
+  if (!urnReady()) { toast('No ingredients to brew with — grow flowers or buy tea leaves'); return; }
   busy = true; render();
   const g = openGame({ title: 'Tea Urn', steps: ['Fill the urn'], theme: 'kitchen' });
   g.step(0);
@@ -211,15 +207,16 @@ async function playUrn() {
   const isNew = !S.recipes[id];
   S.recipes[id] = { n: (S.recipes[id]?.n || 0) + 1, first: S.recipes[id]?.first || Date.now() };
   const stars = starsFor([r.score]);
-  const bonus = stars === 3 ? 1 : 0;
-  add(S.stock, id, p.makes + bonus);
+  const bonus = stars === 3 && r.full ? 1 : 0;   // bonus cup only for a completely full urn
+  const made = cupsFor(r.filled) + bonus;
+  add(S.stock, id, made);
   save();
-  await g.result({ product: id, name: p.name, stars, made: p.makes + bonus, bonus, isNew,
+  await g.result({ product: id, name: p.name, stars, made, bonus, isNew,
     note: 'Tea has been recorded in the recipe book' });
   busy = false;
   render();
   const st = $('.w-station[data-st="urn"]', canvas);
-  bump(st); floatText(st, `+${p.makes + bonus} ${p.name}`);
+  bump(st); floatText(st, `+${made} ${p.name}`);
   game.refreshShop();
   if (!S.lineup.includes(id)) setTimeout(() => { if (!document.querySelector('.mg')) toast(`Tip: add ${p.name} to the menu on the shop iPad`); }, 900);
 }

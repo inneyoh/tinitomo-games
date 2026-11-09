@@ -14,11 +14,11 @@ const STEPS = [
     art: () => `<div class="tut-row">${grid(`<img class="tut-piece" style="left:0;top:0;width:50%;height:40%" src="${P('chamomile')}">`)}
       <span class="tut-arrow">⟵</span><img class="tut-tray" src="${P('lavender')}" style="height:70px"></div>` },
   { title: 'Turn and fit',
-    text: 'Tap a piece in the tray to turn it. Tap a piece in the urn to take it out. Fill every square.',
+    text: 'Tap a piece in the tray to turn it. Tap a piece in the urn to take it out.',
     art: () => `<div class="tut-row"><img src="${P('mint')}" style="height:64px"><span class="tut-arrow">↻</span>
       <img src="${P('mint')}" style="height:64px;transform:rotate(90deg)"></div>` },
   { title: 'Brew!',
-    text: 'When the urn is full, tap Brew. The mix you used decides which tea you get.',
+    text: 'Tap Brew once 2 or more squares are filled. A fuller urn makes more cups, and the mix decides which tea you get.',
     art: () => `<div class="tut-row">${grid(`<img class="tut-piece" style="left:0;top:0;width:50%;height:40%" src="${P('chamomile')}">
       <img class="tut-piece" style="left:50%;top:0;width:50%;height:40%" src="${P('chamomile')}">
       <img class="tut-piece" style="left:0;top:40%;width:100%;height:20%;object-fit:fill" src="${P('earl_grey')}">`)}

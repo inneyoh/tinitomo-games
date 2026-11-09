@@ -34,6 +34,10 @@ const rotCells = (c, r) => { let o = c; for (let i = 0; i < r; i++) o = norm(o.m
 const dims = (k, r) => (r % 2 ? [PIECES[k].h, PIECES[k].w] : [PIECES[k].w, PIECES[k].h]);
 
 // Can these ingredients fill the urn at all? (used before opening the game)
+// Brewing needs at least this many squares filled; a fuller urn makes more cups.
+export const MIN_FILL = 2;
+export const cupsFor = (filled) => (filled >= 14 ? 3 : filled >= 8 ? 2 : 1);
+
 export function canFill(have) {
   const grid = Array(COLS * ROWS).fill(0), left = { ...have };
   const rec = () => {
@@ -244,31 +248,34 @@ export function brewPhase(g, have, opts = {}) {
 
     let finished = false;
     const brewBtn = $('.urn-brew', scene);
-    // Brew is always on screen: greyed out with a counter until every square is filled
+    // Brew is always on screen and can be tapped once MIN_FILL squares are filled.
+    // A fuller urn makes more cups (see cupsFor), so the counter keeps showing until it's full.
     let wasFull = false;
     function checkDone() {
       const filledN = grid.filter((c) => c !== -1).length, full = filledN === grid.length;
-      brewBtn.disabled = !full || finished;
+      const ready = filledN >= MIN_FILL;
+      brewBtn.disabled = !ready || finished;
       brewBtn.classList.toggle('hidden', finished);
-      brewBtn.textContent = full ? 'Brew ✿' : `Brew · ${filledN} / ${grid.length}`;
-      if (full === wasFull) return;
+      brewBtn.textContent = full ? 'Brew ✿' : `Brew ✿ · ${filledN} / ${grid.length}`;
+      if (finished) return;
+      if (!ready) { g.hint(`Add ingredients to the urn: ${MIN_FILL} squares are enough to brew, a full urn makes the most cups.`); return; }
+      const id = opts.preview ? opts.preview(used()) : null;
+      const cups = cupsFor(filledN);
+      g.hint(`${id ? `Smells like ${id}… ` : ''}${full ? 'The urn is full!' : `Brew now for ${cups} cup${cups > 1 ? 's' : ''}, or keep filling for more.`}`);
+      if (full && !wasFull) sfx('chime');
       wasFull = full;
-      if (full && !finished) {
-        const id = opts.preview ? opts.preview(used()) : null;
-        g.hint(id ? `Smells like ${id}… tap Brew!` : 'The urn is full! Tap Brew to see what tea it makes.');
-        sfx('chime');
-      } else if (!finished) g.hint('Fill every square of the urn with any ingredients you like, then brew!');
     }
     const used = () => placed.reduce((u, p) => { u[p.k] = (u[p.k] || 0) + 1; return u; }, {});
     brewBtn.addEventListener('click', async () => {
-      if (finished || !grid.every((c) => c !== -1)) return;
+      if (finished || grid.filter((c) => c !== -1).length < MIN_FILL) return;
       finished = true; brewBtn.classList.add('hidden');
       g.hint('Brewing… ✿'); sfx('chime');
       scene.classList.add('brewing');
       $('.urn-steam', scene).innerHTML = Array.from({ length: 14 }, (_, i) => `<i style="--x:${(i * 37) % 100}%;--d:${(i % 7) * 0.18}s"></i>`).join('');
       await wait(1700);
       const secs = (Date.now() - t0) / 1000;
-      resolve({ score: secs < 90 ? 1 : secs < 180 ? 0.8 : 0.65, used: used() });
+      const filledN = grid.filter((c) => c !== -1).length;
+      resolve({ score: secs < 90 ? 1 : secs < 180 ? 0.8 : 0.65, used: used(), filled: filledN, full: filledN === grid.length });
     });
 
     // testing shortcut, only with ?debug in the address: solve the urn

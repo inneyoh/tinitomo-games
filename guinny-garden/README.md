@@ -107,7 +107,7 @@ To add an app, add `{ id, name, icon, render(body, ctx) }` to the `apps` list in
 
 ### Tea urn brewing & recipe book
 
-- Tapping the tea urn opens the brewing game straight away. The tray holds every brewing ingredient you own. Fill the urn's 4×5 grid with any mix, then tap **Brew**. Ingredients are only used when you brew.
+- Tapping the tea urn opens the brewing game straight away. The tray holds every brewing ingredient you own. Put any mix in the urn's 4×5 grid and tap **Brew**: 2 filled squares are enough. 2–7 squares make 1 cup, 8–13 make 2 and 14–20 make 3, plus a bonus cup for 3 stars with a full urn (`MIN_FILL` and `cupsFor` in `js/minigames/brew.js`). Ingredients are only used when you brew.
 - The mix decides the tea (`js/teas.js`, rules explained at the top of the file):
   - **Special teas** come first, in priority order: Guinny's Special, Flower Tea, Serenity Brew, Butterfly Rose, Camellia Mint, Lavender Earl Grey, Chai Mint, Rose Darjeeling, Camellia Rose, Healing Brew.
   - Otherwise you get the **general tea** of the ingredient used most.
