@@ -308,7 +308,33 @@ function finishPacking(key, scent) {
 }
 
 // ---------------------------------------------------------------------------
+// ----- Guinny: wanders with little hops when the shop is quiet, goes back to her spot to serve,
+// and smiles while taking an order and after handing over the bag.
+const GUINNY = { idle: 'assets/img/guinny-apron.webp', smile: 'assets/img/guinny-smile.webp' };
+new Image().src = GUINNY.smile;   // preload so the first smile doesn't flicker
+let wandering = null;
+function setGuinny() {
+  const el = $('.guinny', canvas);
+  const wander = !cust;
+  const smile = !!cust && ['waiting', 'paying', 'leaving'].includes(cust.stage);
+  const src = smile ? GUINNY.smile : GUINNY.idle;
+  if (!el.src.endsWith(src)) el.src = src;
+  if (wander === wandering) return;
+  wandering = wander;
+  if (wander) { el.classList.remove('homing'); el.style.transform = ''; el.classList.add('wander'); return; }
+  // freeze where she is, then glide back to her spot
+  const now = getComputedStyle(el).transform;
+  el.classList.remove('wander');
+  el.classList.add('homing');
+  el.style.transform = now === 'none' ? '' : now;
+  void el.offsetWidth;
+  el.style.transform = '';
+  clearTimeout(el._home);
+  el._home = setTimeout(() => el.classList.remove('homing'), 650);
+}
+
 function render() {
+  setGuinny();
   const pack = $('.hot-pack', view), bag = $('.bag', view);
   pack.classList.toggle('attn', !!cust && cust.stage === 'waiting' && available(cust.want) > 0);
   $$('.prop-paper, .prop-ribbon', canvas).forEach((el) => el.classList.toggle('lit', pack.classList.contains('attn')));
@@ -455,3 +481,4 @@ function openIpad(start = null) {
 }
 
 export const refresh = () => { if (root) { renderBoard(); render(); } };
+

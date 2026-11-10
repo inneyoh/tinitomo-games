@@ -1168,3 +1168,20 @@ body.rb-open .mg-hint { opacity: 0; }
 @media (orientation: landscape) {
   .mg-urn .mg-hint { left: 50%; transform: translateX(-50%); bottom: auto; top: calc(14px + var(--safe-t)); max-width: calc(100% - 360px); font-size: .78rem; }
 }
+
+/* shop Guinny: bouncy wander when idle, glide home to serve */
+.canvas .guinny.wander { animation: guinny-wander 9s ease-in-out infinite; }
+.canvas .guinny.homing { animation: none; transition: transform .6s cubic-bezier(.3, 1.4, .5, 1); }
+@keyframes guinny-wander {
+  0%   { transform: translate(0, 0); }
+  5%   { transform: translate(-3%, -3%); }   10% { transform: translate(-6%, 0); }
+  15%  { transform: translate(-9%, -3%); }   20% { transform: translate(-12%, 0); }
+  30%  { transform: translate(-12%, 0) scale(1.02, .98); }
+  35%  { transform: translate(-8%, -3%); }   40% { transform: translate(-4%, 0); }
+  45%  { transform: translate(0, -3%); }     50% { transform: translate(4%, 0); }
+  55%  { transform: translate(8%, -3%); }    60% { transform: translate(12%, 0); }
+  70%  { transform: translate(12%, 0) scale(1.02, .98); }
+  75%  { transform: translate(9%, -3%); }    80% { transform: translate(6%, 0); }
+  85%  { transform: translate(3%, -3%); }    90% { transform: translate(0, 0); }
+  100% { transform: translate(0, 0); }
+}
