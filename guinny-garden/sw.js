@@ -1,9 +1,9 @@
 // Offline cache for the prototype. Bump VERSION when files change.
-const VERSION = 'gg-v25';
+const VERSION = 'gg-v26';
 const FILES = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/main.js', 'js/state.js', 'js/data.js', 'js/art.js', 'js/ui.js',
-  'js/minigames/shell.js', 'js/minigames/perfume.js', 'js/minigames/brew.js', 'js/minigames/pack.js',
+  'js/minigames/shell.js', 'js/minigames/perfume.js', 'js/minigames/perfumebench.js', 'js/minigames/brew.js', 'js/minigames/pack.js',
   'js/tablet.js', 'js/teas.js', 'js/recipebook.js', 'js/brewtutorial.js', 'js/notepad.js', 'js/encyclopedia.js', 'js/scenes/shop.js', 'js/scenes/workshop.js', 'js/scenes/garden.js',
   'assets/img/guinny-apron.webp', 'assets/img/guinny-smile.webp', 'assets/img/guinny-garden.webp', 'assets/img/logo.webp',
   'assets/img/ui-panel.webp',

@@ -11,7 +11,7 @@ import { S, save, add, trend } from '../state.js';
 import { P, F } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 import { openGame, starsFor } from '../minigames/shell.js';
-import { weighPhase, sortPhase, mixPhase } from '../minigames/perfume.js';
+import { perfumeBench, BENCH_STEPS } from '../minigames/perfumebench.js';
 import { brewPhase, cupsFor, BONUS_FILL } from '../minigames/brew.js';
 import { BREW_INGREDIENTS, classify, TEAS } from '../teas.js';
 import { openRecipeBook } from '../recipebook.js';
@@ -45,7 +45,7 @@ const STATIONS = {
     keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea' && PRODUCTS[k].method === 'pack') },
 };
 const PLANS = {
-  perfume: { theme: 'alchemy', steps: ['Weigh', 'Sort', 'Mix'], phases: [weighPhase, sortPhase, mixPhase] },
+  perfume: { theme: 'alchemy', steps: BENCH_STEPS, phases: [perfumeBench] },   // one scrolling bench, Momo-style
   pack:    { theme: 'kitchen', steps: ['Chop', 'Dry', 'Pour'], phases: [chopPhase, dryPhase, pourPhase] },
 };
 const planFor = (p) => PLANS[p.cat === 'perfume' ? 'perfume' : p.method || 'pack'];
