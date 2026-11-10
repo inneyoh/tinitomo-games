@@ -12,7 +12,7 @@ import { P, F } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 import { openGame, starsFor } from '../minigames/shell.js';
 import { weighPhase, sortPhase, mixPhase } from '../minigames/perfume.js';
-import { brewPhase, cupsFor } from '../minigames/brew.js';
+import { brewPhase, cupsFor, BONUS_FILL } from '../minigames/brew.js';
 import { BREW_INGREDIENTS, classify, TEAS } from '../teas.js';
 import { openRecipeBook } from '../recipebook.js';
 import { showBrewTutorial } from '../brewtutorial.js';
@@ -207,7 +207,7 @@ async function playUrn() {
   const isNew = !S.recipes[id];
   S.recipes[id] = { n: (S.recipes[id]?.n || 0) + 1, first: S.recipes[id]?.first || Date.now() };
   const stars = starsFor([r.score]);
-  const bonus = stars === 3 && r.full ? 1 : 0;   // bonus cup only for a completely full urn
+  const bonus = stars === 3 && r.filled >= BONUS_FILL ? 1 : 0;   // bonus cup for 3 stars with 18+ squares filled
   const made = cupsFor(r.filled) + bonus;
   add(S.stock, id, made);
   save();

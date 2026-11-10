@@ -36,6 +36,7 @@ const dims = (k, r) => (r % 2 ? [PIECES[k].h, PIECES[k].w] : [PIECES[k].w, PIECE
 // Can these ingredients fill the urn at all? (used before opening the game)
 // Brewing needs at least this many squares filled; a fuller urn makes more cups.
 export const MIN_FILL = 2;
+export const BONUS_FILL = 18;   // with 3 stars, 18+ squares earn a bonus cup
 export const cupsFor = (filled) => (filled >= 14 ? 3 : filled >= 8 ? 2 : 1);
 
 export function canFill(have) {
