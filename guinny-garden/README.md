@@ -111,6 +111,6 @@ To add an app, add `{ id, name, icon, render(body, ctx) }` to the `apps` list in
 - The mix decides the tea (`js/teas.js`, rules explained at the top of the file):
   - **Special teas** come first, in priority order: Guinny's Special, Flower Tea, Serenity Brew, Butterfly Rose, Camellia Mint, Lavender Earl Grey, Chai Mint, Rose Darjeeling, Camellia Rose, Healing Brew.
   - Otherwise you get the **general tea** of the ingredient used most.
-- Every one of the 20 teas can be brewed. This was checked by trying every mix that fills the urn exactly. Guinny's Special has only one mix: 3 butterfly pea, 1 mint, 2 camellia, 1 darjeeling.
+- Every one of the 20 teas can be brewed. Guinny's Special needs at least 2 butterfly pea, 1 mint, 2 camellia and 1 darjeeling (17 squares).
 - The result shows in the shop pop-up frame with the cup sprite (`assets/img/teas/`) and its name. A tea is recorded in the **recipe book** (`js/recipebook.js`, art in `assets/img/book/`) the first time it's brewed. Only recorded teas appear on the shop menu.
 - A tutorial (`js/brewtutorial.js`) shows the first time and from the "?" button.

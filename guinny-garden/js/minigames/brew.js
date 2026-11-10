@@ -285,10 +285,14 @@ export function brewPhase(g, have, opts = {}) {
         while (placed.length) unplace(0);
         const saved = { ...counts };
         if (only) for (const k of Object.keys(counts)) counts[k] = Math.min(counts[k], only[k] || 0);
+        // with a mix given, place all of it (gaps allowed); without, fill the urn completely
+        const skip = new Set();
         const sol = [];
         const rec = () => {
-          const f = grid.indexOf(-1);
-          if (f < 0) return true;
+          if (only && Object.values(counts).every((c) => !c)) return true;
+          let f = -1;
+          for (let i = 0; i < grid.length; i++) if (grid[i] === -1 && !skip.has(i)) { f = i; break; }
+          if (f < 0) return !only;
           const fx = f % COLS, fy = Math.floor(f / COLS);
           for (const k of Object.keys(counts)) {
             if (!counts[k]) continue;
@@ -302,6 +306,7 @@ export function brewPhase(g, have, opts = {}) {
               }
             }
           }
+          if (only) { skip.add(f); if (rec()) return true; skip.delete(f); }   // leave this square empty
           return false;
         };
         const ok = rec();

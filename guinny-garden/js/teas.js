@@ -42,9 +42,8 @@ export const GENERAL = {
 // `keys` are the ingredients that make it special; `alt` is the balanced rule.
 export const SPECIAL = {
   sp_guinny: { name: 'Guinny’s Special', price: 90, color: '#7FA8C9',
-    // the suggested 3 butterfly pea + 1 mint + 2 camellia + 2 darjeeling needs 22 squares,
-    // one more than the urn holds, so it uses 1 darjeeling (exactly 20 squares)
-    recipe: { butterfly_pea: 3, mint: 1, camellia: 2, darjeeling: 1 }, alt: () => false },
+    // 17 squares, so it fits with room to spare (brewing doesn't need a full urn)
+    recipe: { butterfly_pea: 2, mint: 1, camellia: 2, darjeeling: 1 }, alt: () => false },
   sp_flower: { name: 'Flower Tea', price: 58, color: '#E8A9AE',
     recipe: { lavender: 2, rose: 2, camellia: 2 },
     alt: (u) => leaves(u) >= 2 && has(u, ['lavender', 'rose', 'camellia']) && spread(u, ['lavender', 'rose', 'camellia']) <= 2 },
