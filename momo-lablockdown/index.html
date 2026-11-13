@@ -815,8 +815,8 @@ function startLevel(sameSeed){
   code=Array.from({length:N},()=>ri(1,9));toys=[];pings=[];active=0;
   const far=G.rooms.slice().sort((a,b)=>Math.hypot(b.x0-st.x0,b.y0-st.y0)-Math.hypot(a.x0-st.x0,a.y0-st.y0)).filter(r=>r!==G.exit&&r!==G.stuck&&r!==G.dark&&!Object.values(G.lk||{}).includes(r));
   vacs.forEach(v=>v.hum&&v.hum.stop());if(MODE==='prop'){vacs=[mkVac(far[0],0)];const v=vacs[0];v.speedP=1.8*.95;v.speedC=3.3*.95;if(PH.seeker==='player'){const c={n:'Vacuumanator',h:.45,role:['🌀','Seeker',''],i:players.length,x:v.x,y:v.y,a:0,seeker:true,isVac:true,hidden:false,caught:false,running:false,moving:false,walk:0,decoyCD:0,stepPh:0,wasSafe:false,inv:[],watching:false,disguise:null,dmg:0,jz:0,jv:0};players.push(c);v.ctrl=c}PH.phase='hide';PH.until=performance.now()+30000;PH.bat=100;active=0}
-  else if(G.lv2)vacs=[mkVac(far.find(r=>r.fl===0&&!r.stairR)||far[0],0),mkVac(far.find(r=>r.fl===1&&!r.stairR)||far[1],1)];
-  else{vacs=[mkVac(far[0],0)];if(N===4&&G.rooms.length>=9)vacs.push(mkVac(far[1],1))}
+  else if(run.diff==='hard'&&!TUT.on)vacs=G.lv2?[mkVac(far.find(r=>r.fl===0&&!r.stairR)||far[0],0),mkVac(far.find(r=>r.fl===1&&!r.stairR)||far[1],1)]:[mkVac(far[0],0),mkVac(far[1],1)];
+  else vacs=[mkVac(G.lv2?(far.find(r=>!r.stairR)||far[0]):far[0],0)];
   vacs.forEach(v=>v.hum=mkHum());buildWorld();
   if(NET.on){active=NET.my;players.forEach(q=>{q.remote=q.i!==NET.my;q.tp=0;q._nx=q.x;q._ny=q.y;q.tx=q.x;q.ty=q.y;q.ta=q.a});if(G.small)G.small.forEach(s=>{s.ox=s.x;s.oy=s.y;s.of=s.fixed})}
   if(NET.host)for(let i=1;i<NET.roster.length;i++)NET.roster[i].send({t:'start',mode:MODE,diff,seeker:PH.seeker,N,li:run.li,seed:levelSeed,time:run.time,my:NET.assign[i]});
@@ -997,7 +997,7 @@ function jump(){const p=players[active];if(state!=='play'||MODE!=='prop'||p.caug
 function undis(){if(NET.client)return NET.send({t:'a',a:'undis'});const p=players[active];if(MODE!=='prop'||!p.disguise)return;p.disguise=null;ports();toast(`${p.n} dropped the disguise.`)}
 function catchHider(q,by){if(q.caught)return;caughtJingle(q.x,q.y);q.caught=true;q.disguise=null;run.stats.vac++;const c=G.binA.cell[hiders().filter(z=>z.caught).length%4];q.x=c[0]+.5;q.y=c[1]+.5;sfx.suck();ports();toast(`🌀 ${by} found ${q.n}!`,3000);if(hiders().every(z=>z.caught))phEnd(false)}
 function pushSmall(p,r){if(p.isVac)return;for(const s of G.small){if(s.fixed)continue;if(p.disguise&&Math.hypot(s.x-p.x,s.y-p.y)<.05)continue;const dx=p.x-s.x,dy=p.y-s.y,d=Math.hypot(dx,dy),m=s.r+r;if(d<m&&d>.001){const nx=s.x+dx/d*m,ny=s.y+dy/d*m;if(!blocked(nx,ny,r,p.n))p.x=nx,p.y=ny}}}
-function vWps(v){if(!G.lv2)return G.wps;const f=flT(v.y),W=G.wps.filter(w=>flT(w[1]+.5)===f);return W.length?W:G.wps}
+function vWps(v){if(!G.lv2||vacs.length<2)return G.wps;const f=flT(v.y),W=G.wps.filter(w=>flT(w[1]+.5)===f);return W.length?W:G.wps}
 function vacReroute(v,fx,fy){v.wander=null;const W=vWps(v);for(let k=0;k<W.length;k++){v.wi=(v.wi+1)%W.length;const w=W[v.wi];if((w[0]===fx&&w[1]===fy)||bfs(fx,fy,w[0],w[1])!==false){v.step=null;v.repath=0;return}}
   const out=[],seen=new Set([fy*COLS+fx]),q=[[fx,fy,0]];for(let h=0;h<q.length;h++){const[x,y,d]=q[h];if(d>=4)out.push([x,y]);for(const[dx,dy]of D4){const nx=x+dx,ny=y+dy,k=ny*COLS+nx;if(seen.has(k)||solid(nx,ny,'vac'))continue;seen.add(k);q.push([nx,ny,d+1])}}
   if(out.length){v.wander=out[Math.floor(Math.random()*out.length)];v.step=null;v.repath=0}}
