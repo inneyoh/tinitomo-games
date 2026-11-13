@@ -364,7 +364,7 @@ const CH=[
  {n:'Bae',h:.66,role:['😰','Worry Sense','A born worrier: senses Vacuumanators through walls nearby']}];
 let MODE='escape',lobbyMode='escape';const VACICON='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130"><rect x="12" y="50" width="176" height="58" rx="28" fill="#d6d9e4"/><rect x="12" y="84" width="176" height="24" rx="12" fill="#a9adc0"/><path d="M40 56 Q100 0 160 56 Z" fill="#eceef4"/><rect x="64" y="56" width="72" height="22" rx="11" fill="#3a3350"/><circle cx="100" cy="67" r="7" fill="#ff3d6a"/></svg>');const faceOf=p=>p.isVac?VACICON:SPR[p.n+'_front'];
 const PH={seeker:'vac',phase:'hide',until:0,end:0,bat:100};
-const DIFF={easy:{name:'Easy',desc:'1 floor · 2 random gimmicks',levels:[{gc:4,gr:3,g:2}]},
+const DIFF={easy:{name:'Easy',desc:'1 floor · 2 random gimmicks',levels:[{gc:4,gr:3,g:2,nl:1}]},
   medium:{name:'Medium',desc:'2 floors · a small lab, then a full-size one with 3 gimmicks',levels:[{gc:3,gr:2,g:1},{gc:4,gr:3,g:3}]},
   hard:{name:'Hard',desc:'3 floors · gimmicks pile up as you climb',levels:[{gc:3,gr:2,g:1},{gc:3,gr:3,g:2},{gc:4,gr:3,g:3}]}};
 
@@ -384,7 +384,7 @@ const THEMES={chem:{name:'Chem Lab',col:'#bcd6ff',props:['bench','bench','shelf'
 let G;
 let GS={};
 function generate(n,cfg){GC=cfg.gc;GR=cfg.gr;COLS=GC*CS+2;ROWS=GR*CS+2;let pool=[];
-  if(MODE==='escape'&&cfg.g){pool=shuffle(GC*GR>=9?['dark','laser','id','duo']:['id','duo']).slice(0,cfg.g);if(n===2&&pool.includes('laser')&&pool.includes('id')&&pool.includes('duo'))pool=['laser','id','dark']}
+  if(MODE==='escape'&&cfg.g){pool=shuffle((GC*GR>=9?['dark','laser','id','duo']:['id','duo']).filter(k=>!(cfg.nl&&k==='laser'))).slice(0,cfg.g);if(n===2&&pool.includes('laser')&&pool.includes('id')&&pool.includes('duo'))pool=['laser','id','dark']}
   for(;;){GS={};pool.forEach(k=>GS[k]=1);for(let t=0;t<150;t++){const g=tryGen(n,cfg);if(g)return g}if(!pool.length)throw new Error('gen failed');pool.pop()}}
 function tryGen(n,cfg){
   const grid=[...Array(ROWS)].map(()=>Array(COLS).fill(1)),room=[...Array(ROWS)].map(()=>Array(COLS).fill(-1)),col=[...Array(ROWS)].map(()=>Array(COLS).fill(null));
@@ -792,7 +792,7 @@ function startLevel(sameSeed){
   players=CH.slice(0,N).map((c,i)=>({...c,i,seeker:false,disguise:null,dmg:0,jz:0,jv:0,x:sx+fx*off[i][0]+qx*off[i][1],y:sy+fy*off[i][0]+qy*off[i][1],a:face,hidden:false,caught:false,running:false,moving:false,walk:0,decoyCD:0,stepPh:0,wasSafe:true,inv:[],watching:false}));
   code=Array.from({length:N},()=>ri(1,9));toys=[];pings=[];active=0;
   const far=G.rooms.slice().sort((a,b)=>Math.hypot(b.x0-st.x0,b.y0-st.y0)-Math.hypot(a.x0-st.x0,a.y0-st.y0)).filter(r=>r!==G.exit&&r!==G.stuck&&r!==G.dark&&!Object.values(G.lk||{}).includes(r));
-  vacs.forEach(v=>v.hum&&v.hum.stop());if(MODE==='prop'){vacs=[mkVac(far[0],0)];const v=vacs[0];v.speedP=1.8;v.speedC=3.3;if(PH.seeker==='player'){const c={n:'Vacuumanator',h:.45,role:['🌀','Seeker',''],i:players.length,x:v.x,y:v.y,a:0,seeker:true,isVac:true,hidden:false,caught:false,running:false,moving:false,walk:0,decoyCD:0,stepPh:0,wasSafe:false,inv:[],watching:false,disguise:null,dmg:0,jz:0,jv:0};players.push(c);v.ctrl=c}PH.phase='hide';PH.until=performance.now()+30000;PH.bat=100;active=0}
+  vacs.forEach(v=>v.hum&&v.hum.stop());if(MODE==='prop'){vacs=[mkVac(far[0],0)];const v=vacs[0];v.speedP=1.8*.95;v.speedC=3.3*.95;if(PH.seeker==='player'){const c={n:'Vacuumanator',h:.45,role:['🌀','Seeker',''],i:players.length,x:v.x,y:v.y,a:0,seeker:true,isVac:true,hidden:false,caught:false,running:false,moving:false,walk:0,decoyCD:0,stepPh:0,wasSafe:false,inv:[],watching:false,disguise:null,dmg:0,jz:0,jv:0};players.push(c);v.ctrl=c}PH.phase='hide';PH.until=performance.now()+30000;PH.bat=100;active=0}
   else{vacs=[mkVac(far[0],0)];if(N===4&&G.rooms.length>=9)vacs.push(mkVac(far[1],1))}
   vacs.forEach(v=>v.hum=mkHum());buildWorld();
   if(NET.on){active=NET.my;players.forEach(q=>{q.remote=q.i!==NET.my;q.tp=0;q._nx=q.x;q._ny=q.y;q.tx=q.x;q.ty=q.y;q.ta=q.a});if(G.small)G.small.forEach(s=>{s.ox=s.x;s.oy=s.y;s.of=s.fixed})}
@@ -800,7 +800,7 @@ function startLevel(sameSeed){
   if(amb)amb.g.gain.value=MODE==='prop'?.002:.004;playBgm();
   t0=performance.now();state='play';camActive=false;setHud(true);$('#flr').textContent=MODE==='prop'?'🎭 PROP HUNT':`FLOOR ${floorName(run.li)} · ${DIFF[run.diff].name}`;ports();objective();
   if(MODE==='prop')toast(PH.seeker==='vac'?'🎭 HIDE! Find a prop to disguise as. Vacuumanator wakes up in 30 s…':`🎭 HIDE! ${'the Vacuumanator player'} is counting to 30…`,4500);else toast(run.li===0?'Find the notes · open the Exit Lab · sync the levers · escape together':`Floor ${floorName(run.li)}: keep going up!`,4200)}
-function mkVac(r,k){let vx=Math.floor((r.x0+r.x1)/2),vy=Math.floor((r.y0+r.y1)/2);if(G.grid[vy][vx]!==0){o:for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(G.grid[y][x]===0){vx=x;vy=y;break o}}return{x:vx+.5,y:vy+.5,wi:k*3%G.wps.length,k,alert:false,last:0,tx:0,ty:0,target:null,step:null,repath:0,ang:0,beepT:0,hum:null,speedP:2.1,speedC:N===3?3.95:3.65}}
+function mkVac(r,k){let vx=Math.floor((r.x0+r.x1)/2),vy=Math.floor((r.y0+r.y1)/2);if(G.grid[vy][vx]!==0){o:for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++)if(G.grid[y][x]===0){vx=x;vy=y;break o}}return{x:vx+.5,y:vy+.5,wi:k*3%G.wps.length,k,alert:false,last:0,tx:0,ty:0,target:null,step:null,repath:0,ang:0,beepT:0,hum:null,speedP:2.1*.95,speedC:(3.65+(N===3?.3*.8:0))*.95}}
 function setHud(on){document.querySelectorAll('[data-hud]').forEach(e=>e.classList.toggle('hud',!on))}
 
 /* ===================== title / lobby / HUD ===================== */
@@ -1124,8 +1124,9 @@ function hostSim(dt,now){const p=players[active];if(TUT.on)tutTick(dt,now);
     if(dbgFreeze||(MODE==='prop'&&PH.phase==='hide')){v.alert=false;v.target=null;vacAudio(v,now);continue}
     let tgt=null,td=1e9;
     tgt=vacTarget(v,now);
-    if(tgt){if(!v.alert)beep3(1);v.alert=true;v.target=tgt;[v.tx,v.ty]=nearFree(tgt.x,tgt.y);v.last=now}
-    if(v.alert&&now-v.last>3200){v.alert=false;v.target=null}
+    if(!tgt&&v.target&&v.target.hidden){v.lostHide=true;v.target=null}
+    if(tgt){if(!v.alert)beep3(1);v.alert=true;v.target=tgt;v.lostHide=false;[v.tx,v.ty]=nearFree(tgt.x,tgt.y);v.last=now}
+    if(v.alert&&now-v.last>(v.lostHide?1600:3200)){v.alert=false;v.target=null;v.lostHide=false}
     let gx,gy;if(v.alert){gx=v.tx;gy=v.ty}else{const w=G.wps[v.wi];gx=w[0]+.5;gy=w[1]+.5;if(Math.hypot(gx-v.x,gy-v.y)<.3)v.wi=(v.wi+1)%G.wps.length}
     const sp=(v.alert?v.speedC:v.speedP)*dt;
     if(v.alert&&v.target&&Math.hypot(v.target.x-v.x,v.target.y-v.y)<1.6&&los(v,v.target)){const a=Math.atan2(v.target.y-v.y,v.target.x-v.x),nx=v.x+Math.cos(a)*sp,ny=v.y+Math.sin(a)*sp;if(!blocked(nx,ny,.3,'vac')){v.x=nx;v.y=ny;v.ang=a}}
