@@ -315,7 +315,7 @@ body.touch #pip{top:58px}
     <li>🌀 <b>Vacuumanator Proto</b> hums when close and beeps when it spots you. Hide in lockers, throw a 🐥 decoy, or run back to the 🛡️ <b>Safe Room</b>.</li>
     <li>🗑️ Vacuumed? A teammate presses the red button at the <b>Dust Bin Room</b> to free you.</li>
     <li>🌑 <b>Blackout Room</b> (bigger floors): it's pitch dark inside. One player watches the 📹 night cam outside and taps to place guide markers, while the other finds the 🔌 fuse. Plug the fuse in next to the Exit Lab keypad to power it.</li>
-    <li>🎲 <b>Random gimmicks:</b> 🔴🔵 laser grids are switched from the Control Room (the night cam is there too) · 🪪 ID doors only open for the character whose face is on them · 👥 two-player doors need both floor plates pressed at once · 🛗 the exit lift leaves when everyone is on the pad and someone presses USE.</li>
+    <li>🎲 <b>Random gimmicks:</b> 🔴 red lasers let you through but set off an alarm that calls the Vacuumanator · 🔵 blue lasers are a solid wall · flip them at the Control Room switch (the night cam is there too) · ⚙️ conveyor belts drag you along · 🪪 ID doors only open for the character whose face is on them · 👥 two-player doors need both floor plates pressed at once · 🛗 the exit lift leaves when everyone is on the pad and someone presses USE.</li>
     <li>🎭 <b>Prop Hunt:</b> hiders get 30 s to disguise as a prop (USE) before the Vacuumanator starts. Stay still when it scans. Small props are fast but fragile; big ones are slow but tough.</li>
     <li>Roles (Escape): 🗺️ Momo has the map and drops decoys anywhere · 🦶 Soso kicks open stuck doors · 🌀 Kew crawls through vents · 😰 Bae senses Vacuumanators through walls.</li>
   </ul>
@@ -540,7 +540,7 @@ const inSafe=q=>isSafeT(Math.floor(q.x),Math.floor(q.y));
 const inDark=q=>{if(!G.dark)return false;const r=G.dark,x=Math.floor(q.x),y=Math.floor(q.y);return x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1};
 let CLIMB=-1;const topAt=(x,y)=>(G.topH&&G.topH[y*COLS+x])||0;
 function groundZ(p){if(MODE!=='prop'||!G.topH||p.isVac)return 0;let h=0;for(const[dx,dy]of[[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]])h=Math.max(h,topAt(Math.floor(p.x+dx),Math.floor(p.y+dy)));return h}
-function solid(x,y,who){if(x<0||y<0||x>=COLS||y>=ROWS)return true;const g=G.grid[y][x];if(g===1)return true;if(g===3){const h=topAt(x,y);return !(h&&CLIMB>=h-.06)}if(g===2)return who!=='Kew';if(who==='vac'&&(isSafeT(x,y)||(G.safeBuf&&G.safeBuf.has(y*COLS+x))))return true;const d=G.doorAt[y*COLS+x];return !!(d&&!G.doors[d].open)}
+function solid(x,y,who){if(x<0||y<0||x>=COLS||y>=ROWS)return true;const g=G.grid[y][x];if(g===1)return true;if(g===3){const h=topAt(x,y);return !(h&&CLIMB>=h-.06)}if(g===2)return who!=='Kew';if(who==='vac'&&(isSafeT(x,y)||(G.safeBuf&&G.safeBuf.has(y*COLS+x))))return true;const d=G.doorAt[y*COLS+x];return !!(d&&!G.doors[d].open&&G.doors[d].grp!=='lzr')}
 function blocked(x,y,r,who){return solid(Math.floor(x-r),Math.floor(y-r),who)||solid(Math.floor(x+r),Math.floor(y-r),who)||solid(Math.floor(x-r),Math.floor(y+r),who)||solid(Math.floor(x+r),Math.floor(y+r),who)}
 function los(a,b){const d=Math.hypot(b.x-a.x,b.y-a.y),n=Math.ceil(d/.2);for(let i=1;i<n;i++){const x=Math.floor(a.x+(b.x-a.x)*i/n),y=Math.floor(a.y+(b.y-a.y)*i/n);const g=G.grid[y][x];if(g===1||g===2)return false;const dk=G.doorAt[y*COLS+x];if(dk&&!G.doors[dk].open)return false}return true}
 function bfs(sx,sy,tx,ty){if(sx===tx&&sy===ty)return null;const S=sy*COLS+sx,T=ty*COLS+tx,prev=new Int32Array(COLS*ROWS).fill(-1);prev[S]=S;const q=[S];let h=0;
@@ -925,8 +925,8 @@ function use(){
   const o=nearest(p);if(!o)return;
   if(o.type==='lift')return TUT.on?tutGo(12):levelClear();
   if(o.type==='kickvac'){const now=performance.now();if(now<(p.kickCD||0))return toast(`🦶 Kick recharging… ${Math.ceil((p.kickCD-now)/1000)}s`);const v=o.v;v.stun=now+15000;v.alert=false;v.target=null;v.lostHide=false;p.kickCD=now+25000;sfx.kick();toast('🦶 Soso: “HIYAAA!” The Vacuumanator is stunned for 15 seconds!',3200);return}
-  if(o.type==='lswitch'){if(G.laser==='off')return toast('🔌 Lasers are offline. The exit power took over.');const L=[...grpDoors('lzr'),...grpDoors('lzb')];if(players.some(q=>!q.caught&&L.some(d=>d.t.some(([x,y])=>Math.abs(q.x-x-.5)<.75&&Math.abs(q.y-y-.5)<.75))))return toast('⚠️ Someone is standing in a laser doorway. Wait until they are clear.');
-    G.laser=G.laser==='r'?'b':'r';setGrp('lzr',G.laser!=='r');setGrp('lzb',G.laser!=='b');sfx.lever();tone(1200,.2,.06,'sine',0,600);return toast(G.laser==='r'?'🔴 Red lasers ON · 🔵 blue lasers off':'🔵 Blue lasers ON · 🔴 red lasers off',3000)}
+  if(o.type==='lswitch'){if(G.laser==='off')return toast('🔌 Lasers are offline. The exit power took over.');const L=G.laser==='r'?grpDoors('lzb'):[];if(players.some(q=>!q.caught&&L.some(d=>d.t.some(([x,y])=>Math.abs(q.x-x-.5)<.75&&Math.abs(q.y-y-.5)<.75))))return toast('⚠️ Someone is standing in a laser doorway. Wait until they are clear.');
+    G.laser=G.laser==='r'?'b':'r';setGrp('lzr',G.laser!=='r');setGrp('lzb',G.laser!=='b');sfx.lever();tone(1200,.2,.06,'sine',0,600);return toast(G.laser==='r'?'🔴 Red alarm lasers ON · 🔵 blue wall off':'🔵 Blue laser wall ON · 🔴 red alarm off',3000)}
   if(o.type==='iddoor'){if(p.i!==G.idOwner)return toast(`🪪 Access denied. This door only opens for ${CH[G.idOwner].n}'s ID card.`);setGrp('id',true);sfx.ok();sfx.door();toast(`🪪 ${p.n}'s ID accepted. Door open!`);return objective()}
   if(o.type==='note'){o.taken=true;o.mesh.visible=false;p.inv.push({k:'note',i:o.i});sfx.pick();toast(`${p.n} found note ${circ[o.i]}. Only ${p.n} can read it (🎒 Bag).`,3500);ports()}
   else if(o.type==='fuse'){o.taken=true;o.mesh.visible=false;p.inv.push({k:'fuse'});sfx.pick();toast(`🔌 ${p.n} grabbed the power fuse! Bring it to the Exit Lab door.`,3500);ports()}
@@ -942,6 +942,7 @@ function use(){
   else if(o.type==='cam')toast('Standing here keeps the cameras on for everyone.');
   else if(o.type==='nightcam'){p.watching=true;sfx.cam();ports();toast('📹 Night cam ON. Tap the screen to place a guide marker for your teammate in the dark. USE to exit.',4200)}
   objective()}
+function redAlarm(x,y){const now=performance.now();pings=pings.filter(q=>q.from!=='alarm');pings.push({x,y,t:now,ic:'🚨',from:'alarm'});for(let i=0;i<4;i++){tone(1100,.12,.14,'square',i*.24);tone(780,.12,.14,'square',i*.24+.12)}}
 function lasersOff(){const L=[...grpDoors('lzr'),...grpDoors('lzb')];if(!L.length)return false;setGrp('lzr',true);setGrp('lzb',true);G.laser='off';return true}
 function openDoor(k){G.doors[k].open=true;sfx.door()}
 function leaveLocker(p){const L=G.objs.find(o=>(o.type==='locker'||o.type==='box')&&o.who===p.i);p.hidden=false;if(!L)return;L.who=null;
@@ -1033,7 +1034,7 @@ function tutTick(dt,now){const m=players[0],s=players[1],k=TUT.step;
   else if(k===10&&G.doors.code.open)tutGo(11);
   else if(k===11&&inExit(m)&&!inExit(s)){const c=G.alc.cell.find(([x,y])=>!(Math.floor(m.x)===x&&Math.floor(m.y)===y));s.x=c[0]+.5;s.y=c[1]+.5}}
 function tutEnd(){TUT.on=false;G.guide=null;leaveGame();const C=[['📝 ➜ 🔓','Notes & code','Each note is one digit. Share them, then unlock the Exit Lab.'],['🎚️ 🎚️ ⏱️','Levers','Pull every lever within 8 seconds of each other.'],['🟩 🛗','Exit lift','Everyone on the green pad, then press USE.'],
-    ['🔴 🔵 🎛️','Laser grid','Only one colour is on. Flip the switch in the Control Room.'],[`<span class="fc gf"><img src="${SPR.Kew_front}"></span> 🪪`,'ID door','Only the character on the door can open it.'],['👣 + 👣','Two-player door','Stand on both floor plates at the same time.'],
+    ['🔴 🔵 🎛️','Laser grid','🔴 Red: you can walk through, but it sets off an alarm that calls the Vacuumanator (it can cross red too!). 🔵 Blue: a solid wall. Flip colours at the Control Room switch.'],[`<span class="fc gf"><img src="${SPR.Kew_front}"></span> 🪪`,'ID door','Only the character on the door can open it.'],['👣 + 👣','Two-player door','Stand on both floor plates at the same time.'],
     ['🌑 📹 🔌','Blackout room','One player watches the night cam and guides the other to the fuse.'],['⚙️ ▶▶','Conveyor belt','Hallway belts drag everyone along. Ride them for speed, or walk against them (slowly!).'],['🦶 🚪 · 🌀','Soso & Kew','Soso kicks stuck doors open and can stun the Vacuumanator. Kew crawls through vents.']];
   showScene(`<div class="sky" style="background:linear-gradient(#2a1f45,#4a3a78)"></div><div class="txt"><h2 style="font-size:clamp(22px,4vw,36px)">How to escape</h2></div>
     <div class="gg">${C.map(([i,t,d])=>`<div class="gc"><div class="ic">${i}</div><b>${t}</b><small>${d}</small></div>`).join('')}</div>
@@ -1135,6 +1136,9 @@ function hostSim(dt,now){const p=players[active];if(TUT.on)tutTick(dt,now);
   const bd=G.doors.bin;if(bd.open&&now>bd.until&&!players.some(q=>Math.floor(q.x)===bd.t[0][0]&&Math.floor(q.y)===bd.t[0][1])){bd.open=false;sfx.door()}
   const cam=G.objs.find(o=>o.type==='cam');camActive=!!cam&&players.some(q=>!q.caught&&Math.hypot(q.x-cam.x,q.y-cam.y)<1.6);
   toys=toys.filter(t=>now-t.t<10000);toyMeshes=toyMeshes.filter(t=>{if(now-t.t>10000){scene.remove(t.m);return false}return true});pings=pings.filter(q=>now-q.t<9000);if(G.guide&&now-G.guide.t>25000)G.guide=null;
+  if(G.lk&&G.lk.lzr&&G.laser==='r'){const onRed=e=>{const d=G.doorAt[Math.floor(e.y)*COLS+Math.floor(e.x)];return d&&G.doors[d].grp==='lzr'&&!G.doors[d].open};
+    for(const q of players){if(q.caught||q.hidden||!onRed(q)){q.redIn=false;continue}if(!q.redIn&&now>(q.redCD||0)){q.redCD=now+2500;redAlarm(q.x,q.y);noise(q.x,q.y,40);toast(`🚨 ${q.n} tripped the 🔴 red laser! The Vacuumanator is on its way!`,3200)}q.redIn=true}
+    for(const v of vacs){if(!onRed(v)){v.redIn=false;continue}if(!v.redIn&&now>(v.redCD||0)){v.redCD=now+4000;redAlarm(v.x,v.y);toast('🚨 Red laser alarm! The Vacuumanator just crossed the 🔴 grid. Check the map!',3400)}v.redIn=true}}
   for(const v of vacs){
     if(v.ctrl){const c=v.ctrl;v.x=c.x;v.y=c.y;v.ang=c.a;v.alert=c.running&&c.moving;vacAudio(v,now);continue}if(v.stun>now){vacAudio(v,now);continue}
     if(dbgFreeze||(MODE==='prop'&&PH.phase==='hide')){v.alert=false;v.target=null;vacAudio(v,now);continue}
