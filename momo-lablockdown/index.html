@@ -365,8 +365,8 @@ const CH=[
 let MODE='escape',lobbyMode='escape';const VACICON='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 130"><rect x="12" y="50" width="176" height="58" rx="28" fill="#d6d9e4"/><rect x="12" y="84" width="176" height="24" rx="12" fill="#a9adc0"/><path d="M40 56 Q100 0 160 56 Z" fill="#eceef4"/><rect x="64" y="56" width="72" height="22" rx="11" fill="#3a3350"/><circle cx="100" cy="67" r="7" fill="#ff3d6a"/></svg>');const faceOf=p=>p.isVac?VACICON:SPR[p.n+'_front'];
 const PH={seeker:'vac',phase:'hide',until:0,end:0,bat:100};
 const DIFF={easy:{name:'Easy',desc:'1 floor · 2 random gimmicks',levels:[{gc:4,gr:3,g:2,nl:1}]},
-  medium:{name:'Medium',desc:'2 floors · a small lab, then a full-size one with 3 gimmicks',levels:[{gc:3,gr:2,g:1},{gc:4,gr:3,g:3}]},
-  hard:{name:'Hard',desc:'3 floors · gimmicks pile up as you climb',levels:[{gc:3,gr:2,g:1},{gc:3,gr:3,g:2},{gc:4,gr:3,g:3}]}};
+  medium:{name:'Medium',desc:'2 full-size floors · 1 gimmick, then 3',levels:[{gc:4,gr:3,g:1},{gc:4,gr:3,g:3}]},
+  hard:{name:'Hard',desc:'3 floors · gimmicks pile up as you climb',levels:[{gc:4,gr:3,g:1},{gc:4,gr:3,g:2},{gc:4,gr:3,g:3}]}};
 
 /* ===================== rng ===================== */
 let _s=1;
@@ -384,7 +384,7 @@ const THEMES={chem:{name:'Chem Lab',col:'#bcd6ff',props:['bench','bench','shelf'
 let G;
 let GS={};
 function generate(n,cfg){GC=cfg.gc;GR=cfg.gr;COLS=GC*CS+2;ROWS=GR*CS+2;let pool=[];
-  if(MODE==='escape'&&cfg.g){pool=shuffle((GC*GR>=9?['dark','laser','id','duo']:['id','duo']).filter(k=>!(cfg.nl&&k==='laser'))).slice(0,cfg.g);if(n===2&&pool.includes('laser')&&pool.includes('id')&&pool.includes('duo'))pool=['laser','id','dark']}
+  if(MODE==='escape'&&cfg.g){pool=shuffle((GC*GR>=9?['dark','laser','id','duo','belt']:['id','duo','belt']).filter(k=>!(cfg.nl&&k==='laser'))).slice(0,cfg.g);if(n===2&&pool.includes('laser')&&pool.includes('id')&&pool.includes('duo'))pool=['laser','id','dark']}
   for(;;){GS={};pool.forEach(k=>GS[k]=1);for(let t=0;t<150;t++){const g=tryGen(n,cfg);if(g)return g}if(!pool.length)throw new Error('gen failed');pool.pop()}}
 function tryGen(n,cfg){
   const grid=[...Array(ROWS)].map(()=>Array(COLS).fill(1)),room=[...Array(ROWS)].map(()=>Array(COLS).fill(-1)),col=[...Array(ROWS)].map(()=>Array(COLS).fill(null));
@@ -402,14 +402,14 @@ function tryGen(n,cfg){
   const cand=[];rooms.forEach(a=>D4.forEach(([dx,dy])=>{const x=a.cx+dx,y=a.cy+dy;if(x<0||y<0||x>=GC||y>=GR)return;const b=at(x,y);if(b.id<a.id||a.adj.includes(b.id))return;if([exit,stuck].includes(a)||[exit,stuck].includes(b))return;cand.push([a,b])}));
   shuffle(cand).slice(0,rooms.length>=9?2:1).forEach(([a,b])=>{edges.push([a,b]);a.adj.push(b.id);b.adj.push(a.id)});
   rooms.forEach(r=>{for(let y=r.y0;y<=r.y1;y++)for(let x=r.x0;x<=r.x1;x++){grid[y][x]=0;room[y][x]=r.id}});
-  const corr=(x,y)=>{if(grid[y][x]===1)grid[y][x]=0};
-  for(const[a0,b0]of edges){let a=a0,b=b0;const horiz=a.cy===b.cy;if(horiz?a.cx>b.cx:a.cy>b.cy)[a,b]=[b,a];
+  let cur=null;const corr=(x,y)=>{if(cur)cur.push([x,y]);if(grid[y][x]===1)grid[y][x]=0};
+  const segs=[];for(const[a0,b0]of edges){let a=a0,b=b0;cur=[];const horiz=a.cy===b.cy;if(horiz?a.cx>b.cx:a.cy>b.cy)[a,b]=[b,a];
     if(horiz){const ya=ri(a.y0,a.y1-1),yb=ri(b.y0,b.y1-1),gs=a.x1+1,ge=b.x0-1,xm=ri(gs+1,ge-2);
       for(let x=gs;x<=xm+1;x++){corr(x,ya);corr(x,ya+1)}for(let y=Math.min(ya,yb);y<=Math.max(ya,yb)+1;y++){corr(xm,y);corr(xm+1,y)}for(let x=xm;x<=ge;x++){corr(x,yb);corr(x,yb+1)}
-      a.ent.push({to:b.id,t:[[gs,ya],[gs,ya+1]],axis:'x',out:[1,0]});b.ent.push({to:a.id,t:[[ge,yb],[ge,yb+1]],axis:'x',out:[-1,0]})}
+      a.ent.push({to:b.id,t:[[gs,ya],[gs,ya+1]],axis:'x',out:[1,0]});b.ent.push({to:a.id,t:[[ge,yb],[ge,yb+1]],axis:'x',out:[-1,0]});segs.push({t:cur,e0:[[gs,ya],[gs,ya+1]],e1:[[ge,yb],[ge,yb+1]]})}
     else{const xa=ri(a.x0,a.x1-1),xb=ri(b.x0,b.x1-1),gs=a.y1+1,ge=b.y0-1,ym=ri(gs+1,ge-2);
       for(let y=gs;y<=ym+1;y++){corr(xa,y);corr(xa+1,y)}for(let x=Math.min(xa,xb);x<=Math.max(xa,xb)+1;x++){corr(x,ym);corr(x,ym+1)}for(let y=ym;y<=ge;y++){corr(xb,y);corr(xb+1,y)}
-      a.ent.push({to:b.id,t:[[xa,gs],[xa+1,gs]],axis:'y',out:[0,1]});b.ent.push({to:a.id,t:[[xb,ge],[xb+1,ge]],axis:'y',out:[0,-1]})}}
+      a.ent.push({to:b.id,t:[[xa,gs],[xa+1,gs]],axis:'y',out:[0,1]});b.ent.push({to:a.id,t:[[xb,ge],[xb+1,ge]],axis:'y',out:[0,-1]});segs.push({t:cur,e0:[[xa,gs],[xa+1,gs]],e1:[[xb,ge],[xb+1,ge]]})}}cur=null;
   const tkeys=shuffle(Object.keys(THEMES));let ti=0;
   rooms.forEach(r=>{r.theme=tkeys[ti++%tkeys.length];r.name=THEMES[r.theme].name;r.col=THEMES[r.theme].col});
   start.kind='safe';start.name='Safe Room';start.col='#b8ecd2';exit.kind='exit';exit.name='Exit Lab';exit.col='#c4f0dc';if(stuck){stuck.kind='stuck';stuck.name='Storage';stuck.col='#efd6b8'}
@@ -441,7 +441,13 @@ function tryGen(n,cfg){
   const alc=attach(exit,[exitE.out]);if(!alc)return null;carveA(alc,'#bff0d6',0,exit.col);setDoor('gate',[alc.door],alc.side[0]?'x':'y',alc.side);
   const binA=attach(bin);if(!binA)return null;carveA(binA,'#e2e2ea',0,bin.col);setDoor('bin',[binA.door],binA.side[0]?'x':'y',binA.side);
   let ventA=null;if(n>=3&&MODE==='escape'){const vr=pick(rooms.filter(r=>!['safe','exit','bin','dark'].includes(r.kind)));ventA=attach(vr);if(!ventA)return null;ventA.room=vr;carveA(ventA,'#e2e2ea',2,'#e2e2ea')}
-  return{tut:!!cfg.tut,ctrl,lk,laser:'r',idOwner:lk.id?ri(0,n-1):-1,grid,room,col,rooms,edges,start,exit,stuck,bin,cam,dark,alc,binA,ventA,doors,doorAt,n};
+  let belt=null;if(GS.belt){const K=(x,y)=>y*COLS+x,c=[];
+    for(const sg of segs){const T=new Map();for(const[x,y]of sg.t)if(grid[y][x]===0&&room[y][x]===-1&&!doorAt[K(x,y)])T.set(K(x,y),[x,y]);if(T.size>=14)c.push({sg,T})}
+    if(!c.length)return null;const C=pick(c),fw=R()<.5,E=fw?C.sg.e1:C.sg.e0,dist=new Map(),q=[];E.forEach(([x,y])=>{dist.set(K(x,y),0);q.push([x,y])});
+    for(let h=0;h<q.length;h++){const[x,y]=q[h],d=dist.get(K(x,y));for(const[dx,dy]of D4){const k=K(x+dx,y+dy);if(C.T.has(k)&&!dist.has(k)){dist.set(k,d+1);q.push([x+dx,y+dy])}}}
+    belt={};for(const[k,[x,y]]of C.T){const d=dist.get(k);if(d===undefined)continue;for(const[dx,dy]of D4){const k2=K(x+dx,y+dy);if(dist.get(k2)===d-1){belt[x+','+y]=[dx,dy];break}}}}
+  const safeBuf=MODE==='escape'?new Set(start.ent.flatMap(e=>e.t.map(([x,y])=>y*COLS+x))):null;
+  return{tut:!!cfg.tut,belt,safeBuf,ctrl,lk,laser:'r',idOwner:lk.id?ri(0,n-1):-1,grid,room,col,rooms,edges,start,exit,stuck,bin,cam,dark,alc,binA,ventA,doors,doorAt,n};
 }
 function bfsRooms(rooms,s){const d={};d[s]=0;const q=[s];while(q.length){const c=q.shift();for(const nb of rooms[c].adj)if(d[nb]===undefined){d[nb]=d[c]+1;q.push(nb)}}return d}
 function reachCount(){const sx=Math.floor((G.start.x0+G.start.x1)/2),sy=Math.floor((G.start.y0+G.start.y1)/2);const seen=new Uint8Array(COLS*ROWS);const q=[sy*COLS+sx];seen[q[0]]=1;let n=0;
@@ -534,7 +540,7 @@ const inSafe=q=>isSafeT(Math.floor(q.x),Math.floor(q.y));
 const inDark=q=>{if(!G.dark)return false;const r=G.dark,x=Math.floor(q.x),y=Math.floor(q.y);return x>=r.x0&&x<=r.x1&&y>=r.y0&&y<=r.y1};
 let CLIMB=-1;const topAt=(x,y)=>(G.topH&&G.topH[y*COLS+x])||0;
 function groundZ(p){if(MODE!=='prop'||!G.topH||p.isVac)return 0;let h=0;for(const[dx,dy]of[[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]])h=Math.max(h,topAt(Math.floor(p.x+dx),Math.floor(p.y+dy)));return h}
-function solid(x,y,who){if(x<0||y<0||x>=COLS||y>=ROWS)return true;const g=G.grid[y][x];if(g===1)return true;if(g===3){const h=topAt(x,y);return !(h&&CLIMB>=h-.06)}if(g===2)return who!=='Kew';if(who==='vac'&&isSafeT(x,y))return true;const d=G.doorAt[y*COLS+x];return !!(d&&!G.doors[d].open)}
+function solid(x,y,who){if(x<0||y<0||x>=COLS||y>=ROWS)return true;const g=G.grid[y][x];if(g===1)return true;if(g===3){const h=topAt(x,y);return !(h&&CLIMB>=h-.06)}if(g===2)return who!=='Kew';if(who==='vac'&&(isSafeT(x,y)||(G.safeBuf&&G.safeBuf.has(y*COLS+x))))return true;const d=G.doorAt[y*COLS+x];return !!(d&&!G.doors[d].open)}
 function blocked(x,y,r,who){return solid(Math.floor(x-r),Math.floor(y-r),who)||solid(Math.floor(x+r),Math.floor(y-r),who)||solid(Math.floor(x-r),Math.floor(y+r),who)||solid(Math.floor(x+r),Math.floor(y+r),who)}
 function los(a,b){const d=Math.hypot(b.x-a.x,b.y-a.y),n=Math.ceil(d/.2);for(let i=1;i<n;i++){const x=Math.floor(a.x+(b.x-a.x)*i/n),y=Math.floor(a.y+(b.y-a.y)*i/n);const g=G.grid[y][x];if(g===1||g===2)return false;const dk=G.doorAt[y*COLS+x];if(dk&&!G.doors[dk].open)return false}return true}
 function bfs(sx,sy,tx,ty){if(sx===tx&&sy===ty)return null;const S=sy*COLS+sx,T=ty*COLS+tx,prev=new Int32Array(COLS*ROWS).fill(-1);prev[S]=S;const q=[S];let h=0;
@@ -619,6 +625,7 @@ function makeTextures(){
     pudding:(g)=>{g.fillStyle='#ffd1dd';g.fillRect(0,0,128,160);g.font='60px sans-serif';g.textAlign='center';g.fillText('🍮',64,100);g.fillStyle='#c2507a';g.font='bold 13px sans-serif';g.fillText('PUDDING',64,130);g.fillText('IS SCIENCE',64,146)},
     firstaid:(g)=>{g.fillStyle='#e6fff2';g.fillRect(0,0,128,160);g.fillStyle='#3fbf86';g.fillRect(48,30,32,80);g.fillRect(24,54,80,32);g.fillStyle='#2b7f5a';g.font='bold 14px sans-serif';g.textAlign='center';g.fillText('SAFE ROOM',64,136)}};
   TX.poster={};for(const k in pos)TX.poster[k]=tex(128,160,pos[k]);
+  TX.belt=tex(64,64,(g)=>{g.fillStyle='#3a3648';g.fillRect(0,0,64,64);g.fillStyle='#2b2838';for(let i=0;i<64;i+=8)g.fillRect(0,i,64,3);g.fillStyle='#ffc94a';g.beginPath();g.moveTo(14,44);g.lineTo(32,22);g.lineTo(50,44);g.lineTo(50,52);g.lineTo(32,32);g.lineTo(14,52);g.closePath();g.fill();g.fillStyle='#8a86a0';g.fillRect(0,0,4,64);g.fillRect(60,0,4,64)},true);
   TX.wb=tex(128,96,(g)=>{g.fillStyle='#fdfdff';g.fillRect(0,0,128,96);g.fillStyle='#3d6fb3';g.font='bold 11px sans-serif';g.fillText('Q4 PUDDING KPI',8,16);g.strokeStyle='#e2475f';g.lineWidth=2;g.beginPath();g.moveTo(10,80);g.lineTo(40,62);g.lineTo(70,70);g.lineTo(115,26);g.stroke();g.fillStyle='#3fbf86';g.font='bold 10px sans-serif';g.fillText('↑ 300% 🍮',70,88);g.fillStyle='#9a8aa0';g.font='9px sans-serif';g.fillText('- less meetings?',8,34)});
   const signC={};TX.sign=(txt,bg)=>signC[txt+bg]||(signC[txt+bg]=tex(256,64,(g)=>{g.fillStyle=bg;rr(g,2,2,252,60,14);g.fill();g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=3;rr(g,8,8,240,48,10);g.stroke();g.fillStyle='#fff';g.font=`bold ${txt.length>12?22:28}px sans-serif`;g.textAlign='center';g.fillText(txt,128,43)}));
 }
@@ -718,6 +725,7 @@ function buildWorld(){
       [.78,.78,1,1].forEach(a=>wc.push(C.r*a,C.g*a,C.b*a));wu.push(0,0,1,0,1,1,0,1);wi.push(wb,wb+1,wb+2,wb,wb+2,wb+3)}}
   const mk=(pos,colr,uv,idx,mat)=>{const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('color',new THREE.Float32BufferAttribute(colr,3));if(uv)geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();const m=new THREE.Mesh(geo,mat);world.add(m);return m};
   mk(fl,fc,fu,fi,new THREE.MeshLambertMaterial({map:TX.floor,vertexColors:true}));
+  if(G.belt){const bm=new THREE.MeshLambertMaterial({map:TX.belt}),bg=new THREE.PlaneGeometry(1,1);for(const k in G.belt){const[x,y]=k.split(',').map(Number),[dx,dy]=G.belt[k];if(g[y][x]!==0)continue;const m=new THREE.Mesh(bg,bm);m.rotation.set(-Math.PI/2,0,Math.atan2(-dx,-dy));m.position.set(x+.5,.012,y+.5);world.add(m)}}
   mk(wl,wc,wu,wi,new THREE.MeshLambertMaterial({map:TX.wall,vertexColors:true,side:THREE.DoubleSide}));
   mk(cl,cc,null,ci,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide}));
   if(G.ventA){const[vx,vy]=G.ventA.door;for(const[dx,dy]of D4){if(!floorish(vx+dx,vy+dy))continue;const p=new THREE.Mesh(new THREE.PlaneGeometry(.7,.45),new THREE.MeshLambertMaterial({map:TX.grille,transparent:true}));p.position.set(vx+.5+dx*.505,.3,vy+.5+dy*.505);p.lookAt(vx+.5+dx*2,.3,vy+.5+dy*2);world.add(p)}}
@@ -829,7 +837,7 @@ function slots(){const pm=lobbyMode==='prop';if(N>4)N=4;if(!pm&&N<2)N=2;
     L=['30 s to hide before the Vacuumanator moves','USE on a prop to disguise as it. Small props are fast with 1 ❤️, big props are slow with 3 ❤️','JUMP to hop over small props','Third-person view for hiders','No special perks']}
   else{$('#difL').textContent='DIFFICULTY';$('#diffs').innerHTML=Object.entries(DIFF).map(([k,d])=>`<button class="${k===diff?'on':''}" data-d="${k}">${d.name}</button>`).join('');$('#diffs').querySelectorAll('button').forEach(b=>b.onclick=()=>{diff=b.dataset.d;slots()});
     $('#difD').textContent=DIFF[diff].desc;
-    L=[`${N} notes make the Exit Lab code; each digit sits in its finder's bag`,'Notes may hide behind gimmicks: a stuck door (Soso), a vent (Kew) or a locked room',`${N} levers to pull within 8 s`,'Each floor rolls random gimmicks: Blackout Room, Laser Grid, ID-card door, Two-player door','The start room is a safe room'];
+    L=[`${N} notes make the Exit Lab code; each digit sits in its finder's bag`,'Notes may hide behind gimmicks: a stuck door (Soso), a vent (Kew) or a locked room',`${N} levers to pull within 8 s`,'Each floor rolls random gimmicks: Blackout Room, Laser Grid, ID-card door, Two-player door, Conveyor Belt','The start room is a safe room'];
     if(N>=3)L.push('A vent closet only Kew can crawl into','A Camera Room shows the Vacuumanator to everyone','A faster Vacuumanator');if(N>=4)L.push('Two Vacuumanators on full-size floors')}
   $('#gim').innerHTML=L.map(t=>`<li>${t}</li>`).join('')}
 $('#minus').onclick=()=>{N=Math.max(lobbyMode==='prop'?1:2,N-1);slots()};$('#plus').onclick=()=>{N=Math.min(4,N+1);slots()};
@@ -897,16 +905,17 @@ addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);addEventListener('b
 const PING={here:['📍','Here!'],danger:['⚠️','Danger!'],help:['🆘','Help!'],go:['👉','Go go go!']};
 function ping(t){if(state!=='play')return;if(NET.client)return NET.send({t:'a',a:'ping',k:t});const p=players[active];pings=pings.filter(q=>q.from!==p.n);pings.push({x:p.x,y:p.y,t:performance.now(),ic:PING[t][0],from:p.n});run.stats.ping++;sfx.radio();toast(`📻 ${p.n}: ${PING[t][0]} ${PING[t][1]}`)}
 function addToyMesh(x,y){const m=new THREE.Group();m.add(sph(.09,M.yellow,0,.09,0));m.add(sph(.06,M.yellow,.06,.18,0));m.add(blob(.15));m.position.set(x,0,y);scene.add(m);toyMeshes.push({m,t:performance.now()})}
-function dropToy(x,y){toys.push({x,y,t:performance.now()});run.stats.decoy++;sfx.squeak();noise(x,y,13);const m=new THREE.Group();m.add(sph(.09,M.yellow,0,.09,0));m.add(sph(.06,M.yellow,.06,.18,0));const bk=new THREE.Mesh(new THREE.ConeGeometry(.025,.05,8),new THREE.MeshLambertMaterial({color:'#ff9a3c'}));bk.rotation.z=-Math.PI/2;bk.position.set(.12,.18,0);m.add(bk);m.add(blob(.15));m.position.set(x,0,y);scene.add(m);toyMeshes.push({m,t:performance.now()})}
+function dropToy(x,y){toys.push({x,y,t:performance.now()});run.stats.decoy++;sfx.squeak();noise(x,y,20,true);const m=new THREE.Group();m.add(sph(.09,M.yellow,0,.09,0));m.add(sph(.06,M.yellow,.06,.18,0));const bk=new THREE.Mesh(new THREE.ConeGeometry(.025,.05,8),new THREE.MeshLambertMaterial({color:'#ff9a3c'}));bk.rotation.z=-Math.PI/2;bk.position.set(.12,.18,0);m.add(bk);m.add(blob(.15));m.position.set(x,0,y);scene.add(m);toyMeshes.push({m,t:performance.now()})}
 function decoy(){if(state!=='play')return;if(NET.client){const p=players[active];if(MODE==='escape'&&p.n==='Momo'&&!p.caught&&!p.hidden){openMap();return toast('🗺️ Tap anywhere on the map to drop the decoy there')}return NET.send({t:'a',a:'decoy'})}const p=players[active],now=performance.now();if(p.hidden||p.caught||p.watching)return;if(now<p.decoyCD)return toast(`🐥 Decoy recharging… ${Math.ceil((p.decoyCD-now)/1000)}s`);
   if(p.n==='Momo'){openMap();return toast('🗺️ Tap anywhere on the map to drop the decoy there')}
   let x=p.x,y=p.y;for(let d=0;d<3.2;d+=.1){const nx=p.x+Math.cos(p.a)*d,ny=p.y+Math.sin(p.a)*d;if(solid(Math.floor(nx),Math.floor(ny),'vac'))break;x=nx;y=ny}
   dropToy(x,y);p.decoyCD=now+15000;toast('🐥 SQUEAK! Decoy thrown. Vacuumanator heard it…')}
-function noise(x,y,r){vacs.forEach(v=>{if(Math.hypot(v.x-x,v.y-y)<r){v.alert=true;v.tx=x;v.ty=y;v.last=performance.now();v.target=null}})}
+function noise(x,y,r,lure){const now=performance.now();vacs.forEach(v=>{const d=Math.hypot(v.x-x,v.y-y);if(d<r&&!v.ctrl){v.alert=true;[v.tx,v.ty]=nearFree(x,y);v.last=now;v.target=null;v.lostHide=false;v.step=null;v.repath=0;v.wander=null;if(lure)v.lure=now+Math.max(5000,d*1.6/v.speedC*1000+3000)}})}
+function kickReach(p,v){const dx=v.x-p.x,dy=v.y-p.y,d=Math.hypot(dx,dy);if(d>1.8)return false;return d<.55||(dx*Math.cos(p.a)+dy*Math.sin(p.a))/d>.4}
 function facing(p,o,maxD=1.6){const dx=o.x-p.x,dy=o.y-p.y,d=Math.hypot(dx,dy);if(d>maxD)return null;const dot=d<.45?1:(dx*Math.cos(p.a)+dy*Math.sin(p.a))/d;return dot>.5?d*(1.7-dot):null}
 const grpDoors=g=>Object.values(G.doors).filter(d=>d.grp===g),grpOpen=g=>grpDoors(g).every(d=>d.open),setGrp=(g,o)=>grpDoors(g).forEach(d=>d.open=o);
-function nearest(p){if(MODE==='prop')return nearestPH(p);if(G.doors.gate.open&&players.every(inExit))return{type:'lift'};if(p.n==='Soso'&&!p.caught&&!p.hidden&&performance.now()>=(p.kickCD||0)){const now=performance.now();for(const v of vacs){if(v.stun>now)continue;if(facing(p,v,1.5)!==null)return{type:'kickvac',v,x:v.x,y:v.y}}}let best=null,bd=9;for(const o of G.objs){if((o.type==='note'||o.type==='fuse')&&o.taken)continue;if((o.type==='locker'||o.type==='box')&&o.who!==null&&o.who!==p.i)continue;if(o.type==='plate'||(o.type==='iddoor'&&grpOpen('id')))continue;if(o.type==='stuck'&&G.doors.stuck.open)continue;if(o.type==='keypad'&&G.doors.code.open)continue;if(o.type==='fusebox'&&G.fuseIn)continue;const d=facing(p,o);if(d!==null&&d<bd){bd=d;best=o}}return best}
-function label(o,p){if(o.ph)return o.label;switch(o.type){case'lift':return'🛗 Take the lift up';case'kickvac':{const c=(p.kickCD||0)-performance.now();return c>0?`🦶 Kick recharging ${Math.ceil(c/1000)}s`:'🦶 KICK the Vacuumanator!'}case'lswitch':return`Switch lasers (${G.laser==='r'?'🔴 red':'🔵 blue'} is ON)`;case'iddoor':return p.i===G.idOwner?'🪪 Swipe your ID card':`🪪 Needs ${CH[G.idOwner].n}'s ID card`;case'note':return'Take note '+circ[o.i];case'fuse':return'Take the power fuse';case'lever':return'Pull lever '+(o.i+1);case'locker':return'Hide in locker';case'box':return'Hide in the box';case'keypad':return G.fuseIn?'Enter code':'Keypad has no power';case'fusebox':return p.inv.some(i=>i.k==='fuse')?'Plug in the fuse':'Fuse box (empty)';case'binbtn':return'Open dust bin';case'cam':return'Cameras on (stay here)';case'nightcam':return'Watch the night cam';
+function nearest(p){if(MODE==='prop')return nearestPH(p);if(G.doors.gate.open&&players.every(inExit))return{type:'lift'};if(p.n==='Soso'&&!p.caught&&!p.hidden&&performance.now()>=(p.kickCD||0)){const now=performance.now();for(const v of vacs){if(v.stun>now)continue;if(kickReach(p,v))return{type:'kickvac',v,x:v.x,y:v.y}}}let best=null,bd=9;for(const o of G.objs){if((o.type==='note'||o.type==='fuse')&&o.taken)continue;if((o.type==='locker'||o.type==='box')&&o.who!==null&&o.who!==p.i)continue;if(o.type==='plate'||(o.type==='iddoor'&&grpOpen('id')))continue;if(o.type==='stuck'&&G.doors.stuck.open)continue;if(o.type==='keypad'&&G.doors.code.open)continue;if(o.type==='fusebox'&&G.fuseIn)continue;const d=facing(p,o);if(d!==null&&d<bd){bd=d;best=o}}return best}
+function label(o,p){if(o.ph)return o.label;switch(o.type){case'lift':return'🛗 Take the lift up';case'kickvac':{const c=(p.kickCD||0)-performance.now();return c>0?`🦶 Kick recharging ${Math.ceil(c/1000)}s`:'🦶 KICK the Vacuumanator!'}case'lswitch':return G.laser==='off'?'🔌 Lasers offline':`Switch lasers (${G.laser==='r'?'🔴 red':'🔵 blue'} is ON)`;case'iddoor':return p.i===G.idOwner?'🪪 Swipe your ID card':`🪪 Needs ${CH[G.idOwner].n}'s ID card`;case'note':return'Take note '+circ[o.i];case'fuse':return'Take the power fuse';case'lever':return'Pull lever '+(o.i+1);case'locker':return'Hide in locker';case'box':return'Hide in the box';case'keypad':return G.fuseIn?'Enter code':'Keypad has no power';case'fusebox':return p.inv.some(i=>i.k==='fuse')?'Plug in the fuse':'Fuse box (empty)';case'binbtn':return'Open dust bin';case'cam':return'Cameras on (stay here)';case'nightcam':return'Watch the night cam';
   case'stuck':return p.n==='Soso'?'🦶 KICK the door!':'Stuck… Soso could kick it';case'vent':return p.n==='Kew'?'🌀 Walk in to crawl through':'Vent: only Kew fits'}}
 function use(){
   if(state!=='play')return;if(NET.client){const p=players[active],o=MODE==='escape'&&!p.hidden&&!p.watching&&!p.caught&&nearest(p);if(o&&o.type==='keypad'&&G.fuseIn)return openPad();return NET.send({t:'a',a:'use'})}if(MODE==='prop')return usePH();const p=players[active];
@@ -916,7 +925,7 @@ function use(){
   const o=nearest(p);if(!o)return;
   if(o.type==='lift')return TUT.on?tutGo(12):levelClear();
   if(o.type==='kickvac'){const now=performance.now();if(now<(p.kickCD||0))return toast(`🦶 Kick recharging… ${Math.ceil((p.kickCD-now)/1000)}s`);const v=o.v;v.stun=now+15000;v.alert=false;v.target=null;v.lostHide=false;p.kickCD=now+25000;sfx.kick();toast('🦶 Soso: “HIYAAA!” The Vacuumanator is stunned for 15 seconds!',3200);return}
-  if(o.type==='lswitch'){const L=[...grpDoors('lzr'),...grpDoors('lzb')];if(players.some(q=>!q.caught&&L.some(d=>d.t.some(([x,y])=>Math.abs(q.x-x-.5)<.75&&Math.abs(q.y-y-.5)<.75))))return toast('⚠️ Someone is standing in a laser doorway. Wait until they are clear.');
+  if(o.type==='lswitch'){if(G.laser==='off')return toast('🔌 Lasers are offline. The exit power took over.');const L=[...grpDoors('lzr'),...grpDoors('lzb')];if(players.some(q=>!q.caught&&L.some(d=>d.t.some(([x,y])=>Math.abs(q.x-x-.5)<.75&&Math.abs(q.y-y-.5)<.75))))return toast('⚠️ Someone is standing in a laser doorway. Wait until they are clear.');
     G.laser=G.laser==='r'?'b':'r';setGrp('lzr',G.laser!=='r');setGrp('lzb',G.laser!=='b');sfx.lever();tone(1200,.2,.06,'sine',0,600);return toast(G.laser==='r'?'🔴 Red lasers ON · 🔵 blue lasers off':'🔵 Blue lasers ON · 🔴 red lasers off',3000)}
   if(o.type==='iddoor'){if(p.i!==G.idOwner)return toast(`🪪 Access denied. This door only opens for ${CH[G.idOwner].n}'s ID card.`);setGrp('id',true);sfx.ok();sfx.door();toast(`🪪 ${p.n}'s ID accepted. Door open!`);return objective()}
   if(o.type==='note'){o.taken=true;o.mesh.visible=false;p.inv.push({k:'note',i:o.i});sfx.pick();toast(`${p.n} found note ${circ[o.i]}. Only ${p.n} can read it (🎒 Bag).`,3500);ports()}
@@ -924,7 +933,7 @@ function use(){
   else if(o.type==='fusebox'){const k=p.inv.findIndex(i=>i.k==='fuse');if(k<0)return toast('The fuse box is empty. The fuse is somewhere in the Blackout Room.');p.inv.splice(k,1);G.fuseIn=true;o.mesh.userData.fz.visible=true;sfx.plug();toast('⚡ Fuse plugged in! The Exit Lab keypad has power.',3200);ports()}
   else if(o.type==='keypad'){if(!G.fuseIn)return toast('🔌 No power. Plug the fuse from the Blackout Room into the fuse box next to it.');if(NET.actor!=null&&NET.actor!==NET.my)return;openPad()}
   else if(o.type==='lever'){const now=performance.now();o.t=now;sfx.lever();const lv=G.objs.filter(x=>x.type==='lever');
-    if(lv.every(l=>now-l.t<leverWin)){if(!G.doors.gate.open){openDoor('gate');sfx.ok();toast('⚡ All levers synced! The exit gate has power!',3500)}}
+    if(lv.every(l=>now-l.t<leverWin)){if(!G.doors.gate.open){openDoor('gate');sfx.ok();toast('⚡ All levers synced! The exit gate has power!'+(lasersOff()?' Every laser grid just shut down.':''),3800)}}
     else toast(`Lever ${o.i+1} pulled! ${lv.filter(l=>now-l.t<leverWin).length}/${N}. The others have 8 seconds…`)}
   else if(o.type==='locker'||o.type==='box'){o.who=p.i;p.hidden=o.type;p.x=o.x;p.y=o.y;p.a=Math.atan2(o.ny,o.nx);ports();toast(o.type==='box'?`📦 ${p.n} ducks into the box.`:`${p.n} hides in the locker. USE again to leave.`)}
   else if(o.type==='binbtn'){openDoor('bin');G.doors.bin.until=performance.now()+6000;sfx.ok();players.forEach(q=>q.caught=false);ports();toast('Dust bin opened! Get out within 6 seconds.')}
@@ -933,6 +942,7 @@ function use(){
   else if(o.type==='cam')toast('Standing here keeps the cameras on for everyone.');
   else if(o.type==='nightcam'){p.watching=true;sfx.cam();ports();toast('📹 Night cam ON. Tap the screen to place a guide marker for your teammate in the dark. USE to exit.',4200)}
   objective()}
+function lasersOff(){const L=[...grpDoors('lzr'),...grpDoors('lzb')];if(!L.length)return false;setGrp('lzr',true);setGrp('lzb',true);G.laser='off';return true}
 function openDoor(k){G.doors[k].open=true;sfx.door()}
 function leaveLocker(p){const L=G.objs.find(o=>(o.type==='locker'||o.type==='box')&&o.who===p.i);p.hidden=false;if(!L)return;L.who=null;
   const st=[[L.nx,L.ny],[-L.ny,L.nx],[L.ny,-L.nx],[-L.nx,-L.ny]],c=[...st.map(v=>[...v,.85]),...st.map(v=>[...v,1.1]),[1,1,.85],[1,-1,.85],[-1,1,.85],[-1,-1,.85]];
@@ -971,8 +981,11 @@ function jump(){const p=players[active];if(state!=='play'||MODE!=='prop'||p.caug
 function undis(){if(NET.client)return NET.send({t:'a',a:'undis'});const p=players[active];if(MODE!=='prop'||!p.disguise)return;p.disguise=null;ports();toast(`${p.n} dropped the disguise.`)}
 function catchHider(q,by){if(q.caught)return;caughtJingle(q.x,q.y);q.caught=true;q.disguise=null;run.stats.vac++;const c=G.binA.cell[hiders().filter(z=>z.caught).length%4];q.x=c[0]+.5;q.y=c[1]+.5;sfx.suck();ports();toast(`🌀 ${by} found ${q.n}!`,3000);if(hiders().every(z=>z.caught))phEnd(false)}
 function pushSmall(p,r){if(p.isVac)return;for(const s of G.small){if(s.fixed)continue;if(p.disguise&&Math.hypot(s.x-p.x,s.y-p.y)<.05)continue;const dx=p.x-s.x,dy=p.y-s.y,d=Math.hypot(dx,dy),m=s.r+r;if(d<m&&d>.001){const nx=s.x+dx/d*m,ny=s.y+dy/d*m;if(!blocked(nx,ny,r,p.n))p.x=nx,p.y=ny}}}
+function vacReroute(v,fx,fy){v.wander=null;for(let k=0;k<G.wps.length;k++){v.wi=(v.wi+1)%G.wps.length;const w=G.wps[v.wi];if((w[0]===fx&&w[1]===fy)||bfs(fx,fy,w[0],w[1])!==false){v.step=null;v.repath=0;return}}
+  const out=[],seen=new Set([fy*COLS+fx]),q=[[fx,fy,0]];for(let h=0;h<q.length;h++){const[x,y,d]=q[h];if(d>=4)out.push([x,y]);for(const[dx,dy]of D4){const nx=x+dx,ny=y+dy,k=ny*COLS+nx;if(seen.has(k)||solid(nx,ny,'vac'))continue;seen.add(k);q.push([nx,ny,d+1])}}
+  if(out.length){v.wander=out[Math.floor(Math.random()*out.length)];v.step=null;v.repath=0}}
 function vacTarget(v,now){let tgt=null,td=1e9;
-  for(const q of players){if(q.caught||q.hidden||q.seeker||inSafe(q)||now<(q.invT||0))continue;const d=Math.hypot(q.x-v.x,q.y-v.y);if(d>8)continue;const vis=los(v,q);let seen,heard;
+  for(const q of players){if(q.caught||q.hidden||q.seeker||inSafe(q)||now<(q.invT||0))continue;const d=Math.hypot(q.x-v.x,q.y-v.y);if(d>8||(now<(v.lure||0)&&d>1.2))continue;const vis=los(v,q);let seen,heard;
     if(MODE==='prop'&&q.disguise){seen=vis&&(((q.moving||q.jz>0)&&d<3.6)||(d<2.3&&scanHit(v,q,now)));heard=q.running&&q.moving&&d<5.5}
     else{seen=d<(inDark(q)?2.2:4.2)&&vis;heard=q.running&&q.moving&&d<7.5}
     if((seen||heard)&&d<td){td=d;tgt=q}}
@@ -1021,7 +1034,7 @@ function tutTick(dt,now){const m=players[0],s=players[1],k=TUT.step;
   else if(k===11&&inExit(m)&&!inExit(s)){const c=G.alc.cell.find(([x,y])=>!(Math.floor(m.x)===x&&Math.floor(m.y)===y));s.x=c[0]+.5;s.y=c[1]+.5}}
 function tutEnd(){TUT.on=false;G.guide=null;leaveGame();const C=[['📝 ➜ 🔓','Notes & code','Each note is one digit. Share them, then unlock the Exit Lab.'],['🎚️ 🎚️ ⏱️','Levers','Pull every lever within 8 seconds of each other.'],['🟩 🛗','Exit lift','Everyone on the green pad, then press USE.'],
     ['🔴 🔵 🎛️','Laser grid','Only one colour is on. Flip the switch in the Control Room.'],[`<span class="fc gf"><img src="${SPR.Kew_front}"></span> 🪪`,'ID door','Only the character on the door can open it.'],['👣 + 👣','Two-player door','Stand on both floor plates at the same time.'],
-    ['🌑 📹 🔌','Blackout room','One player watches the night cam and guides the other to the fuse.'],['🦶 🚪 · 🌀','Soso & Kew','Soso kicks stuck doors open and can stun the Vacuumanator. Kew crawls through vents.']];
+    ['🌑 📹 🔌','Blackout room','One player watches the night cam and guides the other to the fuse.'],['⚙️ ▶▶','Conveyor belt','Hallway belts drag everyone along. Ride them for speed, or walk against them (slowly!).'],['🦶 🚪 · 🌀','Soso & Kew','Soso kicks stuck doors open and can stun the Vacuumanator. Kew crawls through vents.']];
   showScene(`<div class="sky" style="background:linear-gradient(#2a1f45,#4a3a78)"></div><div class="txt"><h2 style="font-size:clamp(22px,4vw,36px)">How to escape</h2></div>
     <div class="gg">${C.map(([i,t,d])=>`<div class="gc"><div class="ic">${i}</div><b>${t}</b><small>${d}</small></div>`).join('')}</div>
     <div class="btns"><button class="btn" id="tPlayN">Play now</button><button class="btn alt" id="totitle">Title</button></div>`);
@@ -1091,6 +1104,7 @@ mc.addEventListener('pointerdown',e=>{const p=players[active];if(p.n!=='Momo')re
 function drawMap(){const s=Math.floor(Math.min(innerWidth*.95/COLS,(innerHeight-90)/ROWS,24));mc.width=COLS*s;mc.height=ROWS*s;const g=G.grid;
   mx.fillStyle='#231b33';mx.fillRect(0,0,mc.width,mc.height);
   for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){const v=g[y][x],d=G.doorAt[y*COLS+x];if(v===1)continue;mx.fillStyle=v===2?'#9aa3b3':v===3?'#cbbfe0':G.col[y][x]||'#ece4da';if(G.dark&&inDark({x:x+.5,y:y+.5}))mx.fillStyle='#2e2640';if(d&&!G.doors[d].open)mx.fillStyle=({code:'#8e7bd0',gate:'#f2c14e',stuck:'#c99c6c',bin:'#9aa3b3'}[d]||{lzr:'#ff6b81',lzb:'#6ba8ff',id:'#6fb7e8',duo:'#6fe0a8'}[G.doors[d].grp]||'#999');mx.fillRect(x*s,y*s,s,s)}
+  if(G.belt){mx.textAlign='center';mx.textBaseline='middle';mx.font=`900 ${Math.max(8,s*.7)}px sans-serif`;for(const k in G.belt){const[x,y]=k.split(',').map(Number),[dx,dy]=G.belt[k];mx.fillStyle='#4a4560';mx.fillRect(x*s,y*s,s,s);mx.fillStyle='#ffc94a';mx.fillText(dx>0?'▶':dx<0?'◀':dy>0?'▼':'▲',(x+.5)*s,(y+.55)*s)}mx.textBaseline='alphabetic'}
   mx.font=`800 ${Math.max(9,s*.55)}px 'M PLUS Rounded 1c',sans-serif`;mx.textAlign='center';G.rooms.forEach(r=>{mx.fillStyle=r.kind==='dark'?'rgba(200,190,255,.8)':'rgba(60,45,80,.6)';mx.fillText(r.kind==='dark'?'🌑 Blackout':r.name,(r.x0+r.x1+1)/2*s,r.y0*s+s*.8)});
   G.alc.cell.forEach(([x,y])=>{mx.fillStyle='#5df0a8';mx.fillRect(x*s+2,y*s+2,s-4,s-4)});
   toys.forEach(t=>{mx.font=`${s}px sans-serif`;mx.fillText('🐥',t.x*s,t.y*s+s*.35)});pings.forEach(q=>{mx.font=`${s}px sans-serif`;mx.fillText(q.ic,q.x*s,q.y*s+s*.35)});
@@ -1113,6 +1127,7 @@ function moveLocal(dt,now){
     const dx=Math.cos(p.a),dy=Math.sin(p.a),vx=dx*f-dy*s,vy=dy*f+dx*s;p.walk+=dt*(p.running?13:8);
     const nx=p.x+vx*sp;if(!blocked(nx,p.y,.22,p.n))p.x=nx;const ny=p.y+vy*sp;if(!blocked(p.x,ny,.22,p.n))p.y=ny;if(G.small&&!(p.jz>.2))pushSmall(p,.22);
     const ph=Math.floor(p.walk/Math.PI);if(ph!==p.stepPh){p.stepPh=ph;sfx.step()}}
+  if(G.belt&&MODE==='escape'){const b=!p.hidden&&!p.caught&&!p.watching&&G.belt[Math.floor(p.x)+','+Math.floor(p.y)];if(b){const bs=1.4*dt,nx=p.x+b[0]*bs,ny=p.y+b[1]*bs;if(!blocked(nx,p.y,.22,p.n))p.x=nx;if(!blocked(p.x,ny,.22,p.n))p.y=ny;if(!p.beltSeen){p.beltSeen=1;toast('⚙️ Conveyor belt! It drags you along. Ride it to move fast, or step off the side.',3200)}}}
   CLIMB=-1;if(MODE==='prop'&&G.small&&!NET.client)for(const p of players)if(!p.isVac&&!p.caught&&p.jz>=.3)for(const s of G.small)if(s.fixed&&!s.nomesh&&p.jz<=p.gz+.02&&(Math.hypot(s.x-p.x,s.y-p.y)<.45||(Math.floor(s.x)===Math.floor(p.x)&&Math.floor(s.y)===Math.floor(p.y))))knock(s,p.a);
   {const sf=inSafe(p);if(sf&&!p.wasSafe)toast("🛡️ Safe room: Vacuumanator can't come in here.");p.wasSafe=sf;const dk=inDark(p);if(dk&&!p.wasDark)toast('🌑 Pitch black… there\'s a box by the door to hide in. Ask someone to watch the night cam!',3800);p.wasDark=dk}
 }
@@ -1127,13 +1142,15 @@ function hostSim(dt,now){const p=players[active];if(TUT.on)tutTick(dt,now);
     tgt=vacTarget(v,now);
     if(!tgt&&v.target&&v.target.hidden){v.lostHide=true;v.target=null}
     if(tgt){if(!v.alert)beep3(1);v.alert=true;v.target=tgt;v.lostHide=false;[v.tx,v.ty]=nearFree(tgt.x,tgt.y);v.last=now}
-    if(v.alert&&now-v.last>(v.lostHide?1600:3200)){v.alert=false;v.target=null;v.lostHide=false}
-    let gx,gy;if(v.alert){gx=v.tx;gy=v.ty}else{const w=G.wps[v.wi];gx=w[0]+.5;gy=w[1]+.5;if(Math.hypot(gx-v.x,gy-v.y)<.3)v.wi=(v.wi+1)%G.wps.length}
+    if(v.alert&&now>(v.lure||0)&&now-v.last>(v.lostHide?1600:3200)){v.alert=false;v.target=null;v.lostHide=false}
+    let gx,gy;if(v.alert){gx=v.tx;gy=v.ty}else{const w=v.wander||G.wps[v.wi];gx=w[0]+.5;gy=w[1]+.5;if(Math.hypot(gx-v.x,gy-v.y)<.3){if(v.wander)v.wander=null;else v.wi=(v.wi+1)%G.wps.length}}
     const sp=(v.alert?v.speedC:v.speedP)*dt;
-    if(v.alert&&v.target&&Math.hypot(v.target.x-v.x,v.target.y-v.y)<1.6&&los(v,v.target)){const a=Math.atan2(v.target.y-v.y,v.target.x-v.x),nx=v.x+Math.cos(a)*sp,ny=v.y+Math.sin(a)*sp;if(!blocked(nx,ny,.3,'vac')){v.x=nx;v.y=ny;v.ang=a}}
-    else{v.repath-=dt;if(v.repath<=0||!v.step){v.step=bfs(Math.floor(v.x),Math.floor(v.y),Math.floor(gx),Math.floor(gy));v.repath=.25;if(v.step===false){v.step=null;if(v.alert){v.alert=false;v.target=null}else v.wi=(v.wi+1)%G.wps.length}}
-      let sx=gx,sy=gy;if(v.step){sx=v.step[0]+.5;sy=v.step[1]+.5}const d=Math.hypot(sx-v.x,sy-v.y);if(d>.001){const k=Math.min(sp,d)/d;v.x+=(sx-v.x)*k;v.y+=(sy-v.y)*k;v.ang=Math.atan2(sy-v.y,sx-v.x)}if(d<.05)v.step=null;
-      if(v.alert&&!v.target&&Math.hypot(gx-v.x,gy-v.y)<.5)v.last=Math.min(v.last,now-2600)}
+    let moved=false;
+    if(v.alert&&v.target&&Math.hypot(v.target.x-v.x,v.target.y-v.y)<1.6&&los(v,v.target)){const a=Math.atan2(v.target.y-v.y,v.target.x-v.x),nx=v.x+Math.cos(a)*sp,ny=v.y+Math.sin(a)*sp;if(!blocked(nx,ny,.3,'vac')){v.x=nx;v.y=ny;v.ang=a;moved=true;v.step=null}}
+    if(!moved){v.repath-=dt;if(v.repath<=0||v.step==null){v.repath=.25;const fx=Math.floor(v.x),fy=Math.floor(v.y);v.step=bfs(fx,fy,Math.floor(gx),Math.floor(gy));
+        if(v.step===false){if(v.alert){v.alert=false;v.target=null;v.lure=0;v.lostHide=false}else vacReroute(v,fx,fy)}}
+      if(v.step!==false){let sx=gx,sy=gy;if(v.step){sx=v.step[0]+.5;sy=v.step[1]+.5}const d=Math.hypot(sx-v.x,sy-v.y);if(d>.001){const k=Math.min(sp,d)/d;v.x+=(sx-v.x)*k;v.y+=(sy-v.y)*k;v.ang=Math.atan2(sy-v.y,sx-v.x)}if(d<.05)v.step=null}
+      if(v.alert&&!v.target&&now>(v.lure||0)&&Math.hypot(gx-v.x,gy-v.y)<.5)v.last=Math.min(v.last,now-2600)}
     for(const q of players){if(q.caught||q.hidden||inSafe(q))continue;if(MODE==='prop'){if(q.seeker)continue;const d=Math.hypot(q.x-v.x,q.y-v.y);if(q.jz<.3){if(d<.6)hitHider(q,v)}else if(d<1.6&&v.target===q){if(v.lockQ!==q){v.lockQ=q;v.lockT=now;tone(900,.5,.05,'sine',0,1800)}else if(now-v.lockT>1300){v.lockQ=null;fireFx(v.x,v.y,.25,q.x,q.y,q.jz+.2);hitHider(q,v)}}continue}if(Math.hypot(q.x-v.x,q.y-v.y)<.6){caughtJingle(q.x,q.y);q.caught=true;q.hidden=false;q.watching=false;q.disguise=null;run.stats.vac++;const c=G.binA.cell[players.filter(z=>z.caught).length%4];q.x=c[0]+.5;q.y=c[1]+.5;sfx.suck();v.alert=false;v.target=null;ports();toast(`🌀 ${q.n} got vacuumed! Rescue them from the Dust Bin Room.`,3500)}}
     vacAudio(v,now)}
   if(G.small)for(const v of vacs)for(const s of G.small){if(s.fixed)continue;const dx=s.x-v.x,dy=s.y-v.y,d=Math.hypot(dx,dy),m=s.r+.32;if(d<m&&d>.001){const nx=v.x+dx/d*m,ny=v.y+dy/d*m;if(!solid(Math.floor(nx),Math.floor(ny),'vac')){s.x=nx;s.y=ny}}}
@@ -1218,7 +1235,7 @@ function render(now){
   blinkers.forEach((b,i)=>{b.visible=Math.sin(t*(1.3+i%3*.4)+i)>-.95});
   (G.exitPads||[]).forEach(pd=>pd.material.opacity=G.doors.gate.open?.35+.2*Math.sin(t*4):.12);
   vacs.forEach((v,i)=>{const m=vacMeshes[i];m.position.set(v.x,v.alert?Math.abs(Math.sin(t*16))*.012:0,v.y);m.rotation.y=-v.ang+Math.PI/2;const stn=v.stun>now;m.userData.brush.rotation.y+=dbgFreeze||stn?0:(v.alert?.6:.25);m.userData.eyeM.color.set(dbgFreeze?'#9fe6ff':stn?(Math.sin(t*6)>0?'#ffe08a':'#7a6a30'):v.alert?'#ff3d6a':'#5fd6ff');m.rotation.z=stn?Math.sin(t*9)*.08:0;m.userData.lt.intensity=v.alert?1.3+Math.sin(t*12):0;m.visible=!(v.ctrl&&v.ctrl===p)});
-  if(beamFx)beamFx.visible=now-beamT<170;
+  if(beamFx)beamFx.visible=now-beamT<170;if(TX.belt)TX.belt.offset.y=-((t*1.4)%1);
   if(G.guide){guideMesh.visible=true;guideMesh.position.set(G.guide.x,0,G.guide.y);guideMesh.children[0].scale.setScalar(1+.15*Math.sin(t*6))}else guideMesh.visible=false;
   dust.position.set(Math.floor(p.x),0,Math.floor(p.y));dust.rotation.y=t*.006;
   const playing=state==='play';
