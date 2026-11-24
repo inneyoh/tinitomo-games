@@ -362,3 +362,5 @@ p.note{margin:0;font-size:13px;color:#8A6748;line-height:1.5}
 #fire{width:104px;height:96px}#fire b{font-size:16px}
 .pbtn{font-size:15px;padding:4px 12px 4px 6px}.pbtn img{width:32px;height:32px}
 @media (max-width:520px){#pctl{gap:6px;padding:5px 10px}.pcounter img{width:48px}.pcounter b{font-size:16px}.pknob img{width:36px}.pknob input{width:76px}#fire{width:70px;height:64px}#fire b{font-size:13px}.pbtn{font-size:12px;padding:2px 8px 2px 3px}.pbtn img{width:24px;height:24px}}
+#evt,#evt *,#store,#store *{box-sizing:border-box}
+#evt .ev-box{width:100%;max-width:min(1000px,100%)}

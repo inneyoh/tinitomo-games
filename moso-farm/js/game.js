@@ -999,13 +999,21 @@ function renderHUD(){$("coins").textContent=S.coins;$("lc").textContent=S.lc;$("
 
 // ================= INPUT =================
 const evp=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];};
-cv.addEventListener("pointerdown",e=>{const[mx,my]=evp(e);
+// two-finger pinch zoom (farm & plaza)
+const PTRS=new Map();let pinch=null,pinchLock=false;
+function zoomAt(f,mx,my){if(area==="farm"){viewLayout();const a=toW(mx,my);V.z=Math.max(1,Math.min(3,(V.z||1.4)*f));viewLayout();const b=toW(mx,my);V.cx+=a.x-b.x;V.cy+=a.y-b.y;}
+  else if(area==="plaza"){plazaLayout();const a=toWP(mx,my);PZ.z=Math.max(1,Math.min(2.5,(PZ.z||1.1)*f));plazaLayout();const b=toWP(mx,my);PZ.cx+=a.x-b.x;PZ.cy+=a.y-b.y;}}
+cv.addEventListener("pointerdown",e=>{PTRS.set(e.pointerId,evp(e));if(PTRS.size>=2&&area!=="pachi"){const[a,b]=[...PTRS.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1};pinchLock=true;stroke=null;pstroke=null;return;}},true);
+cv.addEventListener("pointermove",e=>{if(!PTRS.has(e.pointerId))return;PTRS.set(e.pointerId,evp(e));if(pinch&&PTRS.size>=2){e.stopImmediatePropagation();const[a,b]=[...PTRS.values()];const d=Math.hypot(a[0]-b[0],a[1]-b[1])||1;zoomAt(d/pinch.d,(a[0]+b[0])/2,(a[1]+b[1])/2);pinch.d=d;}},true);
+const ptrEnd=e=>{PTRS.delete(e.pointerId);if(PTRS.size<2)pinch=null;if(pinchLock){e.stopImmediatePropagation();stroke=null;pstroke=null;if(PTRS.size===0)pinchLock=false;}};
+cv.addEventListener("pointerup",ptrEnd,true);cv.addEventListener("pointercancel",ptrEnd,true);
+cv.addEventListener("pointerdown",e=>{if(pinchLock)return;const[mx,my]=evp(e);
   if(area==="farm"){if(toolOpen){toolOpen=false;renderTray();}try{cv.setPointerCapture(e.pointerId);}catch(_){}farmDown(mx,my);}else if(area==="plaza"){try{cv.setPointerCapture(e.pointerId);}catch(_){}plazaDown(mx,my);}});
-cv.addEventListener("pointermove",e=>{const[mx,my]=evp(e);if(area==="farm"&&stroke)farmMove(mx,my);else if(area==="plaza"&&pstroke)plazaMove(mx,my);});
+cv.addEventListener("pointermove",e=>{if(pinchLock)return;const[mx,my]=evp(e);if(area==="farm"&&stroke)farmMove(mx,my);else if(area==="plaza"&&pstroke)plazaMove(mx,my);});
 cv.addEventListener("pointerup",e=>{const[mx,my]=evp(e);if(area==="farm")farmUp(mx,my);else if(area==="plaza")plazaUp(mx,my);});
 cv.addEventListener("pointercancel",()=>{stroke=null;pstroke=null;});
 $("zoom").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const f=b.dataset.z==="1"?1.25:1/1.25;if(area==="plaza")PZ.z=Math.max(1,Math.min(2.5,(PZ.z||1.1)*f));else V.z=Math.max(1,Math.min(3,(V.z||1.4)*f));});
-cv.addEventListener("wheel",e=>{if(area==="pachi")return;e.preventDefault();const f=e.deltaY<0?1.1:1/1.1;if(area==="plaza")PZ.z=Math.max(1,Math.min(2.5,(PZ.z||1.1)*f));else V.z=Math.max(1,Math.min(3,(V.z||1.4)*f));},{passive:false});
+cv.addEventListener("wheel",e=>{if(area==="pachi")return;e.preventDefault();const[mx,my]=evp(e);zoomAt(e.deltaY<0?1.1:1/1.1,mx,my);},{passive:false});
 document.addEventListener("keydown",e=>{if(area==="pachi"&&e.code==="Space"&&!e.repeat&&sheetKind===null){e.preventDefault();if(S.balls>0){firing=true;fireT=0;$("fire")?.classList.add("on");}}});
 document.addEventListener("keyup",e=>{if(e.code==="Space"){firing=false;$("fire")?.classList.remove("on");}});
 
