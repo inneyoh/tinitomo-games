@@ -33,7 +33,12 @@ plaza art until you visit the plaza.
   The **Shops** button (bottom-right) jumps straight to any store.
 - **Store screen**: the shopkeeper's portrait and speech bubble on the left, and a menu
   with **Line-up**, **Shop owner** and **Upgrades** tabs on the right.
-- **Pachinko**: spend loyalty coins on balls and swap balls for prizes.
+- **Pachinko**: spend loyalty coins on balls and swap balls for prizes. The cabinet, parlor and
+  controls are OpenArt art (`assets/pk_*`, prizes `assets/pz_*`).
+
+Villagers walk only on the cobblestone. `assets/walkmask.png` is a 144×81 map of the plaza
+(one pixel per 16px cell, white = walkable) and they path-find around the fountain, bushes,
+lamps and shop lots. A few arrive up the street at a time, do 2–4 things, then go home.
 
 ## Shops and owners
 
