@@ -522,7 +522,7 @@ function appeal(id){const sh=S.shops[id];return 1+sh.decor+(staffed(id)?1:0)+S.p
 const GATE={x:1150,y:1285};
 const VILL=[];let arriveT=1.5;
 function maxVisitors(){const open=Object.keys(S.shops).filter(k=>S.shops[k].open).length;return Math.min(FRIENDS.length,2+Math.ceil(open*.6)+(S.prize.fountain?1:0));}
-function spawnVillager(){const away=FRIENDS.filter(k=>!VILL.some(v=>v.k===k));if(!away.length)return;const k=pick(away);
+function spawnVillager(){const away=FRIENDS.filter(k=>!VILL.some(v=>v.k===k));if(!away.length)return;const story=away.filter(k=>storyReady(k));const k=story.length&&Math.random()<.7?pick(story):pick(away);
   const v={k,x:GATE.x+rnd(-60,60),y:GATE.y,path:[],st:"idle",t:0,face:1,say:null,sayT:0,mood:null,moodT:0,shop:null,want:null,pal:null,tapT:0,todo:2+Math.floor(Math.random()*3),fade:0};VILL.push(v);
   goTo(v,randWalk(),"walk");}
 function goTo(v,p,st){v.path=findPath(v.x,v.y,p.x,p.y);v.st=st;}
@@ -532,13 +532,15 @@ function updateVillagers(dt){
   const open=Object.keys(S.shops).filter(k=>S.shops[k].open);
   arriveT-=dt;if(arriveT<=0&&WG){arriveT=rnd(5,11);if(VILL.length<maxVisitors())spawnVillager();}
   for(let vi=VILL.length-1;vi>=0;vi--){const v=VILL[vi];v.sayT-=dt;if(v.moodT>0)v.moodT-=dt;if(v.tapT>0)v.tapT-=dt;
-    if(v.st==="walk"||v.st==="toshop"||v.st==="leave"){const tg=v.path[0];
-      if(!tg){if(v.st==="toshop"){v.st="wait";v.t=1.4;}else if(v.st==="leave"){VILL.splice(vi,1);continue;}else{v.st="idle";v.t=rnd(2,6);}continue;}
+    if(v.st==="await"){v.t-=dt;if(!storyReady(v.k)){v.evt=false;v.st="idle";v.t=1;v.todo=Math.min(v.todo,1);}else if(v.t<=0){v.evt=false;v.todo=0;v.st="idle";v.t=0;}continue;}
+    if(v.st==="walk"||v.st==="toshop"||v.st==="leave"||v.st==="toevt"){const tg=v.path[0];
+      if(!tg){if(v.st==="toevt"){v.st="await";v.t=150;v.face=v.evtFace||1;continue;}if(v.st==="toshop"){v.st="wait";v.t=1.4;}else if(v.st==="leave"){VILL.splice(vi,1);continue;}else{v.st="idle";v.t=rnd(2,6);}continue;}
       const dx=tg.x-v.x,dy=tg.y-v.y,d=Math.hypot(dx,dy),sp=95;if(Math.abs(dx)>2)v.face=dx>0?1:-1;
       if(d<sp*dt){v.x=tg.x;v.y=tg.y;v.path.shift();}else{v.x+=dx/d*sp*dt;v.y+=dy/d*sp*dt;}}
     else if(v.st==="wait"){v.t-=dt;if(v.t<=0){buy(v);v.moodT=2.6;v.st="idle";v.t=.6;v.shop=null;v.todo--;}}
     else if(v.st==="chat"){v.t-=dt;if(v.t<=0){v.st="idle";v.t=rnd(1,3);v.pal=null;v.todo--;}}
     else{v.t-=dt;if(v.t<=0){
+        if(!v.evt&&storyReady(v.k)){startStoryWalk(v);continue;}
         if(v.todo<=0){goTo(v,{x:GATE.x+rnd(-50,50),y:GATE.y+40},"leave");v.path.push({x:v.path.length?v.path[v.path.length-1].x:GATE.x,y:PZH+80});continue;}
         const tot=open.reduce((a,k)=>a+appeal(k),0);
         if(open.length&&Math.random()<.45+.03*tot){let w=Math.random()*tot,shop=open[0];for(const k of open){w-=appeal(k);if(w<=0){shop=k;break;}}
@@ -563,7 +565,7 @@ function buy(cu){const sh=S.shops[cu.shop];if(!sh){cu.mood=null;return;}const av
   if(!avail.length){cu.mood="upset";return;}
   const n=Math.random()<.35?2:1;let total=0;const m=priceMul(cu.shop);
   for(let j=0;j<n;j++){const a=Object.keys(sh.shelf).filter(k=>sh.shelf[k]>0);if(!a.length)break;const k=pick(a);sh.shelf[k]--;cu.want=k;
-    total+=Math.round(ITEMS[k].v*m);sh.sales++;S.sales++;S.lcProg++;gainXP(1);}
+    total+=Math.round(ITEMS[k].v*m);sh.sales++;S.sales++;S.lcProg++;S.sold=S.sold||{};S.sold[k]=(S.sold[k]||0)+1;sh.sold=sh.sold||{};sh.sold[k]=(sh.sold[k]||0)+1;gainXP(1);}
   sh.reg+=total;cu.mood="happy";
   if(S.lcProg>=8){S.lcProg-=8;const b=PSHOP.find(x=>x.id===cu.shop);const p=toSP(b.x,b.y-200);giveLC(1,p.x,p.y);}
   dirtyUI=true;}
@@ -588,6 +590,8 @@ function drawShop(b,time){const im=spr(b.spr.replace(/^oa_/,""));if(!im||!im.wid
 function drawPlabels(time){for(const L of PLABELS){const s=toSP(L.x,L.y);ctx.font="700 14px Fredoka,sans-serif";ctx.textAlign="center";
     if(L.coinb){const bb=Math.sin(time*4)*3,w=ctx.measureText(L.txt).width+42;bubble(s.x,s.y+bb,w,32);E(ctx,s.x-w/2+16,s.y+bb-16,9,9,"#F2C14E",2);ctx.fillStyle=OL;ctx.fillText(L.txt,s.x+9,s.y+bb-10);}
     else if(L.shelf){const tw=L.txt?ctx.measureText(L.txt).width+14:0,w=L.shelf.length*28+tw+14;bubble(s.x,s.y,w,34);L.shelf.forEach((k,j)=>drawIcon(ctx,k,s.x-w/2+20+j*28,s.y-17,24));if(L.txt){ctx.fillStyle=OL;ctx.fillText(L.txt,s.x+w/2-14,s.y-11);}}
+    else if(L.evt){const bb=Math.abs(Math.sin(time*4))*6,r=22+Math.sin(time*6)*1.5;ctx.save();ctx.shadowColor="#F7B6C4";ctx.shadowBlur=16;bubble(s.x,s.y-bb,52,44);ctx.restore();bubble(s.x,s.y-bb,52,44);
+      ctx.fillStyle=L.kind==="report"?"#4E9A3A":"#EE5F82";ctx.font="700 26px Fredoka,sans-serif";ctx.fillText(L.kind==="report"?"✓":"!",s.x,s.y-bb-13);ctx.font="700 14px Fredoka,sans-serif";}
     else if(L.say){ctx.font="600 13px Fredoka,sans-serif";const w=ctx.measureText(L.txt).width+20;bubble(s.x,s.y,w,26);ctx.fillStyle=OL;ctx.fillText(L.txt,s.x,s.y-8);}
     else{const w=ctx.measureText(L.txt).width+20;ctx.beginPath();ctx.roundRect(s.x-w/2,s.y-13,w,26,13);P(ctx,L.bg||"#FFF6E6",2.5);ctx.fillStyle=L.col||OL;ctx.fillText(L.txt,s.x,s.y+5);}}
   ctx.textAlign="left";PLABELS.length=0;}
@@ -599,10 +603,12 @@ function drawPlaza(time){plazaLayout();
   const items=[];
   for(const b of PSHOP)items.push({d:b.y,f:()=>drawShop(b,time)});
   for(const v of VILL)items.push({d:v.y,f:()=>{
-    const im=IM["cu_"+v.k+(v.mood==="upset"&&v.moodT>0?"_upset":"")];if(!im||!im.complete)return;const h=120,w=h*im.width/im.height;const moving=v.st==="walk"||v.st==="toshop";const bob=moving?Math.abs(Math.sin(time*9+v.x*.01))*6:v.st==="chat"?Math.abs(Math.sin(time*5+v.x))*3:0;
+    const im=IM["cu_"+v.k+(v.mood==="upset"&&v.moodT>0?"_upset":"")];if(!im||!im.complete)return;const h=120,w=h*im.width/im.height;const moving=v.st==="walk"||v.st==="toshop"||v.st==="toevt"||v.st==="leave";const bob=moving?Math.abs(Math.sin(time*9+v.x*.01))*6:v.st==="chat"?Math.abs(Math.sin(time*5+v.x))*3:0;
     ctx.fillStyle="rgba(60,50,30,.2)";ctx.beginPath();ctx.ellipse(v.x,v.y,w*.35,9,0,0,7);ctx.fill();
     ctx.save();ctx.translate(v.x,v.y-bob);if(v.face<0)ctx.scale(-1,1);ctx.drawImage(im,-w/2,-h,w,h);ctx.restore();
-    if(v.sayT>0&&v.say)plabel(v.x,v.y-h-8,v.say,{say:1});
+    if(v.st==="await"){const c=v.with;if(c&&keeperOf(v.evtShop)!==c)drawTurtle(ctx,c,"three",v.x-v.face*70,v.y+4,104,v.face>0,Math.abs(Math.sin(time*3))*2);
+      plabel(v.x,v.y-h-14,"",{evt:1,kind:storyReady(v.k)});}
+    else if(v.sayT>0&&v.say)plabel(v.x,v.y-h-8,v.say,{say:1});
     else if(v.moodT>0){if(v.mood==="happy"&&v.want)plabel(v.x,v.y-h-6,"",{shelf:[v.want]});else if(v.mood==="upset")plabel(v.x,v.y-h-6,"…",{col:"#C2553D"});}
     if(v.tapT>0){ctx.globalAlpha=Math.min(1,v.tapT);const im3=IM.heart;if(im3&&im3.complete)ctx.drawImage(im3,v.x-14,v.y-h-60-(1-v.tapT)*30,28,28);ctx.globalAlpha=1;}}});
   items.sort((a,b)=>a.d-b.d).forEach(o=>o.f());
@@ -612,12 +618,62 @@ function plazaDown(mx,my){plazaLayout();pstroke={x0:mx,y0:my,cx0:PZ.cx,cy0:PZ.cy
 function plazaMove(mx,my){if(!pstroke)return;if(Math.hypot(mx-pstroke.x0,my-pstroke.y0)>10)pstroke.pan=true;if(pstroke.pan){PZ.cx=pstroke.cx0-(mx-pstroke.x0)/PZ.k;PZ.cy=pstroke.cy0-(my-pstroke.y0)/PZ.k;}}
 function plazaUp(mx,my){const s=pstroke;pstroke=null;if(!s||s.pan)return;plazaTap(mx,my);}
 function plazaTap(mx,my){const w=toWP(mx,my);
-  for(const v of [...VILL].sort((a,b)=>b.y-a.y)){if(Math.abs(w.x-v.x)<42&&w.y<v.y+6&&w.y>v.y-125){v.say=pick(GREET[v.k]||["Hi!"]);v.sayT=2.4;v.tapT=1.2;if(v.st==="idle"||v.st==="walk"){v.st="idle";v.t=2.5;}
-      if(SPECIAL_SHOP[v.k]){const p=partnerOf(v.k);if(!p.won&&Date.now()>(p.tapNext||0)){p.score=Math.min(100,p.score+1);p.tapNext=Date.now()+20000;float(mx,my-40,`+1 ♥ ${FNAME[v.k]}`,"#F7B6C4");save();}}return;}}
+  for(const v of [...VILL].sort((a,b)=>b.y-a.y)){if(v.st==="await"&&Math.abs(w.x-v.x)<46&&w.y<v.y+6&&w.y>v.y-200){playStory(v);return;}
+    if(Math.abs(w.x-v.x)<42&&w.y<v.y+6&&w.y>v.y-125){v.say=pick(GREET[v.k]||["Hi!"]);v.sayT=2.4;v.tapT=1.2;if(v.st==="idle"||v.st==="walk"){v.st="idle";v.t=2.5;}
+      return;}}
   for(const b of [...PSHOP].sort((a,c)=>c.y-a.y)){const im=spr(b.spr.replace(/^oa_/,""));if(!im||!im.width)continue;const h=b.w*im.height/im.width;
     if(w.x>b.x-b.w*.45&&w.x<b.x+b.w*.45&&w.y>b.y-h*.95&&w.y<b.y+30){openStore(b.id);return;}}}
 function focusShop(id){const b=PSHOP.find(x=>x.id===id);if(b){PZ.cx=b.x;PZ.cy=b.y-150;}}
 
+// ================= STORY EVENTS (data in js/events.js) =================
+function storyStep(k){const p=partnerOf(k),L=(typeof STORY!=="undefined"&&STORY[k])||[];return L[p.step||0]||null;}
+function missionText(m){const n=ITEMS[m.item]?ITEMS[m.item].n:"";if(m.type==="sell")return`Sell ${m.count} ${n}${m.shop?` at the ${SHOPS[m.shop].n}`:""}`;if(m.type==="give")return`Bring ${m.count} ${n}`;return`Open the ${SHOPS[m.shop].n}`;}
+function soldCount(m){if(m.shop){const sh=S.shops[m.shop];return(sh&&sh.sold&&sh.sold[m.item])||0;}return(S.sold&&S.sold[m.item])||0;}
+function missionProg(k){const p=partnerOf(k),st=storyStep(k);if(!p.m||!st||!st.mission)return null;const m=st.mission;
+  if(m.type==="sell")return{have:Math.min(m.count,soldCount(m)-p.m.base),need:m.count};
+  if(m.type==="give")return{have:Math.min(m.count,S.inv[m.item]||0),need:m.count};
+  return{have:S.shops[m.shop]&&S.shops[m.shop].open?1:0,need:1};}
+// "talk" = a new event is ready, "report" = mission done and ready to hand in, null = nothing to show
+function storyReady(k){const p=partnerOf(k);if(p.won||p.score>=100)return null;const st=storyStep(k);if(!st)return null;
+  if(p.m){const pr=missionProg(k);return pr&&pr.have>=pr.need?"report":null;}
+  return Date.now()>=(p.next||0)?"talk":null;}
+function startStoryWalk(v){const home=SPECIAL_SHOP[v.k];const turtle=w=>!S.exp[w]&&S.staff[w];
+  let shop=home&&S.shops[home].open&&(onShift("momo",home)||onShift("soso",home))?home:null;
+  if(!shop)shop=["momo","soso"].map(turtle).find(Boolean)||null;
+  if(!shop)shop=home&&S.shops[home].open?home:"produce";
+  v.evt=true;v.evtShop=shop;v.with=onShift("momo",shop)?"momo":onShift("soso",shop)?"soso":pick(["momo","soso"]);
+  const b=PSHOP.find(x=>x.id===shop);v.evtFace=b.flip?-1:1;goTo(v,nearestWalk(b.door.x+(b.flip?60:-60),b.door.y+50),"toevt");}
+function storyStatusHTML(k){const p=partnerOf(k),st=storyStep(k);if(!st)return`<p class="mini">No more story yet.</p>`;
+  if(p.m){const pr=missionProg(k),m=st.mission;return`<div class="mission"><b>📜 ${missionText(m)}</b><div class="sb"><i style="width:${100*pr.have/pr.need}%"></i></div><small>${m.type==="open"?(pr.have?"Done! ":"")+"":`${pr.have}/${pr.need}`}${pr.have>=pr.need?` · Find ${FNAME[k]} in the plaza to report!`:""}</small></div>`;}
+  const wait=Math.max(0,Math.ceil(((p.next||0)-Date.now())/1000));
+  return`<p class="mini">${wait?`${FNAME[k]} will visit again in ${wait}s.`:`Look for ${FNAME[k]} in the plaza and tap the <b style="color:#EE5F82">!</b> bubble.`}</p>`;}
+let EV=null;
+function fillName(t){return t.replace(/\{me\}/g,FNAME[EV.with]);}
+function playStory(v){const k=v.k,mode=storyReady(k),st=storyStep(k),p=partnerOf(k);if(!mode||!st)return;
+  const q=[];
+  if(mode==="talk"){st.talk.forEach(l=>q.push({line:l}));if(st.choices)q.push({choices:st.choices});if(st.mission)q.push({mission:st.mission});else q.push({reward:st.pts});}
+  else{const m=st.mission;if(m.type==="give")q.push({give:m});(st.done||[[k,"Thank you!"]]).forEach(l=>q.push({line:l}));q.push({reward:st.pts});}
+  EV={k,v,with:v.with||"momo",q,i:0,bonus:0};$("evt").hidden=false;$("evL").innerHTML=portrait(k);$("evR").innerHTML=portrait(EV.with);evStep();}
+function evStep(){const it=EV.q[EV.i];if(!it){endStory();return;}const p=partnerOf(EV.k);$("evCh").innerHTML="";$("evNext").hidden=false;
+  const say=(who,text)=>{const w=who==="me"?EV.with:who;$("evName").textContent=FNAME[w]||w;$("evText").textContent=fillName(text);
+    $("evL").classList.toggle("talking",w===EV.k);$("evR").classList.toggle("talking",w!==EV.k);$("evBox").classList.remove("pop");void $("evBox").offsetWidth;$("evBox").classList.add("pop");};
+  if(it.line)say(it.line[0],it.line[1]);
+  else if(it.choices){$("evNext").hidden=true;$("evName").textContent=FNAME[EV.with];$("evText").textContent="…";$("evL").classList.remove("talking");$("evR").classList.add("talking");
+    $("evCh").innerHTML=it.choices.map((c,i)=>`<button class="choice" data-evc="${i}">${fillName(c.text)}</button>`).join("");}
+  else if(it.reply)say(EV.k,it.reply);
+  else if(it.give){const m=it.give;take({[m.item]:m.count});say("me",`Here you go! ${m.count} ${ITEMS[m.item].n}.`);}
+  else if(it.mission){const m=it.mission;p.m={base:m.type==="sell"?soldCount(m):0,t:Date.now()};
+    $("evName").textContent="New mission!";$("evText").innerHTML=`<span class="evm">${ITEMS[m.item]?img(m.item):""}<b>${missionText(m)}</b></span>`;$("evL").classList.remove("talking");$("evR").classList.remove("talking");}
+  else if(it.reward!=null){const st=storyStep(EV.k),pts=it.reward+EV.bonus;p.score=Math.min(100,p.score+pts);p.step=(p.step||0)+1;p.m=null;const nx=storyStep(EV.k);p.next=Date.now()+1000*((nx&&nx.wait)||20);
+    $("evName").textContent="";$("evText").innerHTML=`<span class="evr">💗 +${pts} partnership with ${FNAME[EV.k]}<i style="--w:${p.score}%"></i>${p.score>=100?`<b>${FNAME[EV.k]} can now run the ${SHOPS[SPECIAL_SHOP[EV.k]].n}! Pick them in its Shop owner tab.</b>`:""}</span>`;
+    $("evL").classList.add("talking");$("evR").classList.remove("talking");giveLC(1);}
+  save();dirtyUI=true;}
+function endStory(){const v=EV.v;$("evt").hidden=true;v.evt=false;v.st="idle";v.t=1.5;v.todo=Math.max(1,v.todo);v.say="💕";v.sayT=2;v.tapT=1.2;EV=null;save();}
+document.getElementById("evt").addEventListener("click",e=>{if(!EV)return;const c=e.target.closest("[data-evc]");
+  if(c){const ch=EV.q[EV.i].choices[+c.dataset.evc];EV.bonus+=ch.bonus||0;EV.q.splice(EV.i+1,0,{reply:ch.reply});EV.i++;evStep();return;}
+  if(EV.q[EV.i]&&EV.q[EV.i].choices)return;EV.i++;evStep();});
+
+if(/[?&]debug/.test(location.search))window.__moso={VILL,toSP,get S(){return S;},storyReady,playStory};
 // ================= STORE SCREEN =================
 let storeId=null,storeTab="lineup",chatEv=null;
 const SPECIAL_SHOP={};for(const id in SHOPS)if(SHOPS[id].special)SPECIAL_SHOP[SHOPS[id].special]=id;
@@ -655,9 +711,8 @@ function renderStore(){if(!storeId)return;const id=storeId,D=SHOPS[id],sh=S.shop
     if(sp){const p=partnerOf(sp),hearts=Math.floor(p.score/20);
       h+=`<div class="special ${p.won?"won":""}"><div class="sphead">${portrait(sp)}<div><b>${FNAME[sp]}</b><span class="hearts">${"♥".repeat(hearts)}${"♡".repeat(5-hearts)}</span><div class="sb"><i style="width:${p.score}%"></i></div><small>Partnership ${p.score}/100</small></div></div>`;
       if(p.won){h+=ownerOf(id)?`<p class="mini">${FNAME[sp]} runs the shop ✓ Auto-restock, faster crafting and +15% prices.</p><button class="ktog" data-staff="none">Let Momo or Soso run it</button>`:`<button class="gobtn" data-owner="${sp}">Ask ${FNAME[sp]} to run the shop</button>`;}
-      else if(chatEv&&chatEv.k===sp){h+=`<div class="talk"><p>“${chatEv.q}”</p>${chatEv.a.map((a,i)=>`<button class="choice" data-choice="${i}">${a[0]}</button>`).join("")}</div>`;}
       else if(p.score>=100){h+=`<button class="gobtn pink" data-win="${sp}">${FNAME[sp]} wants to join! 💕</button>`;}
-      else{const wait=Math.max(0,Math.ceil(((p.next||0)-Date.now())/1000));h+=`<button class="gobtn" data-chat="${sp}" ${wait?"disabled":""}>${wait?`${FNAME[sp]} is busy · ${wait}s`:`Chat with ${FNAME[sp]}`}</button><p class="mini">Special events & missions with ${FNAME[sp]} are coming soon. For now, chatting and saying hi in the plaza build partnership.</p>`;}
+      else h+=storyStatusHTML(sp);
       h+=`</div>`;}
     else h+=`<p class="mini">Only Momo or Soso can run the ${D.n}.</p>`;}
   else{const sc=Math.round(90*Math.pow(1.7,sh.shelfLv-1)),kc=250*sh.kitchenLv,dc=150*(sh.decor+1);
@@ -746,10 +801,9 @@ function updatePachi(dt){
 const CAB={w:497,h:900,wx:60,wy:90,ww:376,wh:548};
 function pkImg(k,x,y,w,ax,ay){const im=IM[k];if(!im||!im.complete||!im.width)return false;const h=w*im.height/im.width;ctx.drawImage(im,x-w*(ax??.5),y-h*(ay??.5),w,h);return true;}
 function drawPachi(time){
-  const room=IM.pk_room;
-  if(room&&room.complete&&room.width){const sc=Math.max(CW/room.width,CH/room.height);ctx.drawImage(room,(CW-room.width*sc)/2,(CH-room.height*sc)/2,room.width*sc,room.height*sc);}
-  else{ctx.fillStyle="#F6DCC2";ctx.fillRect(0,0,CW,CH);}
-  const avH=CH-64-(CW<520?150:118),cs=Math.min(avH/CAB.h,(CW-16)/CAB.w);const cx0=(CW-CAB.w*cs)/2,cy0=60+(avH-CAB.h*cs)/2;
+  const bgG=ctx.createLinearGradient(0,0,0,CH);bgG.addColorStop(0,"#FBE3E8");bgG.addColorStop(1,"#F3C9D2");ctx.fillStyle=bgG;ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle="rgba(255,255,255,.35)";for(let y=0;y<CH;y+=60)for(let x=(y/60%2)*30;x<CW;x+=60){starP(ctx,x,y,6,5);ctx.fill();}
+  const trayH=($("tray").offsetHeight||110)+12,top=54,avH=CH-top-trayH+40,cs=Math.min(avH/690,(CW-12)/CAB.w);const cx0=(CW-CAB.w*cs)/2,cy0=top;
   // soft spotlight + cabinet
   const gr=ctx.createRadialGradient(CW/2,cy0+CAB.h*cs*.5,10,CW/2,cy0+CAB.h*cs*.5,CAB.h*cs*.75);gr.addColorStop(0,"rgba(255,240,200,.35)");gr.addColorStop(1,"rgba(255,240,200,0)");ctx.fillStyle=gr;ctx.fillRect(0,0,CW,CH);
   ctx.fillStyle="rgba(60,30,20,.25)";ctx.beginPath();ctx.ellipse(CW/2,cy0+CAB.h*cs-4,CAB.w*cs*.48,14*cs+4,0,0,7);ctx.fill();
@@ -785,9 +839,9 @@ function drawPachi(time){
   for(const b of balls)if(!pkImg("pk_ball",b.x,b.y,11)){ctx.beginPath();ctx.arc(b.x,b.y,5,0,7);ctx.fillStyle="#C9CFD6";ctx.fill();}
   ctx.restore();
   // Momo & Soso cheering beside the machine
-  const dance=fever>0?Math.abs(Math.sin(time*8))*12:Math.abs(Math.sin(time*2))*2,th=Math.min(150,CAB.h*cs*.26),side=CAB.w*cs*.5+th*.35;
-  if(CW/2-side-th*.35>0){drawTurtle(ctx,"momo",fever>0&&Math.floor(time*3)%2?"three":"front",CW/2-side,cy0+CAB.h*cs,th,false,dance);
-    drawTurtle(ctx,"soso",fever>0&&Math.floor(time*3+1)%2?"three":"front",CW/2+side,cy0+CAB.h*cs,th,true,dance);}
+  const dance=fever>0?Math.abs(Math.sin(time*8))*12:Math.abs(Math.sin(time*2))*2,th=Math.min(190,CAB.h*cs*.24),side=CAB.w*cs*.5+th*.5,fy=cy0+640*cs;
+  if(CW>700&&CW/2-side-th*.45>0){drawTurtle(ctx,"momo",fever>0&&Math.floor(time*3)%2?"three":"front",CW/2-side,fy,th,false,dance);
+    drawTurtle(ctx,"soso",fever>0&&Math.floor(time*3+1)%2?"three":"front",CW/2+side,fy,th,true,dance);}
   if(feverMsg>0){ctx.save();ctx.globalAlpha=Math.min(1,feverMsg);ctx.font=`700 ${Math.round(Math.min(56,CW/9))}px Fredoka,sans-serif`;ctx.textAlign="center";ctx.lineWidth=8;ctx.strokeStyle=OL;const t=feverSuper?"SUPER FEVER!":"FEVER!";ctx.strokeText(t,CW/2,cy0+CAB.h*cs*.22);ctx.fillStyle="#FFE08A";ctx.fillText(t,CW/2,cy0+CAB.h*cs*.22);ctx.restore();}}
 
 // ================= SHEETS =================

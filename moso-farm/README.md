@@ -17,6 +17,7 @@ Then open http://localhost:8000.
 ```
 index.html        page shell (HUD, tabs, store screen markup)
 css/style.css     all styles
+js/events.js      story events and missions for special villagers (edit this!)
 js/game.js        the whole game: data, farm, plaza, store screen, pachinko, save/load
 assets/*.webp     every image (art is never embedded in code)
 ```
@@ -52,10 +53,19 @@ lamps and shop lots. A few arrive up the street at a time, do 2–4 things, then
 | Cafe | Momo, Soso, or **Kew** once unlocked |
 | Popcorn Shop | Momo, Soso, or **Rang** once unlocked |
 
-Special owners are unlocked through a **partnership score** (0–100). For now it rises by
-chatting in the Shop owner tab (`PEV` in `js/game.js`) and by saying hi to the villager in the
-plaza. The real events, conversations and missions are still to be written: add them where
-`PEV` is defined and award points with `partnerOf(name).score`.
+Special owners are unlocked through a **partnership score** (0–100) earned from story events:
+
+1. The villager walks into the plaza.
+2. They go to their shop, or any shop Momo or Soso are working at, and stand with Momo or Soso.
+3. A pink **!** bubble appears over their head. Tap it to play the event: dialogue, choices, and
+   sometimes a **mission** (sell items, bring items from the barn, or open a shop).
+4. When a mission is done the villager comes back with a green **✓** bubble to report it.
+5. At 100 partnership they can be picked as shopkeeper in that shop's **Shop owner** tab,
+   which also shows the current mission and its progress.
+
+All the stories live in **`js/events.js`**, with instructions at the top of the file. The ones
+there now are samples: replace the text, choices, points and missions with the real story.
+Open the game with `?debug` in the URL to get `window.__moso` for testing.
 
 Nono has no art yet and shows a placeholder portrait. Add `assets/pt_nono.webp` (portrait)
 and `assets/cu_nono.webp` (walking sprite), add both names to `ASSET_KEYS` at the top of
