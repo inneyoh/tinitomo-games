@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Momo &amp; Soso's Farm Town</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv" aria-label="Game area"></canvas>
+    <div id="hud">
+      <div class="pill" title="Coins"><span class="ic coin">¢</span><span id="coins">0</span></div>
+      <div class="pill" title="Loyalty coins, spend them at the pachinko machine"><span class="ic lc">♥</span><span id="lc">0</span></div>
+      <div class="pill" title="Town level"><span class="ic lv" id="lvl">1</span><span class="xp"><i id="xp"></i></span></div>
+    </div>
+    <div id="tray"></div>
+    <div id="zoom"><button data-z="1" aria-label="Zoom in">+</button><button data-z="-1" aria-label="Zoom out">−</button></div>
+  </div>
+  <nav role="tablist">
+    <button role="tab" id="tab-farm" aria-selected="true">Farm</button>
+    <button role="tab" id="tab-plaza" aria-selected="false">Plaza</button>
+    <button role="tab" id="tab-pachi" aria-selected="false">Pachinko</button>
+  </nav>
+</div>
+<div id="veil" hidden><div id="sheet" role="dialog" aria-modal="true" aria-labelledby="stitle"><header><h2 id="stitle"></h2><button class="x" id="sclose" aria-label="Close">×</button></header><div id="sbody"></div></div></div>
+<div id="store" hidden>
+  <div class="st-wrap">
+    <div class="st-left"><div class="st-bubble" id="stBubble"></div><div class="st-keeper" id="stKeeper"></div></div>
+    <div class="st-panel">
+      <header><h2 id="stName"></h2><button class="x" id="stClose" aria-label="Close">×</button></header>
+      <div class="st-tabs" id="stTabs"></div>
+      <div class="st-body" id="stBody"></div>
+    </div>
+  </div>
+</div>
+<div id="toast" style="opacity:0" role="status" aria-live="polite"></div>
+<script src="js/game.js"></script>
+</body>
+</html>
