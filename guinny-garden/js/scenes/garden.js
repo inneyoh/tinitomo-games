@@ -40,8 +40,8 @@ export function mount(el, api) {
     <div class="canvas g-canvas">
       <img class="layer g-lawn" alt="" draggable="false">
       <img class="layer g-lawn layer-ext" alt="" draggable="false">
-      <img class="g-pot big" src="${IMG}pot2.webp" alt="" draggable="false">
-      <img class="g-pot small" src="${IMG}pot2.webp" alt="" draggable="false">
+      <img class="g-pot big" src="${IMG}pot3.webp" alt="" draggable="false">
+      <img class="g-pot small" src="${IMG}pot3.webp" alt="" draggable="false">
       ${PLOTS.map((p, i) => (p.type === 'pot' ? plotMarkup(i).replace('class="plot pot', `class="plot pot ${p.pot}`) : '')).join('')}
       <img class="g-bench" src="${IMG}bench2.webp" alt="" draggable="false">
       <img class="g-trowel" src="${IMG}trowel.webp" alt="" draggable="false">
@@ -73,7 +73,7 @@ function layout() {
   const vw = view.clientWidth, vh = view.clientHeight;
   if (!vw || !vh) return;
   const o = vw >= vh ? 'landscape' : 'portrait';
-  if (o !== orient) { orient = o; canvas.dataset.o = o; $$('.g-lawn', canvas).forEach((img) => { img.src = `${IMG}lawn2-${o}.webp`; }); }
+  if (o !== orient) { orient = o; canvas.dataset.o = o; $$('.g-lawn', canvas).forEach((img) => { img.src = `${IMG}lawn3-${o}.webp`; }); }
   // fence at the top edge; any spare height below continues as lawn
   fitCanvas(view, canvas, ...SIZE[o], KEEP[o], 0);
 }

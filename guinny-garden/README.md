@@ -118,7 +118,9 @@ To add an app, add `{ id, name, icon, render(body, ctx) }` to the `apps` list in
 ### OpenArt art (Nov 2026)
 
 Made with OpenArt (folder "Guinny's Garden" in the OpenArt Personal Project), using the urn desk, lawn and planter as style references:
-- **Garden:** `assets/img/garden/lawn2-{portrait,landscape}.webp` (winding path), `planter2.webp` (angled four-patch planter), `pot2.webp`, `bench2.webp`. The layout is in the "Garden v2" section at the end of `css/style.css`. Planters sit along the path, and ones lower on screen draw in front.
+- **Garden:** `assets/img/garden/lawn3-{portrait,landscape}.webp` (open lawn, no path), `planter2.webp` (angled four-patch planter), `pot3.webp` (terracotta pot on a grass tuft), `bench2.webp`. The layout is in the "Garden v3" section at the end of `css/style.css`: staggered rows of planters, with the pots grouped beside the potting bench. Planters lower on screen draw in front.
+- **Plants:** `assets/img/plants/` holds `seedling`, `young` and a full-grown `plant-<flower>` for every flower. `plotArt()` in `js/art.js` picks the image for each growth stage.
 - **Workbenches:** `assets/img/bench/` holds the desks (`perfume-*`, `tea-*`, matching the urn desk) and props. `js/minigames/bench.js` runs both as Momo-style scrolling benches, with steps in real-life order (each opens when the previous one is done):
   - Perfume: Weigh petals → Distill (boil in the alchemy flask) → Separate (water separator) → Blend & mature → Bottle
   - Loose-leaf tea: Weigh leaves (scoop from canister to scale) → Wither → Roll → Oxidise → Pan-fire dry → Pack
+  - Each step's instruction is a paper note taped to the desk (`.wb-note`), not a separate header; the urn hint uses the same note style.

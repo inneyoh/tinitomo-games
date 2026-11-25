@@ -190,8 +190,13 @@ export const dropArt = () => svg(`<path d="M50 10 C64 32 78 46 78 62 C78 80 64 9
   <path d="M36 62 C36 70 42 76 48 76" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`);
 
 // Plot art for each growth stage
+// Growth stages use the OpenArt plant art (assets/img/plants): 1 seedling, 2 young plant, 3 the grown plant
+const PLANT_IMG = (f, h = 100) => `<img class="plant-img" style="height:${h}%" src="assets/img/plants/${f}.webp" alt="" draggable="false">`;
 export function plotArt(key, stage) {
   if (!key) return '';
+  if (stage === 1) return PLANT_IMG('seedling', 42);
+  if (stage === 2) return PLANT_IMG('young', 70);
+  if (stage >= 3) return PLANT_IMG(`plant-${key}`);
   if (stage === 0) return svg(`<circle cx="40" cy="70" r="3" fill="${OL}"/><circle cx="55" cy="66" r="3" fill="${OL}"/><circle cx="62" cy="74" r="3" fill="${OL}"/>`);
   if (stage === 1) return svg(`<path d="M50 84 L50 64" ${S}/><path d="M50 66 C40 54 30 60 32 66 C40 70 46 68 50 66Z M50 66 C60 54 70 60 68 66 C60 70 54 68 50 66Z" fill="#A9C79A" ${S} stroke-width="2.5"/>`);
   if (stage === 2) return svg(`<path d="M50 86 L50 46" ${S}/><path d="M50 70 C38 60 28 66 30 72 C40 76 46 74 50 70Z M50 62 C62 52 72 58 70 64 C60 68 54 66 50 62Z" fill="#A9C79A" ${S} stroke-width="2.5"/><ellipse cx="50" cy="42" rx="7" ry="10" fill="${FLOWERS[key].petal}" ${S} stroke-width="2.5"/>`);

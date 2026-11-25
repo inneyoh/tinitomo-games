@@ -1395,3 +1395,55 @@ body.rb-open .mg-hint { opacity: 0; }
 }
 /* the bench must never scroll on its own (button focus / scroll-into-view would shift the stations) */
 .wb-view, .pb-view, .pb-station, .mg-stage { overflow: clip; }
+
+/* instructions live on the background: a paper note on the desk (benches) and over the art (urn) */
+.mg-wb .mg-hint { display: none; }
+.wb-note { position: relative; z-index: 2; max-width: min(92%, 420px); margin: 0 auto 6px; padding: 7px 14px 8px; text-align: center;
+  font-weight: 800; font-size: .86rem; line-height: 1.3; color: var(--ink); background: #FFF8E6;
+  border-radius: 4px; box-shadow: 0 3px 0 rgba(107, 74, 54, .18), 0 6px 10px rgba(94, 69, 53, .12); transform: rotate(-1deg); }
+.wb-note::before { content: ""; position: absolute; left: 50%; top: -6px; width: 34px; height: 12px; margin-left: -17px; background: rgba(175, 195, 155, .75); transform: rotate(2deg); }
+.wb-note[hidden] { display: none; }
+.mg-urn .mg-hint { background: #FFF8E6; border-radius: 4px; transform: translateX(-50%) rotate(-1deg); box-shadow: 0 3px 0 rgba(107, 74, 54, .18), 0 6px 10px rgba(94, 69, 53, .12); font-weight: 800; }
+@media (orientation: landscape) { .mg-urn .mg-hint { transform: translateX(-50%) rotate(-1deg); } .wb-note { font-size: .8rem; padding: 5px 12px 6px; } }
+
+/* Garden v3: no path; staggered planter rows, pots grouped beside the potting bench */
+[data-o="portrait"] .planter { width: 27%; height: 10.78%; }
+[data-o="portrait"] .planter[data-p="0"] { left: 38%; top: 16.5%; z-index: 21; }
+[data-o="portrait"] .planter[data-p="1"] { left: 68%; top: 16.5%; z-index: 21; }
+[data-o="portrait"] .planter[data-p="2"] { left: 8%; top: 29.5%; z-index: 34; }
+[data-o="portrait"] .planter[data-p="3"] { left: 42%; top: 29.5%; z-index: 34; }
+[data-o="portrait"] .planter[data-p="4"] { left: 28%; top: 42.5%; z-index: 47; }
+[data-o="portrait"] .planter[data-p="5"] { left: 62%; top: 42.5%; z-index: 47; }
+[data-o="portrait"] .planter[data-p="6"] { left: 4%; top: 55.5%; z-index: 60; }
+[data-o="portrait"] .planter[data-p="7"] { left: 38%; top: 55.5%; z-index: 60; }
+[data-o="portrait"] .g-pot.big { left: 40%; top: 79%; width: 15%; z-index: 83; }
+[data-o="portrait"] .plot.pot.big { left: 40%; top: 79%; width: 15%; height: 6.56%; z-index: 84; }
+[data-o="portrait"] .g-pot.small { left: 50%; top: 86.5%; width: 12%; z-index: 90; }
+[data-o="portrait"] .plot.pot.small { left: 50%; top: 86.5%; width: 12%; height: 5.25%; z-index: 91; }
+[data-o="portrait"] .g-bench { left: 60%; top: 73%; width: 37%; z-index: 76; }
+[data-o="portrait"] .tool-can { left: 61.48%; top: 69.29%; width: 12.58%; z-index: 77; }
+[data-o="portrait"] .g-trowel { left: 74.80%; top: 71.45%; width: 6.66%; z-index: 77; }
+[data-o="portrait"] .tool-ipad { left: 82.94%; top: 68.67%; width: 10.36%; z-index: 77; }
+[data-o="landscape"] .planter { width: 12.5%; height: 15.76%; }
+[data-o="landscape"] .planter[data-p="0"] { left: 25%; top: 21%; z-index: 26; }
+[data-o="landscape"] .planter[data-p="1"] { left: 39%; top: 21%; z-index: 26; }
+[data-o="landscape"] .planter[data-p="2"] { left: 53%; top: 21%; z-index: 26; }
+[data-o="landscape"] .planter[data-p="3"] { left: 67%; top: 21%; z-index: 26; }
+[data-o="landscape"] .planter[data-p="4"] { left: 18%; top: 43%; z-index: 48; }
+[data-o="landscape"] .planter[data-p="5"] { left: 32%; top: 43%; z-index: 48; }
+[data-o="landscape"] .planter[data-p="6"] { left: 46%; top: 43%; z-index: 48; }
+[data-o="landscape"] .planter[data-p="7"] { left: 60%; top: 43%; z-index: 48; }
+[data-o="landscape"] .g-pot.big { left: 62%; top: 71%; width: 8%; z-index: 75; }
+[data-o="landscape"] .plot.pot.big { left: 62%; top: 71%; width: 8%; height: 11.04%; z-index: 76; }
+[data-o="landscape"] .g-pot.small { left: 68.5%; top: 80%; width: 6.5%; z-index: 84; }
+[data-o="landscape"] .plot.pot.small { left: 68.5%; top: 80%; width: 6.5%; height: 8.97%; z-index: 85; }
+[data-o="landscape"] .g-bench { left: 75%; top: 64%; width: 20%; z-index: 67; }
+[data-o="landscape"] .tool-can { left: 75.80%; top: 57.67%; width: 6.80%; z-index: 68; }
+[data-o="landscape"] .g-trowel { left: 83.00%; top: 61.36%; width: 3.60%; z-index: 68; }
+[data-o="landscape"] .tool-ipad { left: 87.40%; top: 56.61%; width: 5.60%; z-index: 68; }
+/* plant art: bottom-anchored, keeps its shape */
+.g-canvas .plant img.plant-img { width: auto; aspect-ratio: auto; max-width: 100%; object-fit: contain; }
+.g-canvas .plant { align-items: flex-end; }
+.plot.pot .mound { left: 24%; top: 2%; width: 46%; }
+.plot.pot .plant { bottom: 78%; height: 120%; left: -30%; right: -30%; }
+

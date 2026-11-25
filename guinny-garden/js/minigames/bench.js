@@ -296,6 +296,7 @@ export function workbench(g, recipe, kind) {
         <div class="pb-strip">${STATIONS.map((s, i) => `
           <section class="pb-station wb-station" data-i="${i}">
             <div class="pb-plaque">STEP ${i + 1}/${N} · ${s.title}</div>
+            <div class="wb-note" role="status"></div>
             <div class="pb-work wb-work"></div>
             <div class="wb-locked">Finish step ${i} first</div>
             <div class="pb-done">✓ Done</div>
@@ -310,7 +311,14 @@ export function workbench(g, recipe, kind) {
       s.querySelector('i').textContent = done[n] ? '✓' : n + 1;
     });
     const sub = (i) => ({ el: g.el, get alive() { return g.alive; }, stage: $('.wb-work', stations[i]),
-      hint: (t) => { hints[i] = t; if (i === at) g.hint(t); } });
+      hint: (t) => { hints[i] = t; note(i); } });
+    // instructions are written on a little paper note on the desk, under each station's sign
+    const note = (i) => {
+      const el = $('.wb-note', stations[i]);
+      const t = done[i] ? (i < N - 1 ? 'Done! Swipe or tap › for the next step.' : (kind === 'tea' ? 'The tea is ready ✿' : 'The perfume is ready ✿'))
+        : started[i] ? hints[i] : `Finish step ${i} first.`;
+      el.textContent = t; el.hidden = !t;
+    };
     const start = (i) => {
       if (started[i] || i >= N) return;
       started[i] = true; stations[i].classList.add('open');
@@ -326,7 +334,7 @@ export function workbench(g, recipe, kind) {
       $('.pb-next', view).classList.toggle('pulse', done[at] && at < N - 1);
       $$('.pb-dots i', view).forEach((d, i) => { d.className = `${i === at ? 'on' : ''} ${done[i] ? 'ok' : ''}`; });
       markSteps();
-      g.hint(done[at] ? (at < N - 1 ? 'Done! Swipe or tap › for the next step.' : '') : started[at] ? hints[at] : `Finish step ${at} first.`);
+      stations.forEach((_, i) => note(i));
     };
     const go = (i) => { i = Math.max(0, Math.min(N - 1, i)); if (i !== at) { at = i; sfx('tap'); } show(); };
     $('.pb-prev', view).addEventListener('click', () => go(at - 1));
@@ -357,7 +365,7 @@ export function workbench(g, recipe, kind) {
       done[i] = true; scores[i] = s; stations[i].classList.add('is-done'); sfx('chime');
       start(i + 1);
       show();
-      if (done.every(Boolean)) { g.hint(kind === 'tea' ? 'The tea is ready ✿' : 'The perfume is ready ✿'); await wait(900); resolve(avg(scores)); }
+      if (done.every(Boolean)) { await wait(900); resolve(avg(scores)); }
     };
     start(0);
     show();
