@@ -114,3 +114,11 @@ To add an app, add `{ id, name, icon, render(body, ctx) }` to the `apps` list in
 - Every one of the 20 teas can be brewed. Guinny's Special needs at least 2 butterfly pea, 1 mint, 2 camellia and 1 darjeeling (17 squares).
 - The result shows in the shop pop-up frame with the cup sprite (`assets/img/teas/`) and its name. A tea is recorded in the **recipe book** (`js/recipebook.js`, art in `assets/img/book/`) the first time it's brewed. Only recorded teas appear on the shop menu.
 - A tutorial (`js/brewtutorial.js`) shows the first time and from the "?" button.
+
+### OpenArt art (Nov 2026)
+
+Made with OpenArt (folder "Guinny's Garden" in the OpenArt Personal Project), using the urn desk, lawn and planter as style references:
+- **Garden:** `assets/img/garden/lawn2-{portrait,landscape}.webp` (winding path), `planter2.webp` (angled four-patch planter), `pot2.webp`, `bench2.webp`. The layout is in the "Garden v2" section at the end of `css/style.css`. Planters sit along the path, and ones lower on screen draw in front.
+- **Workbenches:** `assets/img/bench/` holds the desks (`perfume-*`, `tea-*`, matching the urn desk) and props. `js/minigames/bench.js` runs both as Momo-style scrolling benches, with steps in real-life order (each opens when the previous one is done):
+  - Perfume: Weigh petals → Distill (boil in the alchemy flask) → Separate (water separator) → Blend & mature → Bottle
+  - Loose-leaf tea: Weigh leaves (scoop from canister to scale) → Wither → Roll → Oxidise → Pan-fire dry → Pack

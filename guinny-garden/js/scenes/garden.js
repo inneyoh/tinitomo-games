@@ -17,7 +17,7 @@ import { MILESTONES } from '../encyclopedia.js';
 const IMG = 'assets/img/garden/';
 const SIZE = { landscape: [1672, 941], portrait: [941, 1672] };
 // Part of the canvas that must stay visible (fractions); the rest is lawn that may be cropped.
-const KEEP = { landscape: [0.02, 0, 0.99, 0.88], portrait: [0.03, 0, 0.97, 0.92] };
+const KEEP = { landscape: [0.02, 0.06, 0.98, 0.98], portrait: [0.01, 0.07, 0.99, 0.99] };
 let root, view, canvas, game;
 let active = false;
 let orient = '';
@@ -40,16 +40,16 @@ export function mount(el, api) {
     <div class="canvas g-canvas">
       <img class="layer g-lawn" alt="" draggable="false">
       <img class="layer g-lawn layer-ext" alt="" draggable="false">
-      <img class="g-pot big" src="${IMG}pot-big.webp" alt="" draggable="false">
-      <img class="g-pot small" src="${IMG}pot-small.webp" alt="" draggable="false">
+      <img class="g-pot big" src="${IMG}pot2.webp" alt="" draggable="false">
+      <img class="g-pot small" src="${IMG}pot2.webp" alt="" draggable="false">
       ${PLOTS.map((p, i) => (p.type === 'pot' ? plotMarkup(i).replace('class="plot pot', `class="plot pot ${p.pot}`) : '')).join('')}
-      <img class="g-bench" src="${IMG}bench.webp" alt="" draggable="false">
+      <img class="g-bench" src="${IMG}bench2.webp" alt="" draggable="false">
       <img class="g-trowel" src="${IMG}trowel.webp" alt="" draggable="false">
       <button class="tool tool-ipad" aria-label="Garden iPad"><img src="${IMG}ipad.webp" alt="" draggable="false"><span class="hot-tag">Buy seeds</span></button>
       <button class="tool tool-can" aria-label="Watering can — drag over plants"><img src="${IMG}can.webp" alt="" draggable="false"></button>
       ${PLANTERS.map((_, n) => `
         <div class="planter" data-p="${n}">
-          <img class="planter-img" src="${IMG}planter.webp" alt="" draggable="false">
+          <img class="planter-img" src="${IMG}planter2.webp" alt="" draggable="false">
           ${PLOTS.map((p, i) => (p.planter === n ? plotMarkup(i) : '')).join('')}
           <div class="planter-lock"><span class="lock">Upgrade</span></div>
           <div class="planter-drop b-drop">${dropArt()}</div>
@@ -73,7 +73,7 @@ function layout() {
   const vw = view.clientWidth, vh = view.clientHeight;
   if (!vw || !vh) return;
   const o = vw >= vh ? 'landscape' : 'portrait';
-  if (o !== orient) { orient = o; canvas.dataset.o = o; $$('.g-lawn', canvas).forEach((img) => { img.src = `${IMG}lawn-${o}.webp`; }); }
+  if (o !== orient) { orient = o; canvas.dataset.o = o; $$('.g-lawn', canvas).forEach((img) => { img.src = `${IMG}lawn2-${o}.webp`; }); }
   // fence at the top edge; any spare height below continues as lawn
   fitCanvas(view, canvas, ...SIZE[o], KEEP[o], 0);
 }
