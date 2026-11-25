@@ -1238,3 +1238,160 @@ body.rb-open .mg-hint { opacity: 0; }
 .pb-work .vial-glass { width: clamp(38px, 9vw, 60px); height: clamp(100px, calc(100dvh - 300px), 220px); }
 .pb-work.mg-sort { flex-direction: column; flex-wrap: nowrap; gap: 10px; }
 .pb-work .sort-bar { gap: 10px; }
+
+/* ====================================================================
+   Garden v2 (OpenArt art): planters along the winding path
+   ==================================================================== */
+[data-o="portrait"] .planter { width: 27%; height: 10.78%; }
+[data-o="portrait"] .planter[data-p="0"] { left: 45%; top: 13.5%; z-index: 18; }
+[data-o="portrait"] .planter[data-p="1"] { left: 71%; top: 13.5%; z-index: 18; }
+[data-o="portrait"] .planter[data-p="2"] { left: 1%; top: 36%; z-index: 41; }
+[data-o="portrait"] .planter[data-p="3"] { left: 1%; top: 48.5%; z-index: 53; }
+[data-o="portrait"] .planter[data-p="4"] { left: 26%; top: 41%; z-index: 46; }
+[data-o="portrait"] .planter[data-p="5"] { left: 53%; top: 61%; z-index: 66; }
+[data-o="portrait"] .planter[data-p="6"] { left: 72%; top: 67.5%; z-index: 72; }
+[data-o="portrait"] .planter[data-p="7"] { left: 1%; top: 61.5%; z-index: 66; }
+[data-o="portrait"] .g-pot.big { left: 3%; top: 80%; width: 13%; z-index: 84; }
+[data-o="portrait"] .plot.pot.big { left: 3%; top: 80%; width: 13%; height: 7.06%; z-index: 85; }
+[data-o="portrait"] .g-pot.small { left: 17%; top: 87%; width: 10%; z-index: 91; }
+[data-o="portrait"] .plot.pot.small { left: 17%; top: 87%; width: 10%; height: 5.43%; z-index: 92; }
+[data-o="portrait"] .g-bench { left: 63%; top: 85.5%; width: 35%; z-index: 88; }
+[data-o="portrait"] .tool-can { left: 64.40%; top: 81.99%; width: 11.90%; z-index: 89; }
+[data-o="portrait"] .g-trowel { left: 77.00%; top: 84.04%; width: 6.30%; z-index: 89; }
+[data-o="portrait"] .tool-ipad { left: 84.70%; top: 81.41%; width: 9.80%; z-index: 89; }
+[data-o="landscape"] .planter { width: 12.5%; height: 15.76%; }
+[data-o="landscape"] .planter[data-p="0"] { left: 21%; top: 13%; z-index: 18; }
+[data-o="landscape"] .planter[data-p="1"] { left: 35.5%; top: 14.5%; z-index: 19; }
+[data-o="landscape"] .planter[data-p="2"] { left: 50%; top: 13%; z-index: 18; }
+[data-o="landscape"] .planter[data-p="3"] { left: 64.5%; top: 14.5%; z-index: 19; }
+[data-o="landscape"] .planter[data-p="4"] { left: 30%; top: 51%; z-index: 56; }
+[data-o="landscape"] .planter[data-p="5"] { left: 45%; top: 49%; z-index: 54; }
+[data-o="landscape"] .planter[data-p="6"] { left: 60%; top: 52%; z-index: 57; }
+[data-o="landscape"] .planter[data-p="7"] { left: 37%; top: 71.5%; z-index: 76; }
+[data-o="landscape"] .g-pot.big { left: 79%; top: 57%; width: 7%; z-index: 61; }
+[data-o="landscape"] .plot.pot.big { left: 79%; top: 57%; width: 7%; height: 11.99%; z-index: 62; }
+[data-o="landscape"] .g-pot.small { left: 87%; top: 65%; width: 5.5%; z-index: 69; }
+[data-o="landscape"] .plot.pot.small { left: 87%; top: 65%; width: 5.5%; height: 9.42%; z-index: 70; }
+[data-o="landscape"] .g-bench { left: 56%; top: 69.5%; width: 21%; z-index: 72; }
+[data-o="landscape"] .tool-can { left: 56.84%; top: 62.85%; width: 7.14%; z-index: 73; }
+[data-o="landscape"] .g-trowel { left: 64.40%; top: 66.73%; width: 3.78%; z-index: 73; }
+[data-o="landscape"] .tool-ipad { left: 69.02%; top: 61.74%; width: 5.88%; z-index: 73; }
+/* the planter is drawn at an angle: its four soil patches are diamonds (back, right, left, front) */
+.plot.soil { width: 36%; height: 27%; }
+.plot.q0 { left: 32%; top: 9%; }  .plot.q1 { left: 54%; top: 27%; }
+.plot.q2 { left: 10%; top: 27%; } .plot.q3 { left: 32%; top: 45%; }
+.plot.q0 { z-index: 1; } .plot.q1, .plot.q2 { z-index: 2; } .plot.q3 { z-index: 3; }
+.plot.soil .patch { display: none; }   /* the new planter already shows dark soil */
+.plot.soil .mound { left: 26%; top: 30%; width: 48%; }
+.plot.pot .mound { left: 24%; top: 4%; width: 52%; }
+.plot.pot .plant { bottom: 80%; }
+
+.plot.soil .plant { left: -55%; right: -55%; bottom: 35%; height: 230%; }
+
+/* ====================================================================
+   Workbench mini-games (js/minigames/bench.js) on the OpenArt desks
+   ==================================================================== */
+.mg-wb { background: rgba(246, 238, 223, .7); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.wb-view { position: absolute; inset: 0; overflow: hidden; touch-action: pan-y; border-radius: 22px; background-size: cover; background-position: center; box-shadow: 0 6px 18px rgba(94, 69, 53, .2); }
+.wb-view[data-kind="perfume"] { background-image: url(../assets/img/bench/perfume-portrait.webp); }
+.wb-view[data-kind="tea"] { background-image: url(../assets/img/bench/tea-portrait.webp); }
+@media (orientation: landscape) {
+  .wb-view[data-kind="perfume"] { background-image: url(../assets/img/bench/perfume-landscape.webp); }
+  .wb-view[data-kind="tea"] { background-image: url(../assets/img/bench/tea-landscape.webp); }
+}
+.wb-station { padding: 12px 56px 36px; }
+.wb-work { flex-direction: column; flex-wrap: nowrap; gap: 10px; }
+.wb-locked { position: absolute; inset: 50px 56px 40px; display: grid; place-items: center; font-weight: 800; color: var(--ink-soft);
+  background: rgba(255, 252, 246, .6); border-radius: 22px; border: 2px dashed rgba(107, 74, 54, .3); }
+.wb-station.open .wb-locked { display: none; }
+.wb-prop { display: block; max-width: 100%; height: auto; pointer-events: none; filter: drop-shadow(0 6px 6px rgba(94, 69, 53, .22)); }
+.wb-pair { display: flex; align-items: flex-end; justify-content: center; gap: 4%; width: 100%; }
+.wb-tap { position: relative; border-radius: 20px; }
+.wb-tap:active { transform: scale(.95); }
+.wb-tag { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); white-space: nowrap; background: var(--butter); border: 2px solid var(--line);
+  border-radius: 999px; padding: 1px 10px; font-size: .74rem; font-weight: 800; box-shadow: var(--shadow); }
+.wb-canister, .wb-dropper { width: min(38vw, 22dvh, 200px); }
+.wb-scale { position: relative; width: min(40vw, 25dvh, 220px); }
+.wb-pile { position: absolute; left: 50%; top: 2%; width: 56%; height: 18%; display: flex; justify-content: center; transform-origin: 50% 100%; transition: transform .25s cubic-bezier(.3, 1.6, .5, 1); }
+.wb-pile > * { width: 40%; height: auto; margin: 0 -8%; }
+.wb-pile svg, .wb-pile img { width: 100%; height: 100%; }
+.wb-fly { position: absolute; left: -40%; top: 0; width: 26px; height: 26px; border-radius: 50%; background: rgba(242, 191, 196, .9); opacity: 0; }
+.wb-fly.go { animation: wb-fly .45s ease-out; }
+@keyframes wb-fly { 0% { opacity: 1; transform: translate(0, 40px); } 60% { opacity: 1; transform: translate(60%, -20px); } 100% { opacity: 0; transform: translate(140%, 10px); } }
+.wb-read { background: rgba(255, 252, 246, .92); border: 2px solid var(--line); border-radius: 16px; padding: 4px 14px 8px; font-weight: 800; text-align: center; min-width: 200px; }
+.wb-read b { font-size: 1.4rem; }
+.wb-bar { position: relative; height: 10px; margin-top: 4px; border-radius: 999px; background: #EDE3D2; overflow: hidden; }
+.wb-band { position: absolute; top: 0; bottom: 0; background: rgba(143, 164, 116, .55); }
+.wb-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--rose); opacity: .8; transition: width .25s; }
+.wb-list { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.wb-list span { display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 252, 246, .85); border-radius: 999px; padding: 2px 10px 2px 4px; font-size: .78rem; font-weight: 800; color: var(--ink-soft); }
+.wb-list span.now { background: var(--butter); color: var(--ink); } .wb-list span.done { color: var(--sage-d); }
+.wb-list i { width: 22px; height: 22px; } .wb-list i svg, .wb-list i img { width: 100%; height: 100%; }
+.wb-btns { display: flex; gap: 8px; }
+.wb-heat-prop { position: relative; width: min(46vw, 28dvh, 240px); }
+.wb-steam { position: absolute; left: 20%; right: 40%; top: -12%; height: 30%; opacity: 0; transition: opacity .3s;
+  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,.9) 0 10%, transparent 11%), radial-gradient(circle at 60% 40%, rgba(255,255,255,.8) 0 12%, transparent 13%), radial-gradient(circle at 45% 10%, rgba(255,255,255,.7) 0 9%, transparent 10%);
+  animation: steam 1.6s ease-in-out infinite; }
+@keyframes steam { 50% { transform: translateY(-10px); } }
+.wb-vial { position: absolute; right: 8%; bottom: 10%; width: 14%; height: 26%; border-radius: 4px 4px 10px 10px; overflow: hidden; display: flex; align-items: flex-end; }
+.wb-vial i { display: block; width: 100%; height: 0; background: rgba(242, 191, 196, .75); }
+.wb-meters { display: flex; flex-direction: column; gap: 6px; width: min(80vw, 320px); font-size: .8rem; font-weight: 800; background: rgba(255,252,246,.85); border-radius: 14px; padding: 6px 10px; }
+.wb-meters .meter { width: 100%; margin-top: 2px; }
+.wb-work .btn-primary { max-width: 320px; min-height: 64px; }
+.wb-work.too-hot .thermo { box-shadow: 0 0 0 4px rgba(227, 154, 122, .5); }
+.wb-pour { display: flex; align-items: flex-end; gap: 16px; }
+.wb-pour .wb-prop { width: min(40vw, 26dvh, 210px); }
+.wb-gauge { position: relative; width: 34px; height: min(30dvh, 190px); border-radius: 18px; border: 3px solid var(--line); background: rgba(255,255,255,.85); overflow: hidden; }
+.wb-gauge.tall { height: min(38dvh, 240px); }
+.wb-gfill, .wb-water, .wb-oil { position: absolute; left: 4px; right: 4px; bottom: 0; height: 0; border-radius: 8px; }
+.wb-water { background: rgba(170, 205, 228, .85); }
+.wb-oil { opacity: .9; }
+.wb-line, .wb-tapline { position: absolute; left: 0; right: 0; height: 0; border-top: 2px dashed var(--sage-d); }
+.wb-tapline { bottom: 0; border-color: var(--rose-d); }
+.pouring .wb-prop { transform: rotate(-4deg); transition: transform .2s; }
+.wb-sep { position: relative; height: min(40dvh, 260px); }
+.wb-sep .wb-prop { height: 100%; width: auto; }
+.wb-drip { position: absolute; left: 50%; bottom: 14%; width: 6px; height: 30px; opacity: 0; background: radial-gradient(circle, #A8CBE0 0 3px, transparent 4px) 0 0 / 6px 10px; animation: pour .3s linear infinite; }
+.draining .wb-drip { opacity: 1; }
+.wb-beaker { position: relative; width: min(38vw, 24dvh, 200px); }
+.wb-liquid { position: absolute; left: 16%; right: 16%; bottom: 12%; height: 36%; border-radius: 0 0 18px 18px; background: rgba(242, 207, 180, .8); opacity: .25; pointer-events: none; }
+.wb-drops { position: absolute; left: 45%; top: -10%; }
+.wb-drop { position: absolute; width: 10px; height: 14px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: #E8B04A; animation: drop .6s ease-in forwards; }
+@keyframes drop { to { transform: translateY(110px); opacity: 0; } }
+.wb-circle { position: relative; width: min(78vw, 44dvh, 340px); aspect-ratio: 1; display: grid; place-items: center; touch-action: none; cursor: grab; }
+.wb-circle .wb-prop { width: 70%; }
+.wb-circle-inner { position: absolute; inset: 30%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; pointer-events: none; transition: transform .1s; }
+.wb-circle-inner > * { width: 40%; height: auto; } .wb-circle-inner svg, .wb-circle-inner img { width: 100%; height: 100%; }
+.wb-circle-inner .wb-liquid.swirl { position: static; width: 60%; height: 40%; border-radius: 50%; opacity: .8; }
+.wb-tray, .wb-basket { position: relative; width: min(80vw, 46dvh, 360px); }
+.wb-leaves { position: absolute; inset: 0; }
+.wb-heap { position: absolute; left: var(--x); top: var(--y); width: 26%; aspect-ratio: 1; transform: translate(-50%, -50%); display: grid; place-items: center; transition: transform .3s; }
+.wb-heap > * { grid-area: 1 / 1; width: 70%; height: auto; transition: transform .35s; }
+.wb-heap svg, .wb-heap img { width: 100%; height: 100%; }
+.wb-heap:not(.spread) { animation: hop 1.2s ease-in-out infinite; }
+.wb-heap.spread > :nth-child(1) { transform: translate(-45%, -10%) rotate(-20deg); }
+.wb-heap.spread > :nth-child(2) { transform: translate(40%, -20%) rotate(25deg); }
+.wb-heap.spread > :nth-child(3) { transform: translate(0, 40%) rotate(80deg); }
+.wb-ox { position: absolute; left: 22%; right: 22%; top: 22%; height: 40%; border-radius: 50%; background: hsl(95 45% 48%);
+  -webkit-mask: radial-gradient(circle, #000 0 3px, transparent 4px) 0 0 / 12px 10px; mask: radial-gradient(circle, #000 0 3px, transparent 4px) 0 0 / 12px 10px; }
+.wb-oxbar { position: relative; width: min(80vw, 320px); height: 18px; border-radius: 999px; border: 2px solid var(--line);
+  background: linear-gradient(90deg, hsl(95 45% 55%), hsl(60 50% 55%), hsl(35 60% 55%), hsl(20 50% 35%)); }
+.wb-oxzone { position: absolute; top: -4px; bottom: -4px; border: 2px dashed #fff; border-radius: 6px; }
+.wb-oxmark { position: absolute; top: -8px; width: 6px; height: 30px; margin-left: -3px; border-radius: 3px; background: var(--ink); }
+@media (orientation: landscape) {
+  .wb-work { flex-direction: row; flex-wrap: wrap; align-content: center; }
+  .wb-canister, .wb-dropper { width: min(18vw, 34dvh, 200px); }
+  .wb-scale { width: min(18vw, 38dvh, 220px); }
+  .wb-heat-prop { width: min(22vw, 44dvh, 240px); }
+  .wb-pour .wb-prop { width: min(18vw, 40dvh, 210px); }
+  .wb-circle { width: min(40vw, 62dvh, 340px); }
+  .wb-tray, .wb-basket { width: min(40vw, 56dvh, 360px); }
+  .wb-meters, .wb-read { width: 220px; }
+}
+.wb-pair > * { flex: 0 1 auto; min-width: 0; }
+@media (orientation: portrait) {
+  .wb-canister, .wb-dropper { width: min(30vw, 22dvh, 190px); }
+  .wb-scale, .wb-beaker { width: min(32vw, 24dvh, 210px); }
+}
+/* the bench must never scroll on its own (button focus / scroll-into-view would shift the stations) */
+.wb-view, .pb-view, .pb-station, .mg-stage { overflow: clip; }

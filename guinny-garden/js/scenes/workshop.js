@@ -1,8 +1,8 @@
 // Scene 2: 作業場 (Workshop) — layered art laid out like the user's samples.
 // Three workable stations, each highlighted with a glowing outline and a label:
-//   Perfume alchemy set → perfume (Weigh → Sort → Mix)
+//   Perfume alchemy set → perfume (Weigh → Distill → Separate → Blend → Bottle)
 //   Tea urn             → tea blends (fit the flowers into the brewing tank)
-//   Tea leaf rack       → loose-leaf tea (Chop → Dry → Pour)
+//   Tea leaf rack       → loose-leaf tea (Weigh → Wither → Roll → Oxidise → Dry → Pack)
 // Wall & ceiling, floor, rug, stool, flower basket and potted plant are customisable:
 // styles are bought in the Furniture Shop app on the shop iPad (WORKSHOP_DECOR in data.js).
 // Flowers are only used when a mini-game is finished; quitting costs nothing. 3 stars = 1 bonus.
@@ -11,12 +11,11 @@ import { S, save, add, trend } from '../state.js';
 import { P, F } from '../art.js';
 import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
 import { openGame, starsFor } from '../minigames/shell.js';
-import { perfumeBench, BENCH_STEPS } from '../minigames/perfumebench.js';
+import { workbench, PERFUME_STEPS, TEA_STEPS } from '../minigames/bench.js';
 import { brewPhase, cupsFor, BONUS_FILL } from '../minigames/brew.js';
 import { BREW_INGREDIENTS, classify, TEAS } from '../teas.js';
 import { openRecipeBook } from '../recipebook.js';
 import { showBrewTutorial } from '../brewtutorial.js';
-import { chopPhase, dryPhase, pourPhase } from '../minigames/pack.js';
 
 const IMG = 'assets/img/workshop/';
 const SIZE = { landscape: [1671, 941], portrait: [941, 1671] };
@@ -37,16 +36,17 @@ const LAYOUT = {
 const PER_ORIENT = ['wall', 'floor', 'bench', 'alchemy', 'urn', 'rack'];
 
 const STATIONS = {
-  alchemy: { name: 'Perfume Alchemy Set', label: 'Perfume', sub: 'Weigh, sort and mix flower essences into perfume',
+  alchemy: { name: 'Perfume Alchemy Set', label: 'Perfume', sub: 'Weigh, distill, separate, blend and bottle a perfume',
     keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'perfume') },
   urn:     { name: 'Tea Urn', label: 'Tea Brewing', sub: 'Fill the urn with any ingredients and see what tea it makes',
     keys: () => [] },   // no recipe list: the urn opens the brewing game straight away
-  rack:    { name: 'Tea Leaf Rack', label: 'Tea Leaves', sub: 'Chop, dry and pack loose-leaf tea into tins',
+  rack:    { name: 'Tea Leaf Rack', label: 'Tea Leaves', sub: 'Weigh, wither, roll, oxidise, dry and pack loose-leaf tea',
     keys: () => Object.keys(PRODUCTS).filter((k) => PRODUCTS[k].cat === 'tea' && PRODUCTS[k].method === 'pack') },
 };
 const PLANS = {
-  perfume: { theme: 'alchemy', steps: BENCH_STEPS, phases: [perfumeBench] },   // one scrolling bench, Momo-style
-  pack:    { theme: 'kitchen', steps: ['Chop', 'Dry', 'Pour'], phases: [chopPhase, dryPhase, pourPhase] },
+  // scrolling workbenches on the OpenArt desk art (js/minigames/bench.js), steps in real-life order
+  perfume: { theme: 'alchemy', steps: PERFUME_STEPS, phases: [(g, p) => workbench(g, p, 'perfume')] },
+  pack:    { theme: 'kitchen', steps: TEA_STEPS, phases: [(g, p) => workbench(g, p, 'tea')] },
 };
 const planFor = (p) => PLANS[p.cat === 'perfume' ? 'perfume' : p.method || 'pack'];
 const stationFor = (p) => (p.cat === 'perfume' ? 'alchemy' : p.urn ? 'urn' : 'rack');
