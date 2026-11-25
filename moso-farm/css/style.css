@@ -393,3 +393,17 @@ p.note{margin:0;font-size:13px;color:#8A6748;line-height:1.5}
 #drText img{height:52px}
 @media (prefers-reduced-motion:reduce){#drive.go .dr-scene,#drive.go .dr-car img,#drive.go .puff{animation:none}}
 @media (min-width:700px){#pctl{gap:22px;padding:10px 20px}.pcounter img{width:64px}.pcounter b{font-size:20px}.ppow{font-size:14px}.ppow input{width:150px}#fire{width:100px;height:90px}#fire b{font-size:17px}.pbtn{font-size:15px;padding:4px 12px 4px 6px}.pbtn img{width:30px;height:30px}}
+
+/* farm tool fan: Plant (left), Water (up-left), Harvest (up) arranged on an arc around the main button */
+#tray.farm .toolbar{gap:0;align-items:flex-end}
+#tray.farm .toolbar.open .fan{margin-top:132px}
+#tray.farm .toolbar.open .seedcar{margin-bottom:4px;margin-right:4px}
+.fan{position:relative;width:78px;height:86px;display:flex;justify-content:center}
+.fan .fab .ring{width:72px;height:72px}.fan .fab .ring img{width:54px;height:54px}.fan .fab b{font-size:13px}
+#tray.farm .fan .tbtn{position:absolute;left:50%;top:36px;flex-direction:column;gap:0;transform:translate(-50%,-50%) rotate(var(--a)) translateX(-104px) rotate(calc(-1 * var(--a)));animation:none}
+#tray.farm .fan .tbtn .ring{width:52px;height:52px;border-width:2.5px;box-shadow:0 3px 0 var(--ink);animation:fanin .22s cubic-bezier(.3,1.5,.5,1) backwards;animation-delay:var(--d)}
+#tray.farm .fan .tbtn .ring img{width:40px;height:40px}
+#tray.farm .fan .tbtn b{margin-top:-8px;font-size:11px;padding:0 7px;border-width:2px;animation:fanin .22s ease-out backwards;animation-delay:var(--d)}
+#tray.farm .fan .tbtn[aria-pressed="true"] .ring{transform:scale(1.08);box-shadow:0 3px 0 var(--ink),0 0 0 4px rgba(255,236,160,.85)}
+@keyframes fanin{from{transform:scale(.3);opacity:0}}
+@media (prefers-reduced-motion:reduce){#tray.farm .fan .tbtn .ring,#tray.farm .fan .tbtn b{animation:none}}

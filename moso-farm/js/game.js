@@ -757,14 +757,14 @@ document.getElementById("store").addEventListener("pointerdown",e=>{if(e.target.
 // Board space is 360 units wide; its height follows the screen so the playfield always fills it.
 const PK={W:360,H:640};
 const pegs=[],pockets=[];
-function buildBoard(H){Object.assign(PK,{H,L:14,R:318,lx:332,lw:[322,346]});PK.cx=(PK.L+PK.R)/2;PK.rad=(PK.R-PK.L)/2;PK.cy=PK.rad+16;PK.bottom=H-16;PK.ly=PK.bottom-14;
+function buildBoard(H){Object.assign(PK,{H,L:14,R:318,T:14,lx:333,lw:[322,346],cr:26});PK.cx=(PK.L+PK.R)/2;PK.bottom=H-16;PK.ly=PK.bottom-14;
   pegs.length=0;pockets.length=0;
-  const sw=190,sh=134,sc={x1:PK.cx-sw/2,y1:PK.cy-6,x2:PK.cx+sw/2,y2:PK.cy-6+sh};PK.screen=sc;
+  const sw=200,sh=138,sc={x1:PK.cx-sw/2-6,y1:PK.T+64,x2:PK.cx+sw/2-6,y2:PK.T+64+sh};PK.screen=sc;
   const sy=sc.y2+58,ay=PK.bottom-78,ty=sy+(ay-sy)*.5;
-  const P2=[[PK.cx,sy,"start",3],[PK.L+62,ty,"tulip",5],[PK.R-62,ty,"tulip",5]];
-  const inArea=(x,y,m)=>{if(y<PK.cy)return Math.hypot(x-PK.cx,y-PK.cy)<PK.rad-m;return x>PK.L+m&&x<PK.R-m&&y<PK.bottom-36;};
+  const P2=[[sc.x1+sw/2,sy,"start",3],[PK.L+62,ty,"tulip",5],[PK.R-62,ty,"tulip",5]];
+  const inArea=(x,y,m)=>x>PK.L+m&&x<PK.R-m&&y>PK.T+34&&y<PK.bottom-36;
   const avoid=(x,y)=>(x>sc.x1-14&&x<sc.x2+14&&y>sc.y1-16&&y<sc.y2+14)||P2.some(([px,py])=>Math.hypot(x-px,y-py)<22)||(y>ay-26&&y<ay+30&&Math.abs(x-PK.cx)<56);
-  for(let r=0;;r++){const y=36+r*23;if(y>PK.bottom-40)break;for(let c=0;c<15;c++){const x=PK.L+12+c*21+(r%2?10.5:0);if(inArea(x,y,13)&&!avoid(x,y))pegs.push({x,y});}}
+  for(let r=0;;r++){const y=PK.T+40+r*23;if(y>PK.bottom-40)break;for(let c=0;c<15;c++){const x=PK.L+12+c*21+(r%2?10.5:0);if(inArea(x,y,10)&&!avoid(x,y))pegs.push({x,y});}}
   for(const[px,py]of P2){pegs.push({x:px-12,y:py-6},{x:px+12,y:py-6});}
   for(const[px,py,id,pay]of P2)pockets.push({id,x:px,y:py+3,w:16,pay});
   pockets.push({id:"attacker",x:PK.cx,y:ay,w:80,pay:12});}
@@ -786,12 +786,13 @@ function updatePachi(dt){
   if(feverMsg>0)feverMsg-=dt;
   const sub=4,h=dt/sub,g=820,br=5;
   for(let s=0;s<sub;s++)for(let i=balls.length-1;i>=0;i--){const b=balls[i];
-    if(b.rail!==null&&b.rail!==undefined&&b.rail>=0){b.rail+=h/0.45;const th=.25+b.pw*2.4;// release angle radians from +x CCW
-      const u=b.rail;if(u<.45){b.x=PK.lx;b.y=PK.ly-(PK.ly-PK.cy)*(u/.45);}else{const a=(u-.45)/.55*th;const R=PK.rad+8;b.x=PK.cx+Math.cos(a)*R;b.y=PK.cy-Math.sin(a)*R;
-        if(u>=1){b.rail=-1;const R2=PK.rad-br-2;b.x=PK.cx+Math.cos(th)*R2;b.y=PK.cy-Math.sin(th)*R2;const sp=240+b.pw*60;b.vx=-Math.sin(th)*sp;b.vy=-Math.cos(th)*sp;}}continue;}
+    if(b.rail!==null&&b.rail!==undefined&&b.rail>=0){b.rail+=h/0.5;const u=b.rail,r=PK.cr,top=PK.T+8;
+      if(u<.75){b.x=PK.lx;b.y=PK.ly-(PK.ly-(top+r))*(u/.75);}
+      else{const a=(u-.75)/.25*Math.PI/2;b.x=PK.lx-r+Math.cos(a)*r;b.y=top+r-Math.sin(a)*r;
+        if(u>=1){b.rail=-1;b.x=PK.lx-r-2;b.y=top+2;b.vx=-(110+b.pw*560);b.vy=10;}}continue;}
     b.vy+=g*h;b.x+=b.vx*h;b.y+=b.vy*h;
     // walls
-    if(b.y<PK.cy){const dx=b.x-PK.cx,dy=b.y-PK.cy,d=Math.hypot(dx,dy);if(d>PK.rad-br){const nx=dx/d,ny=dy/d;b.x=PK.cx+nx*(PK.rad-br);b.y=PK.cy+ny*(PK.rad-br);const vn=b.vx*nx+b.vy*ny;if(vn>0){b.vx-=1.5*vn*nx;b.vy-=1.5*vn*ny;}}}
+    if(b.y<PK.T+br){b.y=PK.T+br;b.vy=Math.abs(b.vy)*.4;}
     if(b.x<PK.L+br){b.x=PK.L+br;b.vx=Math.abs(b.vx)*.5;}if(b.x>PK.R-br){b.x=PK.R-br;b.vx=-Math.abs(b.vx)*.5;}
     // screen box
     const sc=PK.screen,qx=Math.max(sc.x1,Math.min(b.x,sc.x2)),qy=Math.max(sc.y1,Math.min(b.y,sc.y2)),ddx=b.x-qx,ddy=b.y-qy,dd=Math.hypot(ddx,ddy);
@@ -818,15 +819,15 @@ function drawPachi(time){
   const bg=ctx.createLinearGradient(0,0,0,CH);bg.addColorStop(0,"#F6C2CC");bg.addColorStop(1,"#EFA9B8");ctx.fillStyle=bg;ctx.fillRect(0,0,CW,CH);
   ctx.fillStyle="rgba(255,255,255,.3)";for(let y=10;y<CH;y+=56)for(let x=(y/56%2)*28;x<CW;x+=56){starP(ctx,x,y,5,5);ctx.fill();}
   ctx.save();ctx.translate(PK.ox,PK.oy);ctx.scale(bk,bk);
-  // frame: gold rim + bulbs around the glass
-  ctx.beginPath();ctx.roundRect(-2,-2,364,H+4,[184,184,26,26]);ctx.fillStyle="#E7B23C";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.stroke();
-  ctx.beginPath();ctx.roundRect(5,5,350,H-10,[176,176,20,20]);const gl=ctx.createLinearGradient(0,0,0,H);gl.addColorStop(0,"#E4F4E6");gl.addColorStop(1,"#CDEBD3");ctx.fillStyle=gl;ctx.fill();ctx.lineWidth=2;ctx.stroke();
+  // rectangular frame: gold rim, bulbs along the top, mint glass
+  ctx.beginPath();ctx.roundRect(-2,-2,364,H+4,22);ctx.fillStyle="#E7B23C";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.stroke();
+  ctx.beginPath();ctx.roundRect(5,5,350,H-10,16);const gl=ctx.createLinearGradient(0,0,0,H);gl.addColorStop(0,"#E4F4E6");gl.addColorStop(1,"#CDEBD3");ctx.fillStyle=gl;ctx.fill();ctx.lineWidth=2;ctx.stroke();
   ctx.save();ctx.clip();ctx.fillStyle="rgba(255,255,255,.35)";for(let i=0;i<10;i++){ctx.beginPath();ctx.arc(30+i*37,80+(i%4)*(H/4),14+(i%3)*8,0,7);ctx.fill();}ctx.restore();
-  for(let k=0;k<9;k++){const a=Math.PI*(1-k/8),bx=180+Math.cos(a)*178,by=182-Math.sin(a)*178;const on=Math.floor(time*5+k)%3===0;ctx.beginPath();ctx.arc(bx,by,5,0,7);ctx.fillStyle=on?"#FFF6B0":"#FFE7A8";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=OL;ctx.stroke();}
-  // launch lane + rail
-  ctx.fillStyle="rgba(94,59,34,.08)";ctx.fillRect(PK.lw[0],PK.cy,PK.lw[1]-PK.lw[0],PK.bottom-PK.cy);
-  ctx.strokeStyle="#E7B23C";ctx.lineWidth=5;ctx.beginPath();ctx.arc(PK.cx,PK.cy,PK.rad+1,Math.PI,0);ctx.lineTo(PK.R+1,PK.bottom-10);ctx.stroke();
-  ctx.strokeStyle=OL;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(PK.cx,PK.cy,PK.rad+4,Math.PI,0);ctx.stroke();
+  for(let k=0;k<11;k++){const bx=28+k*30.4,on=Math.floor(time*5+k)%3===0;ctx.beginPath();ctx.arc(bx,0,4.5,0,7);ctx.fillStyle=on?"#FFF6B0":"#FFE7A8";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=OL;ctx.stroke();}
+  // launch lane wall and the curved guide at the top-right corner
+  ctx.fillStyle="rgba(94,59,34,.07)";ctx.fillRect(PK.lw[0],PK.T+PK.cr+8,PK.lw[1]-PK.lw[0],PK.bottom-PK.T-PK.cr-8);
+  ctx.strokeStyle="#E7B23C";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(PK.lw[0],PK.bottom-6);ctx.lineTo(PK.lw[0],PK.T+PK.cr+30);ctx.stroke();
+  ctx.beginPath();ctx.arc(PK.lx-PK.cr,PK.T+8+PK.cr,PK.cr+9,-Math.PI/2,0);ctx.stroke();
   ctx.beginPath();ctx.ellipse(PK.cx,PK.bottom-6,26,9,0,0,7);P(ctx,"#5E3B22",2);
   for(const p of pegs)if(!pkImg("pk_pin",p.x,p.y,8)){ctx.beginPath();ctx.arc(p.x,p.y,2.8,0,7);ctx.fillStyle="#D9A441";ctx.fill();}
   for(const pk of pockets){const lit=pk.flash>0;ctx.save();if(lit){ctx.shadowColor="#FFE08A";ctx.shadowBlur=14;}
@@ -974,8 +975,9 @@ function renderTray(){$("zoom").hidden=area==="pachi";const T=$("tray");T.classL
     if(toolOpen&&tool==="seed"){h+=`<div class="seedcar">`;for(const k in CROPS){const C=CROPS[k];if(C.prize&&!S.seeds[k])continue;if(!C.prize&&C.lvl>S.lvl)continue;
       h+=`<button class="seedchip ${(S.seeds[k]||0)?"":"empty"}" data-seed="${k}" aria-pressed="${S.sel===k}" title="${ITEMS[k].n} seeds"><img src="${icon(k)}" alt=""><span class="cnt">${S.seeds[k]||0}</span></button>`;}
       h+=`<button class="seedchip buy" data-open="seeds" title="Buy seeds"><img src="${IMG.ui_shop||IMG.oa_barn}" alt=""><span class="cnt">+</span></button></div>`;}
-    if(toolOpen)h+=`<div class="toolrow">${TOOLS.map(([k,n,src],j)=>`<button class="tbtn" style="--d:${j*40}ms" data-tool="${k}" aria-pressed="${tool===k}"><span class="ring"><img src="${src}" alt=""></span><b>${n}</b></button>`).join("")}</div>`;
-    h+=`<button class="fab" data-fab="1" aria-expanded="${toolOpen}" aria-label="Tools: ${cur[1]}"><span class="ring"><img src="${cur[2]}" alt=""></span><b>${toolOpen?"Close":cur[1]}</b>${tool==="seed"&&!toolOpen?`<span class="fseed"><img src="${icon(S.sel)}" alt=""><i class="fcnt">${S.seeds[S.sel]||0}</i></span>`:""}<span class="caret">${toolOpen?"▾":"▴"}</span></button></div>`;}
+    h+=`<div class="fan">`;
+    if(toolOpen)h+=TOOLS.map(([k,n,src],j)=>`<button class="tbtn" style="--a:${[0,45,90][j]}deg;--d:${j*45}ms" data-tool="${k}" aria-pressed="${tool===k}" aria-label="${n}"><span class="ring"><img src="${src}" alt=""></span><b>${n}</b></button>`).join("");
+    h+=`<button class="fab" data-fab="1" aria-expanded="${toolOpen}" aria-label="Tools: ${cur[1]}"><span class="ring"><img src="${cur[2]}" alt=""></span><b>${toolOpen?"Close":cur[1]}</b>${tool==="seed"&&!toolOpen?`<span class="fseed"><img src="${icon(S.sel)}" alt=""><i class="fcnt">${S.seeds[S.sel]||0}</i></span>`:""}</button></div></div>`;}
   else if(area==="plaza"){h=`<div class="smenu ${shopMenuOpen?"open":""}">`;
     if(shopMenuOpen){h+=`<div class="slist"><button class="srow coll" data-open="collect"><span class="ic coin">¢</span><b>Collect all registers</b></button>`+PSHOP.map(b=>{const sh=S.shops[b.id],D=SHOPS[b.id];return `<button class="srow ${sh.open?"":"lk"}" data-gostore="${b.id}"><img src="${IMG[b.spr]}" alt=""><b>${D.n}</b>${sh.open?(sh.reg?`<em><i class="cn"></i>${sh.reg}</em>`:keeperOf(b.id)?`<small>${FNAME[keeperOf(b.id)]}</small>`:`<small>no keeper</small>`):`<small>🔒</small>`}</button>`;}).join("")+`<button class="srow" data-gopachi="1"><span class="ic">🎰</span><b>Pachinko</b></button></div>`;}
     h+=`<button class="fab" data-smenu="1" aria-expanded="${shopMenuOpen}"><span class="ring"><img src="${IMG.ui_shop}" alt=""></span><b>${shopMenuOpen?"Close":"Shops"}</b></button></div>`;}
