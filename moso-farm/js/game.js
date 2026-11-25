@@ -1,4 +1,4 @@
-const ASSET_KEYS=["can", "canpour", "cu_bae", "cu_bae_upset", "cu_bun", "cu_bun_upset", "cu_gwoof", "cu_gwoof_upset", "cu_kew", "cu_kew_upset", "cu_kuma", "cu_kuma_upset", "cu_piyo", "cu_piyo_upset", "cu_popo", "cu_popo_upset", "cu_rang", "cu_rang_upset", "dr_road", "dr_truck", "farmbg", "heart", "ic_beanie", "ic_bread", "ic_butterpop", "ic_caramelpop", "ic_carrot", "ic_carrotcake", "ic_carrotjuice", "ic_corn", "ic_egg", "ic_honey", "ic_honeytea", "ic_honeytoast", "ic_latte", "ic_melon", "ic_melonsoda", "ic_milk", "ic_mittens", "ic_muffin", "ic_omelette", "ic_parfait", "ic_popcornbucket", "ic_pumpkin", "ic_pumpkinpie", "ic_pumpkinsoup", "ic_quiche", "ic_scarf", "ic_shell", "ic_shortcake", "ic_smoothie", "ic_strawberry", "ic_strawmilk", "ic_strawpop", "ic_sweater", "ic_tomato", "ic_tomatojuice", "ic_tote", "ic_truffle", "ic_trufflepasta", "ic_truffletoast", "ic_veggiestew", "ic_wheat", "ic_wool", "momo_back", "momo_explore", "momo_front", "momo_side", "momo_three", "oa_barn", "oa_chick", "oa_chicken", "oa_cow", "oa_cow_a", "oa_f_bench", "oa_f_bench_momo", "oa_f_bench_soso", "oa_f_hammock", "oa_f_hammock_momo", "oa_f_hammock_soso", "oa_f_picnic", "oa_f_picnic_momo", "oa_f_picnic_soso", "oa_f_swing", "oa_f_swing_momo", "oa_f_swing_soso", "oa_hen", "oa_locked", "oa_pig", "oa_pig_a", "oa_r_carrot", "oa_r_corn", "oa_r_melon", "oa_r_pumpkin", "oa_r_strawberry", "oa_r_tomato", "oa_r_wheat", "oa_s_bakery", "oa_s_cafe", "oa_s_clothing", "oa_s_eatery", "oa_s_juice", "oa_s_popcorn", "oa_s_veggie", "oa_seedmound", "oa_sheep", "oa_sheep_a", "oa_soil", "oa_soilwet", "oa_sprout", "oa_truck", "oa_village", "oa_young", "pk_ball", "pk_bell", "pk_cabinet", "pk_fire", "pk_gate", "pk_gateopen", "pk_heart", "pk_knob", "pk_pin", "pk_room", "pk_screen", "pk_start", "pk_tray", "pk_tulip", "pt_bae", "pt_bun", "pt_gwoof", "pt_kew", "pt_kuma", "pt_momo", "pt_piyo", "pt_popo", "pt_rang", "pt_soso", "pz_boost", "pz_flowerbed", "pz_fountain", "pz_hat", "pz_melon", "pz_pouch", "pz_ribbon", "pz_sprinkler", "soso_back", "soso_explore", "soso_front", "soso_side", "soso_three", "ui_basket", "ui_can", "ui_coin", "ui_seed", "ui_shop", "ui_sickle"];
+const ASSET_KEYS=["can", "canpour", "cu_bae", "cu_bae_upset", "cu_bun", "cu_bun_upset", "cu_gwoof", "cu_gwoof_upset", "cu_kew", "cu_kew_upset", "cu_kuma", "cu_kuma_upset", "cu_piyo", "cu_piyo_upset", "cu_popo", "cu_popo_upset", "cu_rang", "cu_rang_upset", "dr_road", "dr_truck", "farmbg", "heart", "ic_beanie", "ic_bread", "ic_butterpop", "ic_caramelpop", "ic_carrot", "ic_carrotcake", "ic_carrotjuice", "ic_corn", "ic_egg", "ic_honey", "ic_honeytea", "ic_honeytoast", "ic_latte", "ic_melon", "ic_melonsoda", "ic_milk", "ic_mittens", "ic_muffin", "ic_omelette", "ic_parfait", "ic_popcornbucket", "ic_pumpkin", "ic_pumpkinpie", "ic_pumpkinsoup", "ic_quiche", "ic_scarf", "ic_shell", "ic_shortcake", "ic_smoothie", "ic_strawberry", "ic_strawmilk", "ic_strawpop", "ic_sweater", "ic_tomato", "ic_tomatojuice", "ic_tote", "ic_truffle", "ic_trufflepasta", "ic_truffletoast", "ic_veggiestew", "ic_wheat", "ic_wool", "momo_back", "momo_explore", "momo_front", "momo_side", "momo_three", "oa_barn", "oa_chick", "oa_chicken", "oa_cow", "oa_cow_a", "oa_f_bench", "oa_f_bench_momo", "oa_f_bench_soso", "oa_f_hammock", "oa_f_hammock_momo", "oa_f_hammock_soso", "oa_f_picnic", "oa_f_picnic_momo", "oa_f_picnic_soso", "oa_f_swing", "oa_f_swing_momo", "oa_f_swing_soso", "oa_hen", "oa_locked", "oa_pig", "oa_pig_a", "oa_r_carrot", "oa_r_corn", "oa_r_melon", "oa_r_pumpkin", "oa_r_strawberry", "oa_r_tomato", "oa_r_wheat", "oa_s_bakery", "oa_s_cafe", "oa_s_clothing", "oa_s_eatery", "oa_s_juice", "oa_s_popcorn", "oa_s_veggie", "oa_seedmound", "oa_sheep", "oa_sheep_a", "oa_soil", "oa_soilwet", "oa_sprout", "oa_truck", "oa_village", "oa_young", "pk_ball", "pk_bell", "pk_fire", "pk_gate", "pk_gateopen", "pk_heart", "pk_pin", "pk_screen", "pk_start", "pk_tray", "pk_tulip", "pt_bae", "pt_bun", "pt_gwoof", "pt_kew", "pt_kuma", "pt_momo", "pt_piyo", "pt_popo", "pt_rang", "pt_soso", "pz_boost", "pz_flowerbed", "pz_fountain", "pz_hat", "pz_melon", "pz_pouch", "pz_ribbon", "pz_sprinkler", "soso_back", "soso_explore", "soso_front", "soso_side", "soso_three", "ui_basket", "ui_can", "ui_coin", "ui_seed", "ui_shop", "ui_sickle"];
 const IMG=Object.fromEntries(ASSET_KEYS.map(k=>[k,"assets/"+k+".webp"]));
 (function(){
 "use strict";
@@ -754,16 +754,21 @@ document.getElementById("store").addEventListener("click",e=>{const b=e.target.c
 document.getElementById("store").addEventListener("pointerdown",e=>{if(e.target.id==="store")closeStore();});
 
 // ================= PACHINKO =================
-const PK={W:360,H:640,L:22,R:316,cx:169,cy:180,rad:147,bottom:612};
+// Board space is 360 units wide; its height follows the screen so the playfield always fills it.
+const PK={W:360,H:640};
 const pegs=[],pockets=[];
-(function buildBoard(){
-  const inArea=(x,y,m)=>{if(y<PK.cy)return Math.hypot(x-PK.cx,y-PK.cy)<PK.rad-m;return x>PK.L+m&&x<PK.R-m&&y<PK.bottom-30;};
-  const screen={x1:94,y1:170,x2:244,y2:278};
-  const avoid=(x,y)=>(x>screen.x1-14&&x<screen.x2+14&&y>screen.y1-16&&y<screen.y2+14)||Math.hypot(x-169,y-335)<20||Math.hypot(x-74,y-452)<20||Math.hypot(x-264,y-452)<20||(y>505&&y<560&&Math.abs(x-169)<52);
-  for(let r=0;r<22;r++){const y=70+r*23;for(let c=0;c<14;c++){const x=PK.L+14+c*22+(r%2?11:0);if(inArea(x,y,13)&&!avoid(x,y))pegs.push({x,y});}}
-  for(const[px,py]of[[169,335],[74,452],[264,452]]){pegs.push({x:px-12,y:py-6},{x:px+12,y:py-6});}
-  pockets.push({id:"start",x:169,y:338,w:16,pay:3},{id:"tulip",x:74,y:455,w:16,pay:5},{id:"tulip",x:264,y:455,w:16,pay:5},{id:"attacker",x:169,y:528,w:80,pay:12});
-  PK.screen=screen;})();
+function buildBoard(H){Object.assign(PK,{H,L:14,R:318,lx:332,lw:[322,346]});PK.cx=(PK.L+PK.R)/2;PK.rad=(PK.R-PK.L)/2;PK.cy=PK.rad+16;PK.bottom=H-16;PK.ly=PK.bottom-14;
+  pegs.length=0;pockets.length=0;
+  const sw=190,sh=134,sc={x1:PK.cx-sw/2,y1:PK.cy-6,x2:PK.cx+sw/2,y2:PK.cy-6+sh};PK.screen=sc;
+  const sy=sc.y2+58,ay=PK.bottom-78,ty=sy+(ay-sy)*.5;
+  const P2=[[PK.cx,sy,"start",3],[PK.L+62,ty,"tulip",5],[PK.R-62,ty,"tulip",5]];
+  const inArea=(x,y,m)=>{if(y<PK.cy)return Math.hypot(x-PK.cx,y-PK.cy)<PK.rad-m;return x>PK.L+m&&x<PK.R-m&&y<PK.bottom-36;};
+  const avoid=(x,y)=>(x>sc.x1-14&&x<sc.x2+14&&y>sc.y1-16&&y<sc.y2+14)||P2.some(([px,py])=>Math.hypot(x-px,y-py)<22)||(y>ay-26&&y<ay+30&&Math.abs(x-PK.cx)<56);
+  for(let r=0;;r++){const y=36+r*23;if(y>PK.bottom-40)break;for(let c=0;c<15;c++){const x=PK.L+12+c*21+(r%2?10.5:0);if(inArea(x,y,13)&&!avoid(x,y))pegs.push({x,y});}}
+  for(const[px,py]of P2){pegs.push({x:px-12,y:py-6},{x:px+12,y:py-6});}
+  for(const[px,py,id,pay]of P2)pockets.push({id,x:px,y:py+3,w:16,pay});
+  pockets.push({id:"attacker",x:PK.cx,y:ay,w:80,pay:12});}
+buildBoard(640);
 const balls=[];let fireT=0,firing=false;
 const reel={spin:false,t:0,dur:0,res:["momo","carrot","soso"],pend:0,reach:false,win:null};
 let fever=0,feverSuper=false,feverMsg=0;
@@ -774,7 +779,7 @@ function startReel(){reel.pend--;reel.spin=true;reel.t=0;const r=Math.random();
   else{const a=pick(SYM);let b;do{b=pick(SYM);}while(b===a);reel.res=[a,b,pick(SYM)];reel.win=null;reel.reach=false;}
   reel.dur=reel.reach?3:1.6;}
 function updatePachi(dt){
-  if(firing&&S.balls>0&&balls.length<40){fireT-=dt;if(fireT<=0){fireT=.32;S.balls--;dirtyUI=true;const pw=+$("power").value/100;balls.push({x:338,y:600,vx:0,vy:0,rail:0,pw:pw*(0.92+Math.random()*.16)});}}
+  if(firing&&S.balls>0&&balls.length<40){fireT-=dt;if(fireT<=0){fireT=.32;S.balls--;dirtyUI=true;const pw=+$("power").value/100;balls.push({x:PK.lx,y:PK.ly,vx:0,vy:0,rail:0,pw:pw*(0.92+Math.random()*.16)});}}
   if(!reel.spin&&reel.pend>0)startReel();
   if(reel.spin){reel.t+=dt;if(reel.t>=reel.dur){reel.spin=false;if(reel.win){feverSuper=reel.win==="momo"||reel.win==="soso";fever=feverSuper?25:15;feverMsg=2.5;if(feverSuper)giveLC(2);toast(feverSuper?"SUPER FEVER! The gate opens wide. +2 loyalty coins.":"FEVER! The big gate is open.");}}}
   if(fever>0){fever-=dt;if(fever<=0)fever=0;}
@@ -782,7 +787,7 @@ function updatePachi(dt){
   const sub=4,h=dt/sub,g=820,br=5;
   for(let s=0;s<sub;s++)for(let i=balls.length-1;i>=0;i--){const b=balls[i];
     if(b.rail!==null&&b.rail!==undefined&&b.rail>=0){b.rail+=h/0.45;const th=.25+b.pw*2.4;// release angle radians from +x CCW
-      const u=b.rail;if(u<.45){b.x=338;b.y=600-(600-PK.cy)*(u/.45);}else{const a=(u-.45)/.55*th;const R=PK.rad+8;b.x=PK.cx+Math.cos(a)*R;b.y=PK.cy-Math.sin(a)*R;
+      const u=b.rail;if(u<.45){b.x=PK.lx;b.y=PK.ly-(PK.ly-PK.cy)*(u/.45);}else{const a=(u-.45)/.55*th;const R=PK.rad+8;b.x=PK.cx+Math.cos(a)*R;b.y=PK.cy-Math.sin(a)*R;
         if(u>=1){b.rail=-1;const R2=PK.rad-br-2;b.x=PK.cx+Math.cos(th)*R2;b.y=PK.cy-Math.sin(th)*R2;const sp=240+b.pw*60;b.vx=-Math.sin(th)*sp;b.vy=-Math.cos(th)*sp;}}continue;}
     b.vy+=g*h;b.x+=b.vx*h;b.y+=b.vy*h;
     // walls
@@ -795,7 +800,7 @@ function updatePachi(dt){
     // pegs
     for(const p of pegs){const dx=b.x-p.x,dy=b.y-p.y;if(Math.abs(dx)>8||Math.abs(dy)>8)continue;const d=Math.hypot(dx,dy),m=br+3;if(d<m&&d>0){const nx=dx/d,ny=dy/d;b.x=p.x+nx*m;b.y=p.y+ny*m;const vn=b.vx*nx+b.vy*ny;if(vn<0){b.vx-=1.45*vn*nx;b.vy-=1.45*vn*ny;b.vx+=rnd(-12,12);}}}
     // attacker lid when closed
-    const at=pockets[3];if(!fever&&Math.abs(b.x-at.x)<at.w/2+br&&b.y>at.y-10-br&&b.y<at.y){b.y=at.y-10-br;b.vy=-Math.abs(b.vy)*.35;b.vx+=b.x<at.x?-20:20;}
+    const at=pockets.find(p=>p.id==="attacker");if(!fever&&Math.abs(b.x-at.x)<at.w/2+br&&b.y>at.y-10-br&&b.y<at.y){b.y=at.y-10-br;b.vy=-Math.abs(b.vy)*.35;b.vx+=b.x<at.x?-20:20;}
     // pockets
     let gone=false;
     for(const pk of pockets){if(pk.id==="attacker"&&!fever)continue;if(b.vy>0&&Math.abs(b.x-pk.x)<pk.w/2&&b.y>pk.y-4&&b.y<pk.y+6){gone=true;S.balls+=pk.pay;dirtyUI=true;pk.flash=.4;
@@ -803,19 +808,23 @@ function updatePachi(dt){
       if(pk.id==="start"&&reel.pend<4)reel.pend++;break;}}
     if(gone||b.y>PK.bottom+10){balls.splice(i,1);}}
   for(const pk of pockets)if(pk.flash>0)pk.flash-=dt;}
-// Cabinet art: assets/pk_cabinet.webp (497×900); its glass playfield spans x 60–436, y 90–638.
-const CAB={w:497,h:900,wx:60,wy:90,ww:376,wh:548};
 function pkImg(k,x,y,w,ax,ay){const im=IM[k];if(!im||!im.complete||!im.width)return false;const h=w*im.height/im.width;ctx.drawImage(im,x-w*(ax??.5),y-h*(ay??.5),w,h);return true;}
 function drawPachi(time){
-  // Close-up: the playfield fills the screen; the cabinet art is scaled to frame it and runs off the edges.
-  ctx.fillStyle="#F3B5BF";ctx.fillRect(0,0,CW,CH);
-  const trayH=($("tray").offsetHeight||90),top=50,avH=CH-top-trayH-6;
-  const bk=Math.min((CW-20)/328,avH/593);PK.s=bk;PK.ox=CW/2-169*bk;PK.oy=top+(avH-593*bk)/2-19*bk;
-  const cs=bk/Math.min(CAB.ww/328,CAB.wh/593);const cx0=CW/2-(CAB.wx+CAB.ww/2)*cs,cy0=PK.oy+(19+593/2)*bk-(CAB.wy+CAB.wh/2)*cs;
-  const cab=IM.pk_cabinet;if(cab&&cab.complete)ctx.drawImage(cab,cx0,cy0,CAB.w*cs,CAB.h*cs);
-  for(let k=0;k<7;k++){const on=Math.floor(time*5+k)%3===0;if(!on)continue;const a=Math.PI*(1-k/6);const bx=cx0+(248+Math.cos(a)*190)*cs,by=cy0+(150-Math.sin(a)*95)*cs;ctx.globalAlpha=.75;ctx.fillStyle="#FFF6B0";ctx.beginPath();ctx.arc(bx,by,9*cs+2,0,7);ctx.fill();ctx.globalAlpha=1;}
+  const trayH=($("tray").offsetHeight||90),top=48,avH=CH-top-trayH-4,avW=CW-8;
+  let bk=avW/360,H=Math.round(Math.max(560,Math.min(860,avH/bk))/10)*10;bk=Math.min(avW/360,avH/H);
+  if(H!==PK.H){buildBoard(H);balls.length=0;}
+  PK.s=bk;PK.ox=CW/2-180*bk;PK.oy=top+(avH-H*bk)/2;
+  // cabinet surround
+  const bg=ctx.createLinearGradient(0,0,0,CH);bg.addColorStop(0,"#F6C2CC");bg.addColorStop(1,"#EFA9B8");ctx.fillStyle=bg;ctx.fillRect(0,0,CW,CH);
+  ctx.fillStyle="rgba(255,255,255,.3)";for(let y=10;y<CH;y+=56)for(let x=(y/56%2)*28;x<CW;x+=56){starP(ctx,x,y,5,5);ctx.fill();}
   ctx.save();ctx.translate(PK.ox,PK.oy);ctx.scale(bk,bk);
-  // gold rail
+  // frame: gold rim + bulbs around the glass
+  ctx.beginPath();ctx.roundRect(-2,-2,364,H+4,[184,184,26,26]);ctx.fillStyle="#E7B23C";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.stroke();
+  ctx.beginPath();ctx.roundRect(5,5,350,H-10,[176,176,20,20]);const gl=ctx.createLinearGradient(0,0,0,H);gl.addColorStop(0,"#E4F4E6");gl.addColorStop(1,"#CDEBD3");ctx.fillStyle=gl;ctx.fill();ctx.lineWidth=2;ctx.stroke();
+  ctx.save();ctx.clip();ctx.fillStyle="rgba(255,255,255,.35)";for(let i=0;i<10;i++){ctx.beginPath();ctx.arc(30+i*37,80+(i%4)*(H/4),14+(i%3)*8,0,7);ctx.fill();}ctx.restore();
+  for(let k=0;k<9;k++){const a=Math.PI*(1-k/8),bx=180+Math.cos(a)*178,by=182-Math.sin(a)*178;const on=Math.floor(time*5+k)%3===0;ctx.beginPath();ctx.arc(bx,by,5,0,7);ctx.fillStyle=on?"#FFF6B0":"#FFE7A8";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=OL;ctx.stroke();}
+  // launch lane + rail
+  ctx.fillStyle="rgba(94,59,34,.08)";ctx.fillRect(PK.lw[0],PK.cy,PK.lw[1]-PK.lw[0],PK.bottom-PK.cy);
   ctx.strokeStyle="#E7B23C";ctx.lineWidth=5;ctx.beginPath();ctx.arc(PK.cx,PK.cy,PK.rad+1,Math.PI,0);ctx.lineTo(PK.R+1,PK.bottom-10);ctx.stroke();
   ctx.strokeStyle=OL;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(PK.cx,PK.cy,PK.rad+4,Math.PI,0);ctx.stroke();
   ctx.beginPath();ctx.ellipse(PK.cx,PK.bottom-6,26,9,0,0,7);P(ctx,"#5E3B22",2);
@@ -836,11 +845,11 @@ function drawPachi(time){
     if(sym==="momo"||sym==="soso")drawTurtle(ctx,sym,"front",cx,cy+rh*.36,rh*.8,false,0);else drawIcon(ctx,sym,cx,cy,rh*.62);
     ctx.restore();}
   ctx.textAlign="center";ctx.font="700 12px Fredoka,sans-serif";ctx.fillStyle="#FFE08A";
-  const msg=fever>0?`${feverSuper?"SUPER ":""}FEVER · ${Math.ceil(fever)}s`:reel.spin&&reel.reach&&reel.t>reel.dur*.55?"REACH!":reel.pend?`Spins · ${reel.pend}`:"Hit START!";
+  ctx.font="700 14px Fredoka,sans-serif";const msg=fever>0?`${feverSuper?"SUPER ":""}FEVER · ${Math.ceil(fever)}s`:reel.spin&&reel.reach&&reel.t>reel.dur*.55?"REACH!":reel.pend?`Spins · ${reel.pend}`:"Hit START!";
   ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.strokeText(msg,(sc.x1+sc.x2)/2,sc.y2-8);ctx.fillText(msg,(sc.x1+sc.x2)/2,sc.y2-8);
   for(const b of balls)if(!pkImg("pk_ball",b.x,b.y,11)){ctx.beginPath();ctx.arc(b.x,b.y,5,0,7);ctx.fillStyle="#C9CFD6";ctx.fill();}
   ctx.restore();
-  if(feverMsg>0){ctx.save();ctx.globalAlpha=Math.min(1,feverMsg);ctx.font=`700 ${Math.round(Math.min(56,CW/9))}px Fredoka,sans-serif`;ctx.textAlign="center";ctx.lineWidth=8;ctx.strokeStyle=OL;const t=feverSuper?"SUPER FEVER!":"FEVER!";ctx.strokeText(t,CW/2,PK.oy+140*bk);ctx.fillStyle="#FFE08A";ctx.fillText(t,CW/2,PK.oy+140*bk);ctx.restore();}}
+  if(feverMsg>0){ctx.save();ctx.globalAlpha=Math.min(1,feverMsg);ctx.font=`700 ${Math.round(Math.min(56,CW/9))}px Fredoka,sans-serif`;ctx.textAlign="center";ctx.lineWidth=8;ctx.strokeStyle=OL;const t=feverSuper?"SUPER FEVER!":"FEVER!";ctx.strokeText(t,CW/2,PK.oy+(PK.screen.y2+40)*bk);ctx.fillStyle="#FFE08A";ctx.fillText(t,CW/2,PK.oy+(PK.screen.y2+40)*bk);ctx.restore();}}
 
 // ================= SHEETS =================
 let sheetKind=null,sheetArg=null;
