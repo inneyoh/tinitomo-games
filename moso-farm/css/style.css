@@ -364,3 +364,32 @@ p.note{margin:0;font-size:13px;color:#8A6748;line-height:1.5}
 @media (max-width:520px){#pctl{gap:6px;padding:5px 10px}.pcounter img{width:48px}.pcounter b{font-size:16px}.pknob img{width:36px}.pknob input{width:76px}#fire{width:70px;height:64px}#fire b{font-size:13px}.pbtn{font-size:12px;padding:2px 8px 2px 3px}.pbtn img{width:24px;height:24px}}
 #evt,#evt *,#store,#store *{box-sizing:border-box}
 #evt .ev-box{width:100%;max-width:min(1000px,100%)}
+
+/* pachinko close-up control bar */
+#tray:has(#pctl){left:0;right:0;bottom:0;padding:0}
+#pctl{width:100%;max-width:none;border-radius:22px 22px 0 0;border:0;border-top:3px solid var(--ink);box-shadow:0 -3px 0 #E7B23C inset,0 -4px 0 rgba(94,59,34,.15);background:linear-gradient(#FFF1F3,#F7D3DA);padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));gap:12px;justify-content:center;flex-wrap:nowrap}
+.pcounter img{width:52px}.pcounter b{font-size:18px}
+.ppow{display:flex;flex-direction:column;align-items:center;gap:2px;font:700 12px var(--display);color:#8A6748}
+.ppow b{color:var(--ink);font-variant-numeric:tabular-nums}.ppow input{width:110px;accent-color:#EE8FA2}
+#fire{width:84px;height:76px}#fire b{font-size:15px}
+.pbtn{font-size:13px;padding:3px 10px 3px 4px}.pbtn img{width:26px;height:26px}
+@media (max-width:520px){#pctl{gap:6px;padding:6px 8px}.pcounter img{width:40px}.pcounter b{font-size:15px}.pcounter small{display:none}.ppow input{width:70px}#fire{width:64px;height:58px}#fire b{font-size:12px}.pbtn{font-size:11px;padding:2px 6px 2px 3px}.pbtn img{width:20px;height:20px}}
+/* truck departure scene */
+#drive{position:fixed;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;background:rgba(60,38,20,.45);padding:16px;cursor:pointer;animation:fadein .2s}
+.dr-card{width:min(640px,100%);background:var(--cream);border:3px solid var(--ink);border-radius:26px;box-shadow:0 0 0 5px var(--leaf),0 0 0 8px var(--ink);overflow:hidden;animation:popin .3s cubic-bezier(.3,1.5,.5,1)}
+.dr-scene{position:relative;height:clamp(180px,42vw,280px);background-size:auto 100%;background-repeat:repeat-x;background-position:0 0;overflow:hidden}
+#drive.go .dr-scene{animation:roadscroll 2.4s linear infinite}
+@keyframes roadscroll{to{background-position-x:var(--sw,1800px)}}
+.dr-car{position:absolute;left:50%;bottom:12%;width:44%;transform:translateX(-50%)}
+.dr-car img{width:100%;display:block;filter:drop-shadow(0 6px 0 rgba(60,40,20,.18))}
+#drive.go .dr-car{animation:drive 3.4s ease-in forwards}
+#drive.go .dr-car img{animation:rumble .18s ease-in-out infinite alternate}
+@keyframes drive{0%{transform:translateX(30%)}25%{transform:translateX(-50%)}62%{transform:translateX(-50%)}100%{transform:translateX(-260%)}}
+@keyframes rumble{to{transform:translateY(-3px) rotate(-.6deg)}}
+.puff{position:absolute;right:-6%;bottom:6%;width:18%;aspect-ratio:1;border-radius:50%;background:#F3E4C2;opacity:0}
+#drive.go .puff{animation:puff .7s ease-out infinite}.puff.p2{animation-delay:.23s!important}.puff.p3{animation-delay:.46s!important}
+@keyframes puff{0%{opacity:.85;transform:scale(.4) translate(0,0)}100%{opacity:0;transform:scale(1.2) translate(60%,-30%)}}
+#drText{margin:0;padding:12px 16px;display:flex;align-items:center;gap:10px;font:700 18px var(--display);color:var(--ink)}
+#drText img{height:52px}
+@media (prefers-reduced-motion:reduce){#drive.go .dr-scene,#drive.go .dr-car img,#drive.go .puff{animation:none}}
+@media (min-width:700px){#pctl{gap:22px;padding:10px 20px}.pcounter img{width:64px}.pcounter b{font-size:20px}.ppow{font-size:14px}.ppow input{width:150px}#fire{width:100px;height:90px}#fire b{font-size:17px}.pbtn{font-size:15px;padding:4px 12px 4px 6px}.pbtn img{width:30px;height:30px}}

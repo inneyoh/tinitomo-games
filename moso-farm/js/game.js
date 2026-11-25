@@ -1,4 +1,4 @@
-const ASSET_KEYS=["can", "canpour", "cu_bae", "cu_bae_upset", "cu_bun", "cu_bun_upset", "cu_gwoof", "cu_gwoof_upset", "cu_kew", "cu_kew_upset", "cu_kuma", "cu_kuma_upset", "cu_piyo", "cu_piyo_upset", "cu_popo", "cu_popo_upset", "cu_rang", "cu_rang_upset", "farmbg", "heart", "ic_beanie", "ic_bread", "ic_butterpop", "ic_caramelpop", "ic_carrot", "ic_carrotcake", "ic_carrotjuice", "ic_corn", "ic_egg", "ic_honey", "ic_honeytea", "ic_honeytoast", "ic_latte", "ic_melon", "ic_melonsoda", "ic_milk", "ic_mittens", "ic_muffin", "ic_omelette", "ic_parfait", "ic_popcornbucket", "ic_pumpkin", "ic_pumpkinpie", "ic_pumpkinsoup", "ic_quiche", "ic_scarf", "ic_shell", "ic_shortcake", "ic_smoothie", "ic_strawberry", "ic_strawmilk", "ic_strawpop", "ic_sweater", "ic_tomato", "ic_tomatojuice", "ic_tote", "ic_truffle", "ic_trufflepasta", "ic_truffletoast", "ic_veggiestew", "ic_wheat", "ic_wool", "momo_back", "momo_explore", "momo_front", "momo_side", "momo_three", "oa_barn", "oa_chick", "oa_chicken", "oa_cow", "oa_cow_a", "oa_f_bench", "oa_f_bench_momo", "oa_f_bench_soso", "oa_f_hammock", "oa_f_hammock_momo", "oa_f_hammock_soso", "oa_f_picnic", "oa_f_picnic_momo", "oa_f_picnic_soso", "oa_f_swing", "oa_f_swing_momo", "oa_f_swing_soso", "oa_hen", "oa_locked", "oa_pig", "oa_pig_a", "oa_r_carrot", "oa_r_corn", "oa_r_melon", "oa_r_pumpkin", "oa_r_strawberry", "oa_r_tomato", "oa_r_wheat", "oa_s_bakery", "oa_s_cafe", "oa_s_clothing", "oa_s_eatery", "oa_s_juice", "oa_s_popcorn", "oa_s_veggie", "oa_seedmound", "oa_sheep", "oa_sheep_a", "oa_soil", "oa_soilwet", "oa_sprout", "oa_truck", "oa_village", "oa_young", "pk_ball", "pk_bell", "pk_cabinet", "pk_fire", "pk_gate", "pk_gateopen", "pk_heart", "pk_knob", "pk_pin", "pk_room", "pk_screen", "pk_start", "pk_tray", "pk_tulip", "pt_bae", "pt_bun", "pt_gwoof", "pt_kew", "pt_kuma", "pt_momo", "pt_piyo", "pt_popo", "pt_rang", "pt_soso", "pz_boost", "pz_flowerbed", "pz_fountain", "pz_hat", "pz_melon", "pz_pouch", "pz_ribbon", "pz_sprinkler", "soso_back", "soso_explore", "soso_front", "soso_side", "soso_three", "ui_basket", "ui_can", "ui_coin", "ui_seed", "ui_shop", "ui_sickle"];
+const ASSET_KEYS=["can", "canpour", "cu_bae", "cu_bae_upset", "cu_bun", "cu_bun_upset", "cu_gwoof", "cu_gwoof_upset", "cu_kew", "cu_kew_upset", "cu_kuma", "cu_kuma_upset", "cu_piyo", "cu_piyo_upset", "cu_popo", "cu_popo_upset", "cu_rang", "cu_rang_upset", "dr_road", "dr_truck", "farmbg", "heart", "ic_beanie", "ic_bread", "ic_butterpop", "ic_caramelpop", "ic_carrot", "ic_carrotcake", "ic_carrotjuice", "ic_corn", "ic_egg", "ic_honey", "ic_honeytea", "ic_honeytoast", "ic_latte", "ic_melon", "ic_melonsoda", "ic_milk", "ic_mittens", "ic_muffin", "ic_omelette", "ic_parfait", "ic_popcornbucket", "ic_pumpkin", "ic_pumpkinpie", "ic_pumpkinsoup", "ic_quiche", "ic_scarf", "ic_shell", "ic_shortcake", "ic_smoothie", "ic_strawberry", "ic_strawmilk", "ic_strawpop", "ic_sweater", "ic_tomato", "ic_tomatojuice", "ic_tote", "ic_truffle", "ic_trufflepasta", "ic_truffletoast", "ic_veggiestew", "ic_wheat", "ic_wool", "momo_back", "momo_explore", "momo_front", "momo_side", "momo_three", "oa_barn", "oa_chick", "oa_chicken", "oa_cow", "oa_cow_a", "oa_f_bench", "oa_f_bench_momo", "oa_f_bench_soso", "oa_f_hammock", "oa_f_hammock_momo", "oa_f_hammock_soso", "oa_f_picnic", "oa_f_picnic_momo", "oa_f_picnic_soso", "oa_f_swing", "oa_f_swing_momo", "oa_f_swing_soso", "oa_hen", "oa_locked", "oa_pig", "oa_pig_a", "oa_r_carrot", "oa_r_corn", "oa_r_melon", "oa_r_pumpkin", "oa_r_strawberry", "oa_r_tomato", "oa_r_wheat", "oa_s_bakery", "oa_s_cafe", "oa_s_clothing", "oa_s_eatery", "oa_s_juice", "oa_s_popcorn", "oa_s_veggie", "oa_seedmound", "oa_sheep", "oa_sheep_a", "oa_soil", "oa_soilwet", "oa_sprout", "oa_truck", "oa_village", "oa_young", "pk_ball", "pk_bell", "pk_cabinet", "pk_fire", "pk_gate", "pk_gateopen", "pk_heart", "pk_knob", "pk_pin", "pk_room", "pk_screen", "pk_start", "pk_tray", "pk_tulip", "pt_bae", "pt_bun", "pt_gwoof", "pt_kew", "pt_kuma", "pt_momo", "pt_piyo", "pt_popo", "pt_rang", "pt_soso", "pz_boost", "pz_flowerbed", "pz_fountain", "pz_hat", "pz_melon", "pz_pouch", "pz_ribbon", "pz_sprinkler", "soso_back", "soso_explore", "soso_front", "soso_side", "soso_three", "ui_basket", "ui_can", "ui_coin", "ui_seed", "ui_shop", "ui_sickle"];
 const IMG=Object.fromEntries(ASSET_KEYS.map(k=>[k,"assets/"+k+".webp"]));
 (function(){
 "use strict";
@@ -381,7 +381,7 @@ function rollLoot(e){const D=DEST[e.dest],got={};
 function sendExp(){const {who,dest,snack}=expSel;if(S.exp[who])return;if(S.exp.momo||S.exp.soso){toast("The truck is already out. One trip at a time.");return;}if(S.lvl<DEST[dest].lvl){toast(`${DEST[dest].n} opens at level ${DEST[dest].lvl}.`);return;}
   if(snack){if(!has({egg:1,wheat:2})){toast("A snack needs 1 egg and 2 wheat from the barn.");return;}take({egg:1,wheat:2});}
   S.exp[who]={dest,start:Date.now(),end:Date.now()+expDur(who,dest),snack};
-  toast(`${who==="momo"?"Momo":"Soso"} drove the truck to ${DEST[dest].n}!`);closeSheet();save();}
+  closeSheet();TRK.state="gone";playDeparture(who,dest);save();}
 function collectExp(who){const e=S.exp[who];if(!e||Date.now()<e.end)return;const got=rollLoot(e);
   for(const k in got){if(k.startsWith("seed:")){const c=k.slice(5);S.seeds[c]=(S.seeds[c]||0)+got[k];}else addInv(k,got[k]);}
   S.exp[who]=null;gainXP(5+DEST[e.dest].min);postcard={who,dest:e.dest,got};const tu=TURTLES.find(t=>t.who===who);tu.c=6.4;tu.r=12.6;tu.say="I'm home!";tu.sayT=2.5;save();}
@@ -440,7 +440,7 @@ function drawTruck(time){const b=BLD.truck,im=spr("truck");if(!im||!im.width)ret
   const away=["momo","soso"].find(w=>S.exp[w]);const ready=away&&Date.now()>=S.exp[away].end;
   const want=away&&!ready?"gone":"home";
   if(TRK.state===undefined)TRK.state=want;
-  if(TRK.state!==want&&!TRK.mode){TRK.mode=want==="gone"?"leave":"arrive";TRK.t=0;}
+  if(TRK.state!==want){TRK.state=want;TRK.mode=null;if(want==="home")burst("sparkle",b.x,b.y-h*.5,12,{sp:1});}
   let off=0;
   if(TRK.mode){TRK.t+=1/60;const u=Math.min(1,TRK.t/2.2);const e=u*u*(3-2*u);
     off=TRK.mode==="leave"?e*1100:(1-e)*-1100;
@@ -451,6 +451,12 @@ function drawTruck(time){const b=BLD.truck,im=spr("truck");if(!im||!im.width)ret
   ctx.save();ctx.translate(x,y-bob);ctx.drawImage(im,-b.w/2,-h,b.w,h);ctx.restore();
   if(TRK.mode)for(let k=0;k<2;k++){ctx.globalAlpha=.4;E(ctx,x-b.w*.45-k*30,y-10-k*12,18+k*6,12+k*4,"#E9D6AA",0);ctx.globalAlpha=1;}
   if(!TRK.mode){if(ready)label(x,y-h*.95,"Back home!",{bubble:1,col:"#C2553D"});else label(x,y+16,"Expedition Truck");}}
+let driveT=null;
+function playDeparture(who,dest){const el=$("drive");el.hidden=false;const sc=$("drScene");sc.style.backgroundImage=`url(${IMG.dr_road})`;requestAnimationFrame(()=>sc.style.setProperty("--sw",Math.round(sc.offsetHeight*2800/600)+"px"));$("drTruck").src=IMG.dr_truck;
+  $("drText").innerHTML=`<img src="${IMG[who+"_explore"]}" alt=""><span>${FNAME[who]} is off to <b>${DEST[dest].n}</b>!</span>`;
+  el.classList.remove("go");void el.offsetWidth;el.classList.add("go");clearTimeout(driveT);driveT=setTimeout(endDeparture,3600);}
+function endDeparture(){clearTimeout(driveT);$("drive").hidden=true;}
+document.getElementById("drive").addEventListener("click",endDeparture);
 function drawTurtleW(tu,time){const p=turtlePos(tu);const moving=tu.state==="walk"||tu.state==="wander"||tu.state==="goto";
   const ph=time*(tu.state==="walk"?13:8)+(tu.who==="soso"?1.3:0);const hop=moving?Math.abs(Math.sin(ph))*12:Math.sin(time*2.2+(tu.who==="soso"?1:0))*1.5;const sq=moving?1+Math.cos(ph*2)*.05:1+Math.sin(time*2.2)*.02;
   drawTurtle(ctx,tu.who,tu.view,p.x,p.y,128,tu.flip,hop,sq);
@@ -801,17 +807,13 @@ function updatePachi(dt){
 const CAB={w:497,h:900,wx:60,wy:90,ww:376,wh:548};
 function pkImg(k,x,y,w,ax,ay){const im=IM[k];if(!im||!im.complete||!im.width)return false;const h=w*im.height/im.width;ctx.drawImage(im,x-w*(ax??.5),y-h*(ay??.5),w,h);return true;}
 function drawPachi(time){
-  const bgG=ctx.createLinearGradient(0,0,0,CH);bgG.addColorStop(0,"#FBE3E8");bgG.addColorStop(1,"#F3C9D2");ctx.fillStyle=bgG;ctx.fillRect(0,0,CW,CH);
-  ctx.fillStyle="rgba(255,255,255,.35)";for(let y=0;y<CH;y+=60)for(let x=(y/60%2)*30;x<CW;x+=60){starP(ctx,x,y,6,5);ctx.fill();}
-  const trayH=($("tray").offsetHeight||110)+12,top=54,avH=CH-top-trayH+40,cs=Math.min(avH/690,(CW-12)/CAB.w);const cx0=(CW-CAB.w*cs)/2,cy0=top;
-  // soft spotlight + cabinet
-  const gr=ctx.createRadialGradient(CW/2,cy0+CAB.h*cs*.5,10,CW/2,cy0+CAB.h*cs*.5,CAB.h*cs*.75);gr.addColorStop(0,"rgba(255,240,200,.35)");gr.addColorStop(1,"rgba(255,240,200,0)");ctx.fillStyle=gr;ctx.fillRect(0,0,CW,CH);
-  ctx.fillStyle="rgba(60,30,20,.25)";ctx.beginPath();ctx.ellipse(CW/2,cy0+CAB.h*cs-4,CAB.w*cs*.48,14*cs+4,0,0,7);ctx.fill();
+  // Close-up: the playfield fills the screen; the cabinet art is scaled to frame it and runs off the edges.
+  ctx.fillStyle="#F3B5BF";ctx.fillRect(0,0,CW,CH);
+  const trayH=($("tray").offsetHeight||90),top=50,avH=CH-top-trayH-6;
+  const bk=Math.min((CW-20)/328,avH/593);PK.s=bk;PK.ox=CW/2-169*bk;PK.oy=top+(avH-593*bk)/2-19*bk;
+  const cs=bk/Math.min(CAB.ww/328,CAB.wh/593);const cx0=CW/2-(CAB.wx+CAB.ww/2)*cs,cy0=PK.oy+(19+593/2)*bk-(CAB.wy+CAB.wh/2)*cs;
   const cab=IM.pk_cabinet;if(cab&&cab.complete)ctx.drawImage(cab,cx0,cy0,CAB.w*cs,CAB.h*cs);
-  // marquee bulbs twinkle over the art
   for(let k=0;k<7;k++){const on=Math.floor(time*5+k)%3===0;if(!on)continue;const a=Math.PI*(1-k/6);const bx=cx0+(248+Math.cos(a)*190)*cs,by=cy0+(150-Math.sin(a)*95)*cs;ctx.globalAlpha=.75;ctx.fillStyle="#FFF6B0";ctx.beginPath();ctx.arc(bx,by,9*cs+2,0,7);ctx.fill();ctx.globalAlpha=1;}
-  // board transform: PK space (x 5–333, y 19–612) fitted inside the glass
-  const bk=Math.min(CAB.ww/328,CAB.wh/593)*cs;PK.s=bk;PK.ox=cx0+(CAB.wx+CAB.ww/2)*cs-169*bk;PK.oy=cy0+CAB.wy*cs+(CAB.wh*cs-593*bk)/2-19*bk;
   ctx.save();ctx.translate(PK.ox,PK.oy);ctx.scale(bk,bk);
   // gold rail
   ctx.strokeStyle="#E7B23C";ctx.lineWidth=5;ctx.beginPath();ctx.arc(PK.cx,PK.cy,PK.rad+1,Math.PI,0);ctx.lineTo(PK.R+1,PK.bottom-10);ctx.stroke();
@@ -838,11 +840,7 @@ function drawPachi(time){
   ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.strokeText(msg,(sc.x1+sc.x2)/2,sc.y2-8);ctx.fillText(msg,(sc.x1+sc.x2)/2,sc.y2-8);
   for(const b of balls)if(!pkImg("pk_ball",b.x,b.y,11)){ctx.beginPath();ctx.arc(b.x,b.y,5,0,7);ctx.fillStyle="#C9CFD6";ctx.fill();}
   ctx.restore();
-  // Momo & Soso cheering beside the machine
-  const dance=fever>0?Math.abs(Math.sin(time*8))*12:Math.abs(Math.sin(time*2))*2,th=Math.min(190,CAB.h*cs*.24),side=CAB.w*cs*.5+th*.5,fy=cy0+640*cs;
-  if(CW>700&&CW/2-side-th*.45>0){drawTurtle(ctx,"momo",fever>0&&Math.floor(time*3)%2?"three":"front",CW/2-side,fy,th,false,dance);
-    drawTurtle(ctx,"soso",fever>0&&Math.floor(time*3+1)%2?"three":"front",CW/2+side,fy,th,true,dance);}
-  if(feverMsg>0){ctx.save();ctx.globalAlpha=Math.min(1,feverMsg);ctx.font=`700 ${Math.round(Math.min(56,CW/9))}px Fredoka,sans-serif`;ctx.textAlign="center";ctx.lineWidth=8;ctx.strokeStyle=OL;const t=feverSuper?"SUPER FEVER!":"FEVER!";ctx.strokeText(t,CW/2,cy0+CAB.h*cs*.22);ctx.fillStyle="#FFE08A";ctx.fillText(t,CW/2,cy0+CAB.h*cs*.22);ctx.restore();}}
+  if(feverMsg>0){ctx.save();ctx.globalAlpha=Math.min(1,feverMsg);ctx.font=`700 ${Math.round(Math.min(56,CW/9))}px Fredoka,sans-serif`;ctx.textAlign="center";ctx.lineWidth=8;ctx.strokeStyle=OL;const t=feverSuper?"SUPER FEVER!":"FEVER!";ctx.strokeText(t,CW/2,PK.oy+140*bk);ctx.fillStyle="#FFE08A";ctx.fillText(t,CW/2,PK.oy+140*bk);ctx.restore();}}
 
 // ================= SHEETS =================
 let sheetKind=null,sheetArg=null;
@@ -973,13 +971,13 @@ function renderTray(){$("zoom").hidden=area==="pachi";const T=$("tray");T.classL
     if(shopMenuOpen){h+=`<div class="slist"><button class="srow coll" data-open="collect"><span class="ic coin">¢</span><b>Collect all registers</b></button>`+PSHOP.map(b=>{const sh=S.shops[b.id],D=SHOPS[b.id];return `<button class="srow ${sh.open?"":"lk"}" data-gostore="${b.id}"><img src="${IMG[b.spr]}" alt=""><b>${D.n}</b>${sh.open?(sh.reg?`<em><i class="cn"></i>${sh.reg}</em>`:keeperOf(b.id)?`<small>${FNAME[keeperOf(b.id)]}</small>`:`<small>no keeper</small>`):`<small>🔒</small>`}</button>`;}).join("")+`<button class="srow" data-gopachi="1"><span class="ic">🎰</span><b>Pachinko</b></button></div>`;}
     h+=`<button class="fab" data-smenu="1" aria-expanded="${shopMenuOpen}"><span class="ring"><img src="${IMG.ui_shop}" alt=""></span><b>${shopMenuOpen?"Close":"Shops"}</b></button></div>`;}
   else{h=`<div id="pctl"><div class="pcounter"><img src="${IMG.pk_tray}" alt=""><b id="bcount">${S.balls}</b><small>balls</small></div>
-    <label class="pknob" for="power"><img src="${IMG.pk_knob}" alt="" id="knobimg" style="transform:rotate(${(pctPower-50)*1.6}deg)"><span>Power</span><input type="range" id="power" min="0" max="100" value="${pctPower}"></label>
+    <label class="ppow" for="power"><span>Power <b id="powv">${pctPower}</b></span><input type="range" id="power" min="0" max="100" value="${pctPower}"></label>
     <button id="fire" aria-label="Hold to fire balls"><img src="${IMG.pk_fire}" alt=""><b>HOLD</b></button>
     <div class="pside"><button class="pbtn" data-open="buyballs" ${S.lc>0?"":"disabled"}><img src="${IMG.pk_heart}" alt="">1 ♥ → 25</button><button class="pbtn" data-open="prizes"><img src="${IMG.pk_bell}" alt="">Prizes</button></div></div>`;}
   T.innerHTML=h;
   if(area==="pachi"){const f=$("fire");const on=e=>{e.preventDefault();if(S.balls<=0){toast(S.lc>0?"Out of balls. Swap a loyalty coin for 25.":"Out of balls. Earn loyalty coins by selling in the plaza and buying upgrades.");return;}firing=true;fireT=0;f.classList.add("on");try{f.setPointerCapture(e.pointerId);}catch(_){}};
     const off=()=>{firing=false;f.classList.remove("on");};f.addEventListener("pointerdown",on);f.addEventListener("pointerup",off);f.addEventListener("pointercancel",off);f.addEventListener("lostpointercapture",off);
-    $("power").addEventListener("input",e=>{pctPower=+e.target.value;const k=$("knobimg");if(k)k.style.transform=`rotate(${(pctPower-50)*1.6}deg)`;});}}
+    $("power").addEventListener("input",e=>{pctPower=+e.target.value;const k=$("powv");if(k)k.textContent=pctPower;});}}
 let pctPower=55;
 $("tray").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;
   if(d.seed){S.sel=d.seed;tool="seed";toolOpen=false;renderTray();}
