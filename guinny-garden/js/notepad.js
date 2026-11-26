@@ -17,7 +17,7 @@ const rec = (k) => {
 const seen = (k) => { const r = rec(k); return r.planted > 0 || r.harvested > 0; };
 const rank = (n) => MILESTONES.filter((m) => n >= m.at).pop() || null;
 const date = (t) => (t ? new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) : '—');
-const where = (f) => f.where.map((w) => (w === 'pot' ? 'flower pot' : 'planter')).join(' or ');
+const where = () => 'little pot on the step shelf';
 // how much of the page is filled in: opened, harvested, + each milestone note
 const filled = (k) => {
   const r = rec(k);

@@ -37,7 +37,12 @@ function load() {
     if (raw) {
       const d = JSON.parse(raw);
       delete d.plots;
-      if (!d.garden || d.garden.length !== PLOTS.length) delete d.garden;   // garden layout changed
+      // garden layout changed: keep what was growing (up to the number of pots)
+      if (d.garden && d.garden.length !== PLOTS.length) {
+        const kept = d.garden.filter((p) => p && p.key && FLOWERS[p.key]).slice(0, PLOTS.length);
+        d.garden = PLOTS.map((_, i) => kept[i] || { key: null });
+      }
+      if (!d.garden) delete d.garden;
       // drop goods that no longer exist (older versions had other teas)
       if (d.lineup) d.lineup = d.lineup.filter((k) => PRODUCTS[k]);
       for (const bag of [d.stock, d.sold]) if (bag) for (const k of Object.keys(bag)) if (!PRODUCTS[k]) delete bag[k];
@@ -88,7 +93,7 @@ export function growMs(key) {
   return FLOWERS[key].growMin * 60_000 * (S.settings.speedy ? 0.1 : 1) * (S.upgrades.compost ? 0.75 : 1);
 }
 export const wetMs = (key) => growMs(key) * (S.upgrades.bigcan ? 1.05 : 0.5);
-const autoWet = (i) => !!S.upgrades.sprinkler && PLOTS[i].type === 'soil';
+const autoWet = () => !!S.upgrades.sprinkler;
 
 export function updatePlot(i, now = Date.now()) {
   const p = S.garden[i];
