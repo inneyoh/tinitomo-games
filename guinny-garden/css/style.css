@@ -1447,3 +1447,101 @@ body.rb-open .mg-hint { opacity: 0; }
 .plot.pot .mound { left: 24%; top: 2%; width: 46%; }
 .plot.pot .plant { bottom: 78%; height: 120%; left: -30%; right: -30%; }
 
+
+/* ====================================================================
+   Hands-on workbench: pick things up, pour, hold the flame (no text buttons)
+   ==================================================================== */
+.wb-grab { touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.wb-src { position: relative; }
+.wb-src.lifted > .wb-prop:not(.wb-jar-keep) { opacity: .9; }
+.wb-canister.lifted::after { content: none; }
+.wb-spot { position: absolute; width: 54px; height: 54px; margin: -27px 0 0 -27px; border-radius: 50%; pointer-events: none;
+  border: 3px solid #FFF6D8; background: rgba(255, 236, 170, .28); box-shadow: 0 0 0 3px rgba(232, 176, 74, .8), 0 0 14px rgba(255, 220, 140, .9);
+  animation: wb-spot 1.6s ease-in-out infinite; z-index: 3; }
+@keyframes wb-spot { 0%, 100% { transform: scale(.8); opacity: .9; } 50% { transform: scale(1.12); opacity: .45; } }
+.lifted .wb-spot, .held .wb-spot, .pb-station.is-done .wb-spot { display: none; }
+.wb-ghost { position: fixed; left: 0; top: 0; z-index: 5000; pointer-events: none; transform: translate(-50%, -88%); }
+.wb-ghost.back { transition: left .26s ease-in, top .26s ease-in, opacity .26s; opacity: 0; }
+.wb-ghost .wb-prop { pointer-events: none; }
+/* scoop: bowl at lower left, tips to the left to pour */
+.wb-scoop { position: relative; width: 120px; transform-origin: 30% 70%; transition: transform .18s; }
+.wb-scoop .wb-prop { width: 100%; }
+.wb-scoop-heap { position: absolute; left: 2%; top: 26%; width: 52%; height: 42%; display: flex; justify-content: center; transform-origin: 50% 100%; transition: transform .15s; }
+.wb-scoop-heap > * { width: 55%; height: auto; margin: 0 -10%; } .wb-scoop-heap svg, .wb-scoop-heap img { width: 100%; height: 100%; }
+.wb-ghost.tilt .wb-scoop { transform: rotate(-38deg); }
+.wb-ghost.tilt .wb-scoop-heap { top: 34%; }
+.wb-ghost.empty .wb-scoop-heap { display: none; }
+.wb-pinch { width: 46px; height: 46px; } .wb-pinch svg, .wb-pinch img { width: 100%; height: 100%; }
+.wb-pile { pointer-events: auto; z-index: 2; }
+.wb-falls { position: absolute; left: 25%; right: 25%; top: -18%; height: 30%; pointer-events: none; z-index: 3; }
+.wb-target .wb-falls { top: -24%; height: 40%; }
+.wb-bit { position: absolute; top: 0; width: 22px; height: 22px; animation: wb-bit .5s ease-in forwards; }
+.wb-bit > * { width: 100%; height: 100%; display: block; }
+.wb-bit b { border-radius: 50%; width: 9px; height: 12px; margin: 0 auto; }
+@keyframes wb-bit { from { transform: translateY(-10px) rotate(0); opacity: 1; } to { transform: translateY(70px) rotate(90deg); opacity: 0; } }
+/* heating: the flame grows while you hold it */
+.wb-heat-prop { touch-action: none; }
+.wb-flame { position: absolute; width: 26px; height: 36px; margin: -30px 0 0 -13px; border-radius: 50% 50% 45% 45% / 65% 65% 35% 35%; pointer-events: none;
+  background: radial-gradient(circle at 50% 70%, #FFF3B8 0 25%, #F7B458 55%, rgba(239, 124, 74, 0) 75%);
+  transform: scale(var(--f, .35)); transform-origin: 50% 100%; transition: transform .15s; animation: wb-flick .25s ease-in-out infinite alternate; opacity: .95; }
+@keyframes wb-flick { to { filter: brightness(1.15); margin-top: -32px; } }
+/* jug / tray pouring */
+.wb-pour { display: flex; align-items: flex-end; gap: clamp(8px, 3vw, 20px); }
+.wb-jug { width: min(30vw, 20dvh, 170px); }
+.wb-jug .wb-prop, .wb-jug-ghost .wb-prop { width: 100%; }
+.wb-target { position: relative; width: min(34vw, 24dvh, 190px); }
+.wb-target .wb-prop { width: 100%; }
+.wb-jug-in { position: absolute; inset: 30% 18% 14%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; pointer-events: none; }
+.wb-jug-in > svg, .wb-jug-in > img { width: 30%; height: auto; margin: -4%; }
+.wb-jug-liquid { position: absolute; left: 0; right: 0; bottom: 0; height: 55%; border-radius: 0 0 16px 16px; opacity: .65; }
+.wb-jug.lifted .wb-jug-in { opacity: .25; }
+.wb-jug-ghost { position: relative; width: 140px; transform-origin: 20% 30%; transition: transform .2s; }
+.wb-ghost.tilt .wb-jug-ghost { transform: rotate(-40deg); }
+/* dropper */
+.wb-dropper { width: min(32vw, 20dvh, 170px); display: flex; align-items: flex-end; }
+.wb-dropper > .wb-prop:first-child { width: 48%; }
+.wb-dropper-rest { width: 52%; margin-left: -6%; margin-bottom: 4%; transform: rotate(-12deg); }
+.wb-dropper.lifted .wb-dropper-rest { opacity: 0; }
+.wb-dropper-ghost { width: 130px; transform: rotate(-90deg) translateX(-30%); transform-origin: 50% 50%; }
+.wb-dropper-ghost .wb-prop { width: 100%; }
+.wb-ghost:has(.wb-dropper-ghost) { transform: translate(-50%, -140%); }
+/* withering tray, oxidising basket */
+.wb-heap { pointer-events: auto; }
+.wb-handful { width: 70px; height: 44px; border-radius: 50% 50% 46% 46%; box-shadow: inset 0 -6px 10px rgba(0,0,0,.18), 0 4px 8px rgba(94,69,53,.25); }
+.wb-basket { touch-action: none; }
+.wb-basket.lifted .wb-ox { opacity: .3; }
+
+/* ====================================================================
+   Garden v4: 12 little pots on two wooden step shelves (3 steps x 2 pots)
+   ==================================================================== */
+.g-canvas .shelf { position: absolute; aspect-ratio: 0.9250; }
+.g-canvas .shelf-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; filter: drop-shadow(0 8px 6px rgba(94, 69, 53, .22)); }
+.g-canvas .shelf .plot.pot { position: absolute; width: 23%; height: auto; aspect-ratio: 300 / 287; top: auto; }
+.g-canvas .shelf .pot-img { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; filter: drop-shadow(0 3px 2px rgba(94, 69, 53, .25)); transition: filter .6s; }
+.g-canvas .shelf .plot.wet .pot-img { filter: drop-shadow(0 3px 2px rgba(94, 69, 53, .25)) brightness(.9) saturate(1.1); }
+.g-canvas .shelf .plot .plant { left: -30%; right: -30%; bottom: 78%; height: 122%; z-index: 0; }
+.g-canvas .shelf .plot .plot-bar { bottom: 30%; z-index: 2; }
+.g-canvas .shelf .plot .plot-badge { top: 10%; z-index: 3; }
+.g-canvas .shelf .plot.empty .pot-img { filter: drop-shadow(0 3px 2px rgba(94, 69, 53, .25)) drop-shadow(0 0 0 rgba(255,255,255,0)); }
+.g-canvas .shelf .plot.empty::after { content: "+"; position: absolute; left: 50%; top: 8%; transform: translateX(-50%); z-index: 2; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; color: var(--ink-soft); background: rgba(255, 252, 246, .8); border: 2px solid var(--line); pointer-events: none; }
+.g-canvas .shelf .plot.t0 { bottom: 90.00%; z-index: 1; }
+.g-canvas .shelf .plot.t0.s0 { left: 21.50%; }
+.g-canvas .shelf .plot.t0.s1 { left: 62.50%; }
+.g-canvas .shelf .plot.t1 { bottom: 59.50%; z-index: 2; }
+.g-canvas .shelf .plot.t1.s0 { left: 15.50%; }
+.g-canvas .shelf .plot.t1.s1 { left: 54.50%; }
+.g-canvas .shelf .plot.t2 { bottom: 29.50%; z-index: 3; }
+.g-canvas .shelf .plot.t2.s0 { left: 8.50%; }
+.g-canvas .shelf .plot.t2.s1 { left: 46.50%; }
+[data-o="portrait"] .shelf[data-s="0"] { left: 37%; top: 11.5%; width: 58%; z-index: 16; }
+[data-o="portrait"] .shelf[data-s="1"] { left: 3%; top: 44.5%; width: 58%; z-index: 49; }
+[data-o="portrait"] .g-bench { left: 63%; top: 78%; width: 35%; z-index: 81; }
+[data-o="portrait"] .tool-can { left: 64.40%; top: 74.49%; width: 11.90%; z-index: 82; }
+[data-o="portrait"] .g-trowel { left: 77.00%; top: 76.54%; width: 6.30%; z-index: 82; }
+[data-o="portrait"] .tool-ipad { left: 84.70%; top: 73.91%; width: 9.80%; z-index: 82; }
+[data-o="landscape"] .shelf[data-s="0"] { left: 16%; top: 23%; width: 27%; z-index: 28; }
+[data-o="landscape"] .shelf[data-s="1"] { left: 45%; top: 25%; width: 27%; z-index: 30; }
+[data-o="landscape"] .g-bench { left: 75%; top: 64%; width: 20%; z-index: 67; }
+[data-o="landscape"] .tool-can { left: 75.80%; top: 57.67%; width: 6.80%; z-index: 68; }
+[data-o="landscape"] .g-trowel { left: 83.00%; top: 61.36%; width: 3.60%; z-index: 68; }
+[data-o="landscape"] .tool-ipad { left: 87.40%; top: 56.61%; width: 5.60%; z-index: 68; }
