@@ -174,8 +174,10 @@ const img=(k,cls)=>`<img src="${icon(k)}" alt="" class="${cls||""}">`;
 function needHTML(need,mul){return `<div class="need">${Object.entries(need).map(([k,n])=>{const h=S.inv[k]||0;return `<span class="${h<n?"no":""}" title="${ITEMS[k].n}">${img(k)}${h}/${n}</span>`;}).join("")}</div>`;}
 
 // ================= TURTLES =================
+const TSIZE={momo:1,soso:25/27};
 function drawTurtle(ctx,who,view,x,y,h,flip,bob,sq){
   const im=IM[who+"_"+view]; if(!im||!im.complete)return;
+  h*=TSIZE[who]||1; // Momo ~27cm, Soso ~25cm
   const w=h*im.width/im.height;
   ctx.save();ctx.fillStyle="rgba(70,50,30,.18)";ctx.beginPath();ctx.ellipse(x,y,w*.38,h*.06,0,0,7);ctx.fill();
   ctx.translate(x,y-(bob||0));sq=sq||1;ctx.scale((flip?-1:1)*(2-sq),sq);

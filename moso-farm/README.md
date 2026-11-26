@@ -74,8 +74,11 @@ and `assets/cu_nono.webp` (walking sprite), add both names to `ASSET_KEYS` at th
 ## Art
 
 Farm, plaza, shops, furniture, crops and item icons were generated with OpenArt in a style
-matched to the TiniTomo art. Momo, Soso and the villagers come from the other TiniTomo games
-in this repo.
+matched to the TiniTomo art. Momo and Soso's front/back/side/three-quarter sprites
+(`momo_*`, `soso_*`) are cut from their modular sprite sheets, and the furniture poses
+(`oa_f_<furniture>_<momo|soso>`) were made from those sheets. Momo is drawn a little bigger
+than Soso (about 27 cm to 25 cm; `TSIZE` in `js/game.js`). The villagers come from the other
+TiniTomo games in this repo.
 
 ## Saves
 
