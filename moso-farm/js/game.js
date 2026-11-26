@@ -681,7 +681,7 @@ document.getElementById("evt").addEventListener("click",e=>{if(!EV)return;const 
   if(c){const ch=EV.q[EV.i].choices[+c.dataset.evc];EV.bonus+=ch.bonus||0;EV.q.splice(EV.i+1,0,{reply:ch.reply});EV.i++;evStep();return;}
   if(EV.q[EV.i]&&EV.q[EV.i].choices)return;EV.i++;evStep();});
 
-if(/[?&]debug/.test(location.search))window.__moso={VILL,toSP,get S(){return S;},storyReady,playStory};
+if(/[?&]debug/.test(location.search))window.__moso={VILL,toSP,get balls(){return balls;},get S(){return S;},storyReady,playStory};
 // ================= STORE SCREEN =================
 let storeId=null,storeTab="lineup",chatEv=null;
 const SPECIAL_SHOP={};for(const id in SHOPS)if(SHOPS[id].special)SPECIAL_SHOP[SHOPS[id].special]=id;
@@ -764,7 +764,7 @@ const SLOTV=[1,3,"?",3,1];
 const pegs=[],bumpers=[{x:212,y:520,r:34,k:"pk2_bumper_star"},{x:472,y:520,r:34,k:"pk2_bumper_heart"}],posts=[];
 const catcher={x:342,y:720,w:70};
 (function buildBoard(){const sw=(PK.R-PK.L)/5;for(let i=1;i<5;i++)posts.push(PK.L+sw*i);
-  for(let r=0;;r++){const y=300+r*34;if(y>PK.slotTop-22)break;for(let c=0;;c++){const x=PK.L+18+c*34+(r%2?17:0);if(x>PK.R-12)break;
+  for(let r=0;;r++){const y=300+r*34;if(y>PK.slotTop-22)break;for(let c=0;;c++){const x=PK.L+18+c*34+(r%2?17:0);if(x>PK.R-30)break;if(x<PK.L+30)continue;
     if(bumpers.some(b=>Math.hypot(x-b.x,y-b.y)<b.r+22))continue;if(Math.abs(x-catcher.x)<64&&y>catcher.y-44&&y<catcher.y+40)continue;pegs.push({x,y});}}
   pegs.push({x:catcher.x-46,y:catcher.y-22},{x:catcher.x+46,y:catcher.y-22});})();
 const balls=[];let fireT=0,firing=false;
@@ -778,7 +778,7 @@ function startReel(){reel.pend--;reel.spin=true;reel.t=0;const r=Math.random();
   reel.dur=reel.reach?3:1.6;}
 function award(n,x,y,col){S.balls+=n;dirtyUI=true;float(PK.ox+x*PK.s,PK.oy+y*PK.s,`+${n}`,col||"#FFE08A");}
 function updatePachi(dt){
-  if(firing&&S.balls>0&&balls.length<40){fireT-=dt;if(fireT<=0){fireT=.3;S.balls--;dirtyUI=true;const pw=+$("power").value/100;balls.push({x:PK.lx,y:PK.B-14,vx:0,vy:0,rail:0,pw:pw*(0.93+Math.random()*.14),hit:0});}}
+  if(firing&&S.balls>0&&balls.length<40){fireT-=dt;if(fireT<=0){fireT=.3;S.balls--;dirtyUI=true;const pw=+$("power").value/100;balls.push({x:PK.lx,y:PK.B-14,vx:0,vy:0,rail:0,pw:pw*(0.93+Math.random()*.14),hit:0,age:0,cy:0,ct:0,stk:0});}}
   if(!reel.spin&&reel.pend>0)startReel();
   if(reel.spin){reel.t+=dt;if(reel.t>=reel.dur){reel.spin=false;if(reel.win){feverSuper=reel.win==="momo"||reel.win==="soso";fever=feverSuper?25:15;feverMsg=2.5;if(feverSuper)giveLC(2);toast(feverSuper?"SUPER FEVER! Every prize ×3 · +2 loyalty coins":"FEVER! Every prize ×2");}}}
   if(fever>0)fever=Math.max(0,fever-dt);if(feverMsg>0)feverMsg-=dt;if(catchFlash>0)catchFlash-=dt;for(let i=0;i<5;i++)if(slotFlash[i]>0)slotFlash[i]-=dt;
@@ -789,6 +789,9 @@ function updatePachi(dt){
       else{const a=(u-.75)/.25*Math.PI/2;b.x=PK.lx-r+Math.cos(a)*r;b.y=top+r-Math.sin(a)*r;
         if(u>=1){b.rail=-1;b.x=PK.lx-r-2;b.y=top+br;b.vx=-(170+b.pw*900);b.vy=20;}}continue;}
     b.vy+=g*h;b.x+=b.vx*h;b.y+=b.vy*h;if(b.hit>0)b.hit-=h;
+    // stuck guard: a ball that has not dropped for a while gets a nudge, then is cleared (ball refunded)
+    b.age+=h;b.ct+=h;if(b.ct>=.7){if(b.y-b.cy<8){b.stk++;b.vx=(b.x<(PK.L+PK.R)/2?1:-1)*rnd(140,220);b.vy=-rnd(60,120);}else b.stk=0;b.cy=b.y;b.ct=0;}
+    if(b.stk>=4||b.age>25){balls.splice(i,1);S.balls++;dirtyUI=true;continue;}
     if(b.y<PK.T+br){b.y=PK.T+br;b.vy=Math.abs(b.vy)*.4;}
     if(b.x<PK.L+br){b.x=PK.L+br;b.vx=Math.abs(b.vx)*.5;}if(b.x>PK.R-br){b.x=PK.R-br;b.vx=-Math.abs(b.vx)*.5;}
     for(const p of pegs){const dx=b.x-p.x,dy=b.y-p.y;if(Math.abs(dx)>14||Math.abs(dy)>14)continue;const d=Math.hypot(dx,dy),m=br+5;if(d<m&&d>0){const nx=dx/d,ny=dy/d;b.x=p.x+nx*m;b.y=p.y+ny*m;const vn=b.vx*nx+b.vy*ny;if(vn<0){b.vx-=1.45*vn*nx;b.vy-=1.45*vn*ny;b.vx+=rnd(-18,18);}}}
