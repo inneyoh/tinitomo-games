@@ -1,4 +1,4 @@
-const ASSET_KEYS=["can", "canpour", "cu_bae", "cu_bae_upset", "cu_bun", "cu_bun_upset", "cu_gwoof", "cu_gwoof_upset", "cu_kew", "cu_kew_upset", "cu_kuma", "cu_kuma_upset", "cu_piyo", "cu_piyo_upset", "cu_popo", "cu_popo_upset", "cu_rang", "cu_rang_upset", "dr_road", "dr_truck", "farmbg", "heart", "ic_beanie", "ic_bread", "ic_butterpop", "ic_caramelpop", "ic_carrot", "ic_carrotcake", "ic_carrotjuice", "ic_corn", "ic_egg", "ic_honey", "ic_honeytea", "ic_honeytoast", "ic_latte", "ic_melon", "ic_melonsoda", "ic_milk", "ic_mittens", "ic_muffin", "ic_omelette", "ic_parfait", "ic_popcornbucket", "ic_pumpkin", "ic_pumpkinpie", "ic_pumpkinsoup", "ic_quiche", "ic_scarf", "ic_shell", "ic_shortcake", "ic_smoothie", "ic_strawberry", "ic_strawmilk", "ic_strawpop", "ic_sweater", "ic_tomato", "ic_tomatojuice", "ic_tote", "ic_truffle", "ic_trufflepasta", "ic_truffletoast", "ic_veggiestew", "ic_wheat", "ic_wool", "momo_back", "momo_explore", "momo_front", "momo_side", "momo_three", "oa_barn", "oa_chick", "oa_chicken", "oa_cow", "oa_cow_a", "oa_f_bench", "oa_f_bench_momo", "oa_f_bench_soso", "oa_f_hammock", "oa_f_hammock_momo", "oa_f_hammock_soso", "oa_f_picnic", "oa_f_picnic_momo", "oa_f_picnic_soso", "oa_f_swing", "oa_f_swing_momo", "oa_f_swing_soso", "oa_hen", "oa_locked", "oa_pig", "oa_pig_a", "oa_r_carrot", "oa_r_corn", "oa_r_melon", "oa_r_pumpkin", "oa_r_strawberry", "oa_r_tomato", "oa_r_wheat", "oa_s_bakery", "oa_s_cafe", "oa_s_clothing", "oa_s_eatery", "oa_s_juice", "oa_s_popcorn", "oa_s_veggie", "oa_seedmound", "oa_sheep", "oa_sheep_a", "oa_soil", "oa_soilwet", "oa_sprout", "oa_truck", "oa_village", "oa_young", "pk_ball", "pk_bell", "pk_fire", "pk_gate", "pk_gateopen", "pk_heart", "pk_pin", "pk_screen", "pk_start", "pk_tray", "pk_tulip", "pt_bae", "pt_bun", "pt_gwoof", "pt_kew", "pt_kuma", "pt_momo", "pt_piyo", "pt_popo", "pt_rang", "pt_soso", "pz_boost", "pz_flowerbed", "pz_fountain", "pz_hat", "pz_melon", "pz_pouch", "pz_ribbon", "pz_sprinkler", "soso_back", "soso_explore", "soso_front", "soso_side", "soso_three", "ui_basket", "ui_can", "ui_coin", "ui_seed", "ui_shop", "ui_sickle"];
+const ASSET_KEYS=["can", "canpour", "cu_bae", "cu_bae_upset", "cu_bun", "cu_bun_upset", "cu_gwoof", "cu_gwoof_upset", "cu_kew", "cu_kew_upset", "cu_kuma", "cu_kuma_upset", "cu_piyo", "cu_piyo_upset", "cu_popo", "cu_popo_upset", "cu_rang", "cu_rang_upset", "dr_road", "dr_truck", "farmbg", "heart", "ic_beanie", "ic_bread", "ic_butterpop", "ic_caramelpop", "ic_carrot", "ic_carrotcake", "ic_carrotjuice", "ic_corn", "ic_egg", "ic_honey", "ic_honeytea", "ic_honeytoast", "ic_latte", "ic_melon", "ic_melonsoda", "ic_milk", "ic_mittens", "ic_muffin", "ic_omelette", "ic_parfait", "ic_popcornbucket", "ic_pumpkin", "ic_pumpkinpie", "ic_pumpkinsoup", "ic_quiche", "ic_scarf", "ic_shell", "ic_shortcake", "ic_smoothie", "ic_strawberry", "ic_strawmilk", "ic_strawpop", "ic_sweater", "ic_tomato", "ic_tomatojuice", "ic_tote", "ic_truffle", "ic_trufflepasta", "ic_truffletoast", "ic_veggiestew", "ic_wheat", "ic_wool", "momo_back", "momo_explore", "momo_front", "momo_side", "momo_three", "oa_barn", "oa_chick", "oa_chicken", "oa_cow", "oa_cow_a", "oa_f_bench", "oa_f_bench_momo", "oa_f_bench_soso", "oa_f_hammock", "oa_f_hammock_momo", "oa_f_hammock_soso", "oa_f_picnic", "oa_f_picnic_momo", "oa_f_picnic_soso", "oa_f_swing", "oa_f_swing_momo", "oa_f_swing_soso", "oa_hen", "oa_locked", "oa_pig", "oa_pig_a", "oa_r_carrot", "oa_r_corn", "oa_r_melon", "oa_r_pumpkin", "oa_r_strawberry", "oa_r_tomato", "oa_r_wheat", "oa_s_bakery", "oa_s_cafe", "oa_s_clothing", "oa_s_eatery", "oa_s_juice", "oa_s_popcorn", "oa_s_veggie", "oa_seedmound", "oa_sheep", "oa_sheep_a", "oa_soil", "oa_soilwet", "oa_sprout", "oa_truck", "oa_village", "oa_young", "pk2_ball", "pk2_bumper_heart", "pk2_bumper_star", "pk2_button", "pk2_catcher", "pk2_coin", "pk2_frame", "pk2_pin", "pk2_post", "pk2_screen", "pk2_slot", "pk2_slotq", "pk2_spark", "pk_bell", "pk_heart", "pk_tray", "ps_momo_basket", "ps_momo_cheer", "ps_momo_sleepy", "ps_momo_surprised", "ps_momo_water", "ps_momo_wave", "ps_soso_cheer", "ps_soso_seeds", "ps_soso_shy", "ps_soso_tea", "ps_soso_thumbsup", "ps_soso_wave", "pt_bae", "pt_bun", "pt_gwoof", "pt_kew", "pt_kuma", "pt_momo", "pt_piyo", "pt_popo", "pt_rang", "pt_soso", "pz_boost", "pz_flowerbed", "pz_fountain", "pz_hat", "pz_melon", "pz_pouch", "pz_ribbon", "pz_sprinkler", "soso_back", "soso_explore", "soso_front", "soso_side", "soso_three", "ui_basket", "ui_can", "ui_coin", "ui_seed", "ui_shop", "ui_sickle"];
 const IMG=Object.fromEntries(ASSET_KEYS.map(k=>[k,"assets/"+k+".webp"]));
 (function(){
 "use strict";
@@ -754,103 +754,93 @@ document.getElementById("store").addEventListener("click",e=>{const b=e.target.c
 document.getElementById("store").addEventListener("pointerdown",e=>{if(e.target.id==="store")closeStore();});
 
 // ================= PACHINKO =================
-// Board space is 360 units wide; its height follows the screen so the playfield always fills it.
-const PK={W:360,H:640};
-const pegs=[],pockets=[];
-function buildBoard(H){Object.assign(PK,{H,L:14,R:318,T:14,lx:333,lw:[322,346],cr:26});PK.cx=(PK.L+PK.R)/2;PK.bottom=H-16;PK.ly=PK.bottom-14;
-  pegs.length=0;pockets.length=0;
-  const sw=200,sh=138,sc={x1:PK.cx-sw/2-6,y1:PK.T+64,x2:PK.cx+sw/2-6,y2:PK.T+64+sh};PK.screen=sc;
-  const sy=sc.y2+58,ay=PK.bottom-78,ty=sy+(ay-sy)*.5;
-  const P2=[[sc.x1+sw/2,sy,"start",3],[PK.L+62,ty,"tulip",5],[PK.R-62,ty,"tulip",5]];
-  const inArea=(x,y,m)=>x>PK.L+m&&x<PK.R-m&&y>PK.T+34&&y<PK.bottom-36;
-  const avoid=(x,y)=>(x>sc.x1-14&&x<sc.x2+14&&y>sc.y1-16&&y<sc.y2+14)||P2.some(([px,py])=>Math.hypot(x-px,y-py)<22)||(y>ay-26&&y<ay+30&&Math.abs(x-PK.cx)<56);
-  for(let r=0;;r++){const y=PK.T+40+r*23;if(y>PK.bottom-40)break;for(let c=0;c<15;c++){const x=PK.L+12+c*21+(r%2?10.5:0);if(inArea(x,y,10)&&!avoid(x,y))pegs.push({x,y});}}
-  for(const[px,py]of P2){pegs.push({x:px-12,y:py-6},{x:px+12,y:py-6});}
-  for(const[px,py,id,pay]of P2)pockets.push({id,x:px,y:py+3,w:16,pay});
-  pockets.push({id:"attacker",x:PK.cx,y:ay,w:80,pay:12});}
-buildBoard(640);
+// Board space = pixels of assets/pk2_frame.webp (720×1280). The mint glass window is x 68–649, y 242–1042,
+// the little reel screen is x 240–479, y 132–193. The frame is drawn from the top down to y FRAME_CUT.
+const FR={w:720,h:1280,cut:1068,scr:{x1:244,y1:135,x2:475,y2:190}};
+const PK={L:78,R:606,T:250,B:1036,lx:626,lane:[610,642],cr:38,br:8,s:1,ox:0,oy:0,slotTop:946};
+const SLOTV=[1,3,"?",3,1];
+const pegs=[],bumpers=[{x:212,y:520,r:34,k:"pk2_bumper_star"},{x:472,y:520,r:34,k:"pk2_bumper_heart"}],posts=[];
+const catcher={x:342,y:720,w:70};
+(function buildBoard(){const sw=(PK.R-PK.L)/5;for(let i=1;i<5;i++)posts.push(PK.L+sw*i);
+  for(let r=0;;r++){const y=300+r*34;if(y>PK.slotTop-22)break;for(let c=0;;c++){const x=PK.L+18+c*34+(r%2?17:0);if(x>PK.R-12)break;
+    if(bumpers.some(b=>Math.hypot(x-b.x,y-b.y)<b.r+22))continue;if(Math.abs(x-catcher.x)<64&&y>catcher.y-44&&y<catcher.y+40)continue;pegs.push({x,y});}}
+  pegs.push({x:catcher.x-46,y:catcher.y-22},{x:catcher.x+46,y:catcher.y-22});})();
 const balls=[];let fireT=0,firing=false;
 const reel={spin:false,t:0,dur:0,res:["momo","carrot","soso"],pend:0,reach:false,win:null};
-let fever=0,feverSuper=false,feverMsg=0;
+let fever=0,feverSuper=false,feverMsg=0;const slotFlash=[0,0,0,0,0];let catchFlash=0;
 const SYM=["momo","soso","carrot","strawberry","wheat","egg","melon"];
 function startReel(){reel.pend--;reel.spin=true;reel.t=0;const r=Math.random();
-  if(r<1/11){const s=pick(SYM);reel.res=[s,s,s];reel.win=s;reel.reach=true;}
+  if(r<1/9){const s=pick(SYM);reel.res=[s,s,s];reel.win=s;reel.reach=true;}
   else if(r<.32){const s=pick(SYM);let o;do{o=pick(SYM);}while(o===s);reel.res=[s,s,o];reel.win=null;reel.reach=true;}
   else{const a=pick(SYM);let b;do{b=pick(SYM);}while(b===a);reel.res=[a,b,pick(SYM)];reel.win=null;reel.reach=false;}
   reel.dur=reel.reach?3:1.6;}
+function award(n,x,y,col){S.balls+=n;dirtyUI=true;float(PK.ox+x*PK.s,PK.oy+y*PK.s,`+${n}`,col||"#FFE08A");}
 function updatePachi(dt){
-  if(firing&&S.balls>0&&balls.length<40){fireT-=dt;if(fireT<=0){fireT=.32;S.balls--;dirtyUI=true;const pw=+$("power").value/100;balls.push({x:PK.lx,y:PK.ly,vx:0,vy:0,rail:0,pw:pw*(0.92+Math.random()*.16)});}}
+  if(firing&&S.balls>0&&balls.length<40){fireT-=dt;if(fireT<=0){fireT=.3;S.balls--;dirtyUI=true;const pw=+$("power").value/100;balls.push({x:PK.lx,y:PK.B-14,vx:0,vy:0,rail:0,pw:pw*(0.93+Math.random()*.14),hit:0});}}
   if(!reel.spin&&reel.pend>0)startReel();
-  if(reel.spin){reel.t+=dt;if(reel.t>=reel.dur){reel.spin=false;if(reel.win){feverSuper=reel.win==="momo"||reel.win==="soso";fever=feverSuper?25:15;feverMsg=2.5;if(feverSuper)giveLC(2);toast(feverSuper?"SUPER FEVER! The gate opens wide. +2 loyalty coins.":"FEVER! The big gate is open.");}}}
-  if(fever>0){fever-=dt;if(fever<=0)fever=0;}
-  if(feverMsg>0)feverMsg-=dt;
-  const sub=4,h=dt/sub,g=820,br=5;
+  if(reel.spin){reel.t+=dt;if(reel.t>=reel.dur){reel.spin=false;if(reel.win){feverSuper=reel.win==="momo"||reel.win==="soso";fever=feverSuper?25:15;feverMsg=2.5;if(feverSuper)giveLC(2);toast(feverSuper?"SUPER FEVER! Every prize ×3 · +2 loyalty coins":"FEVER! Every prize ×2");}}}
+  if(fever>0)fever=Math.max(0,fever-dt);if(feverMsg>0)feverMsg-=dt;if(catchFlash>0)catchFlash-=dt;for(let i=0;i<5;i++)if(slotFlash[i]>0)slotFlash[i]-=dt;
+  const mul=fever>0?(feverSuper?3:2):1,sub=5,h=dt/sub,g=1300,br=PK.br;
   for(let s=0;s<sub;s++)for(let i=balls.length-1;i>=0;i--){const b=balls[i];
-    if(b.rail!==null&&b.rail!==undefined&&b.rail>=0){b.rail+=h/0.5;const u=b.rail,r=PK.cr,top=PK.T+8;
-      if(u<.75){b.x=PK.lx;b.y=PK.ly-(PK.ly-(top+r))*(u/.75);}
+    if(b.rail>=0){b.rail+=h/0.45;const u=b.rail,r=PK.cr,top=PK.T+6;
+      if(u<.75){b.x=PK.lx;b.y=(PK.B-14)-((PK.B-14)-(top+r))*(u/.75);}
       else{const a=(u-.75)/.25*Math.PI/2;b.x=PK.lx-r+Math.cos(a)*r;b.y=top+r-Math.sin(a)*r;
-        if(u>=1){b.rail=-1;b.x=PK.lx-r-2;b.y=top+2;b.vx=-(110+b.pw*560);b.vy=10;}}continue;}
-    b.vy+=g*h;b.x+=b.vx*h;b.y+=b.vy*h;
-    // walls
+        if(u>=1){b.rail=-1;b.x=PK.lx-r-2;b.y=top+br;b.vx=-(170+b.pw*900);b.vy=20;}}continue;}
+    b.vy+=g*h;b.x+=b.vx*h;b.y+=b.vy*h;if(b.hit>0)b.hit-=h;
     if(b.y<PK.T+br){b.y=PK.T+br;b.vy=Math.abs(b.vy)*.4;}
     if(b.x<PK.L+br){b.x=PK.L+br;b.vx=Math.abs(b.vx)*.5;}if(b.x>PK.R-br){b.x=PK.R-br;b.vx=-Math.abs(b.vx)*.5;}
-    // screen box
-    const sc=PK.screen,qx=Math.max(sc.x1,Math.min(b.x,sc.x2)),qy=Math.max(sc.y1,Math.min(b.y,sc.y2)),ddx=b.x-qx,ddy=b.y-qy,dd=Math.hypot(ddx,ddy);
-    if(dd<br&&dd>0){const nx=ddx/dd,ny=ddy/dd;b.x=qx+nx*br;b.y=qy+ny*br;const vn=b.vx*nx+b.vy*ny;if(vn<0){b.vx-=1.5*vn*nx;b.vy-=1.5*vn*ny;}}
-    else if(dd===0){b.y=sc.y1-br;b.vy=-Math.abs(b.vy)*.4;}
-    // pegs
-    for(const p of pegs){const dx=b.x-p.x,dy=b.y-p.y;if(Math.abs(dx)>8||Math.abs(dy)>8)continue;const d=Math.hypot(dx,dy),m=br+3;if(d<m&&d>0){const nx=dx/d,ny=dy/d;b.x=p.x+nx*m;b.y=p.y+ny*m;const vn=b.vx*nx+b.vy*ny;if(vn<0){b.vx-=1.45*vn*nx;b.vy-=1.45*vn*ny;b.vx+=rnd(-12,12);}}}
-    // attacker lid when closed
-    const at=pockets.find(p=>p.id==="attacker");if(!fever&&Math.abs(b.x-at.x)<at.w/2+br&&b.y>at.y-10-br&&b.y<at.y){b.y=at.y-10-br;b.vy=-Math.abs(b.vy)*.35;b.vx+=b.x<at.x?-20:20;}
-    // pockets
-    let gone=false;
-    for(const pk of pockets){if(pk.id==="attacker"&&!fever)continue;if(b.vy>0&&Math.abs(b.x-pk.x)<pk.w/2&&b.y>pk.y-4&&b.y<pk.y+6){gone=true;S.balls+=pk.pay;dirtyUI=true;pk.flash=.4;
-      const sx=PK.ox+pk.x*PK.s,sy=PK.oy+pk.y*PK.s;float(sx,sy-10,`+${pk.pay}`,"#FFE08A");
-      if(pk.id==="start"&&reel.pend<4)reel.pend++;break;}}
-    if(gone||b.y>PK.bottom+10){balls.splice(i,1);}}
-  for(const pk of pockets)if(pk.flash>0)pk.flash-=dt;}
+    for(const p of pegs){const dx=b.x-p.x,dy=b.y-p.y;if(Math.abs(dx)>14||Math.abs(dy)>14)continue;const d=Math.hypot(dx,dy),m=br+5;if(d<m&&d>0){const nx=dx/d,ny=dy/d;b.x=p.x+nx*m;b.y=p.y+ny*m;const vn=b.vx*nx+b.vy*ny;if(vn<0){b.vx-=1.45*vn*nx;b.vy-=1.45*vn*ny;b.vx+=rnd(-18,18);}}}
+    for(const bp of bumpers){const dx=b.x-bp.x,dy=b.y-bp.y,d=Math.hypot(dx,dy),m=bp.r+br;if(d<m&&d>0){const nx=dx/d,ny=dy/d;b.x=bp.x+nx*m;b.y=bp.y+ny*m;const vn=b.vx*nx+b.vy*ny;if(vn<0){b.vx-=2.1*vn*nx;b.vy-=2.1*vn*ny;}
+      if(b.hit<=0){b.hit=.4;bp.flash=.3;award(1,bp.x,bp.y-bp.r);}}}
+    // catcher cup: open at the top, solid rim on the sides
+    const c=catcher,cw=fever>0?c.w*1.5:c.w;
+    if(b.vy>0&&Math.abs(b.x-c.x)<cw/2-br*.4&&b.y>c.y-12&&b.y<c.y+6){balls.splice(i,1);catchFlash=.4;award(6*mul,c.x,c.y-30,"#FFF3B0");continue;}
+    // slot posts
+    if(b.y>PK.slotTop-6)for(const px of posts){const dx=b.x-px;if(Math.abs(dx)<br+4){b.x=px+(dx<0?-1:1)*(br+4);b.vx=-b.vx*.4;}}
+    if(b.y>PK.B-br){const k=Math.max(0,Math.min(4,Math.floor((b.x-PK.L)/((PK.R-PK.L)/5))));balls.splice(i,1);slotFlash[k]=.5;
+      const sx=PK.L+(k+.5)*(PK.R-PK.L)/5;if(SLOTV[k]==="?"){if(reel.pend<4)reel.pend++;award(1,sx,PK.slotTop);}else award(SLOTV[k]*mul,sx,PK.slotTop);}}
+  for(const bp of bumpers)if(bp.flash>0)bp.flash-=dt;}
 function pkImg(k,x,y,w,ax,ay){const im=IM[k];if(!im||!im.complete||!im.width)return false;const h=w*im.height/im.width;ctx.drawImage(im,x-w*(ax??.5),y-h*(ay??.5),w,h);return true;}
 function drawPachi(time){
-  const trayH=($("tray").offsetHeight||90),top=48,avH=CH-top-trayH-4,avW=CW-8;
-  let bk=avW/360,H=Math.round(Math.max(560,Math.min(860,avH/bk))/10)*10;bk=Math.min(avW/360,avH/H);
-  if(H!==PK.H){buildBoard(H);balls.length=0;}
-  PK.s=bk;PK.ox=CW/2-180*bk;PK.oy=top+(avH-H*bk)/2;
-  // cabinet surround
-  const bg=ctx.createLinearGradient(0,0,0,CH);bg.addColorStop(0,"#F6C2CC");bg.addColorStop(1,"#EFA9B8");ctx.fillStyle=bg;ctx.fillRect(0,0,CW,CH);
-  ctx.fillStyle="rgba(255,255,255,.3)";for(let y=10;y<CH;y+=56)for(let x=(y/56%2)*28;x<CW;x+=56){starP(ctx,x,y,5,5);ctx.fill();}
-  ctx.save();ctx.translate(PK.ox,PK.oy);ctx.scale(bk,bk);
-  // rectangular frame: gold rim, bulbs along the top, mint glass
-  ctx.beginPath();ctx.roundRect(-2,-2,364,H+4,22);ctx.fillStyle="#E7B23C";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.stroke();
-  ctx.beginPath();ctx.roundRect(5,5,350,H-10,16);const gl=ctx.createLinearGradient(0,0,0,H);gl.addColorStop(0,"#E4F4E6");gl.addColorStop(1,"#CDEBD3");ctx.fillStyle=gl;ctx.fill();ctx.lineWidth=2;ctx.stroke();
-  ctx.save();ctx.clip();ctx.fillStyle="rgba(255,255,255,.35)";for(let i=0;i<10;i++){ctx.beginPath();ctx.arc(30+i*37,80+(i%4)*(H/4),14+(i%3)*8,0,7);ctx.fill();}ctx.restore();
-  for(let k=0;k<11;k++){const bx=28+k*30.4,on=Math.floor(time*5+k)%3===0;ctx.beginPath();ctx.arc(bx,0,4.5,0,7);ctx.fillStyle=on?"#FFF6B0":"#FFE7A8";ctx.fill();ctx.lineWidth=1.5;ctx.strokeStyle=OL;ctx.stroke();}
-  // launch lane wall and the curved guide at the top-right corner
-  ctx.fillStyle="rgba(94,59,34,.07)";ctx.fillRect(PK.lw[0],PK.T+PK.cr+8,PK.lw[1]-PK.lw[0],PK.bottom-PK.T-PK.cr-8);
-  ctx.strokeStyle="#E7B23C";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(PK.lw[0],PK.bottom-6);ctx.lineTo(PK.lw[0],PK.T+PK.cr+30);ctx.stroke();
-  ctx.beginPath();ctx.arc(PK.lx-PK.cr,PK.T+8+PK.cr,PK.cr+9,-Math.PI/2,0);ctx.stroke();
-  ctx.beginPath();ctx.ellipse(PK.cx,PK.bottom-6,26,9,0,0,7);P(ctx,"#5E3B22",2);
-  for(const p of pegs)if(!pkImg("pk_pin",p.x,p.y,8)){ctx.beginPath();ctx.arc(p.x,p.y,2.8,0,7);ctx.fillStyle="#D9A441";ctx.fill();}
-  for(const pk of pockets){const lit=pk.flash>0;ctx.save();if(lit){ctx.shadowColor="#FFE08A";ctx.shadowBlur=14;}
-    if(pk.id==="attacker")pkImg(fever>0?"pk_gateopen":"pk_gate",pk.x,pk.y,pk.w+30,.5,.55);
-    else pkImg(pk.id==="start"?"pk_start":"pk_tulip",pk.x,pk.y+2,34,.5,.5);ctx.restore();}
-  // reel screen in its golden frame
-  const sc=PK.screen,sw=sc.x2-sc.x1,sh=sc.y2-sc.y1;
-  pkImg("pk_screen",(sc.x1+sc.x2)/2,(sc.y1+sc.y2)/2,sw/0.74);
-  ctx.fillStyle=fever?"#4A2E44":"#26324A";ctx.beginPath();ctx.roundRect(sc.x1,sc.y1,sw,sh,8);ctx.fill();
-  const rw=(sw-24)/3;
-  for(let k=0;k<3;k++){const rx=sc.x1+8+k*(rw+4),ry=sc.y1+8,rh=sh-32;ctx.beginPath();ctx.roundRect(rx,ry,rw,rh,8);ctx.fillStyle="#FFF6E6";ctx.fill();
-    const stopAt=reel.dur*(k===2?1:k===1?.55:.35);let sym;
-    if(reel.spin&&reel.t<stopAt){sym=SYM[Math.floor(reel.t*14+k*3)%SYM.length];}else sym=reel.res[k];
-    ctx.save();ctx.beginPath();ctx.roundRect(rx,ry,rw,rh,8);ctx.clip();
-    const cx=rx+rw/2,cy=ry+rh/2+(reel.spin&&reel.t<stopAt?((reel.t*14)%1-.5)*rh*.5:0);
-    if(sym==="momo"||sym==="soso")drawTurtle(ctx,sym,"front",cx,cy+rh*.36,rh*.8,false,0);else drawIcon(ctx,sym,cx,cy,rh*.62);
-    ctx.restore();}
-  ctx.textAlign="center";ctx.font="700 12px Fredoka,sans-serif";ctx.fillStyle="#FFE08A";
-  ctx.font="700 14px Fredoka,sans-serif";const msg=fever>0?`${feverSuper?"SUPER ":""}FEVER · ${Math.ceil(fever)}s`:reel.spin&&reel.reach&&reel.t>reel.dur*.55?"REACH!":reel.pend?`Spins · ${reel.pend}`:"Hit START!";
-  ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.strokeText(msg,(sc.x1+sc.x2)/2,sc.y2-8);ctx.fillText(msg,(sc.x1+sc.x2)/2,sc.y2-8);
-  for(const b of balls)if(!pkImg("pk_ball",b.x,b.y,11)){ctx.beginPath();ctx.arc(b.x,b.y,5,0,7);ctx.fillStyle="#C9CFD6";ctx.fill();}
+  ctx.fillStyle="#F2A9B6";ctx.fillRect(0,0,CW,CH);
+  const trayH=($("tray").offsetHeight||90),top=46,avH=CH-top-trayH-2;
+  const s=Math.min(CW/FR.w,avH/FR.cut);PK.s=s;PK.ox=(CW-FR.w*s)/2;PK.oy=top+(avH-FR.cut*s)/2;
+  const fr=IM.pk2_frame;
+  ctx.save();ctx.translate(PK.ox,PK.oy);ctx.scale(s,s);
+  if(fr&&fr.complete&&fr.width)ctx.drawImage(fr,0,0,fr.width,fr.height*FR.cut/FR.h,0,0,FR.w,FR.cut);
+  // marquee bulbs twinkle along the window sides
+  for(let k=0;k<14;k++){if(Math.floor(time*5+k)%4)continue;const y=262+k*56;for(const x of[34,686]){ctx.globalAlpha=.55;ctx.fillStyle="#FFFBD0";ctx.beginPath();ctx.arc(x,y,12,0,7);ctx.fill();}}ctx.globalAlpha=1;
+  // reels in the small top screen
+  const sc=FR.scr,rw=(sc.x2-sc.x1-16)/3,rh=sc.y2-sc.y1-8;
+  ctx.fillStyle=fever?"#4A2E44":"#26324A";ctx.beginPath();ctx.roundRect(sc.x1,sc.y1,sc.x2-sc.x1,sc.y2-sc.y1,6);ctx.fill();
+  for(let k=0;k<3;k++){const rx=sc.x1+4+k*(rw+4),ry=sc.y1+4;ctx.beginPath();ctx.roundRect(rx,ry,rw,rh,5);ctx.fillStyle="#FFF6E6";ctx.fill();
+    const stopAt=reel.dur*(k===2?1:k===1?.55:.35);const spin=reel.spin&&reel.t<stopAt;const sym=spin?SYM[Math.floor(reel.t*14+k*3)%SYM.length]:reel.res[k];
+    ctx.save();ctx.beginPath();ctx.roundRect(rx,ry,rw,rh,5);ctx.clip();const cy=ry+rh/2+(spin?((reel.t*14)%1-.5)*rh*.6:0);
+    if(sym==="momo"||sym==="soso")drawTurtle(ctx,sym,"front",rx+rw/2,cy+rh*.42,rh*.95,false,0);else drawIcon(ctx,sym,rx+rw/2,cy,rh*.8);ctx.restore();}
+  // launch lane + corner guide
+  ctx.fillStyle="rgba(94,59,34,.08)";ctx.fillRect(PK.lane[0],PK.T+PK.cr+20,PK.lane[1]-PK.lane[0],PK.B-PK.T-PK.cr-20);
+  ctx.strokeStyle="#E7B23C";ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(PK.lane[0],PK.B);ctx.lineTo(PK.lane[0],PK.T+PK.cr+60);ctx.stroke();
+  ctx.beginPath();ctx.arc(PK.lx-PK.cr,PK.T+6+PK.cr,PK.cr+14,-Math.PI/2,0);ctx.stroke();
+  for(const p of pegs)pkImg("pk2_pin",p.x,p.y,11);
+  for(const bp of bumpers){ctx.save();if(bp.flash>0){ctx.shadowColor="#FFF3B0";ctx.shadowBlur=24;}const sc2=1+(bp.flash>0?.12:0);pkImg(bp.k,bp.x,bp.y,bp.r*2.1*sc2);ctx.restore();}
+  ctx.save();if(catchFlash>0||fever){ctx.shadowColor="#FFF3B0";ctx.shadowBlur=20;}pkImg("pk2_catcher",catcher.x,catcher.y,(fever?catcher.w*1.5:catcher.w)*1.25,.5,.45);ctx.restore();
+  ctx.font="700 22px Fredoka,sans-serif";ctx.textAlign="center";ctx.lineWidth=5;ctx.strokeStyle=OL;ctx.fillStyle="#FFF3B0";ctx.strokeText(`+${6*(fever?(feverSuper?3:2):1)}`,catcher.x,catcher.y+40);ctx.fillText(`+${6*(fever?(feverSuper?3:2):1)}`,catcher.x,catcher.y+40);
+  // prize slots along the bottom
+  const sw=(PK.R-PK.L)/5,mul=fever?(feverSuper?3:2):1;
+  for(let k=0;k<5;k++){const x0=PK.L+k*sw,q=SLOTV[k]==="?";ctx.beginPath();ctx.roundRect(x0+5,PK.slotTop,sw-10,PK.B-PK.slotTop,[10,10,4,4]);
+    ctx.fillStyle=slotFlash[k]>0?"#FFF3B0":q?"#F7B6C4":"#BFE5B8";ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=OL;ctx.stroke();
+    if(q){pkImg("pk2_slotq",x0+sw/2,PK.slotTop+44,30);}
+    else{pkImg("pk2_coin",x0+sw/2,PK.slotTop+28,30);ctx.font="700 26px Fredoka,sans-serif";ctx.lineWidth=5;ctx.strokeText(SLOTV[k]*mul,x0+sw/2,PK.slotTop+74);ctx.fillStyle="#fff";ctx.fillText(SLOTV[k]*mul,x0+sw/2,PK.slotTop+74);}}
+  for(const px of posts)pkImg("pk2_post",px,PK.slotTop+44,20);
+  if(fever){ctx.font="700 30px Fredoka,sans-serif";const t=`${feverSuper?"SUPER ":""}FEVER ×${mul} · ${Math.ceil(fever)}s`;ctx.lineWidth=6;ctx.strokeText(t,FR.w/2,226);ctx.fillStyle="#FFE08A";ctx.fillText(t,FR.w/2,226);}
+  else if(reel.spin&&reel.reach&&reel.t>reel.dur*.55){ctx.font="700 30px Fredoka,sans-serif";ctx.lineWidth=6;ctx.strokeText("REACH!",FR.w/2,226);ctx.fillStyle="#FF8FB1";ctx.fillText("REACH!",FR.w/2,226);}
+  else if(reel.pend){ctx.font="700 22px Fredoka,sans-serif";ctx.lineWidth=5;const t=`Spins ×${reel.pend}`;ctx.strokeText(t,FR.w/2,224);ctx.fillStyle="#fff";ctx.fillText(t,FR.w/2,224);}
+  for(const b of balls)pkImg("pk2_ball",b.x,b.y,PK.br*2.2);
+  // Momo & Soso cheering from the frame corners
+  const ch=fever>0;const bob=Math.abs(Math.sin(time*(ch?9:2.5)))*(ch?14:4);
+  pkImg(ch?"ps_momo_cheer":"ps_momo_wave",40,FR.cut-62-bob,84,.5,.5);pkImg(ch?"ps_soso_cheer":"ps_soso_thumbsup",680,FR.cut-62-bob,84,.5,.5);
   ctx.restore();
-  if(feverMsg>0){ctx.save();ctx.globalAlpha=Math.min(1,feverMsg);ctx.font=`700 ${Math.round(Math.min(56,CW/9))}px Fredoka,sans-serif`;ctx.textAlign="center";ctx.lineWidth=8;ctx.strokeStyle=OL;const t=feverSuper?"SUPER FEVER!":"FEVER!";ctx.strokeText(t,CW/2,PK.oy+(PK.screen.y2+40)*bk);ctx.fillStyle="#FFE08A";ctx.fillText(t,CW/2,PK.oy+(PK.screen.y2+40)*bk);ctx.restore();}}
+  if(feverMsg>0){ctx.save();ctx.globalAlpha=Math.min(1,feverMsg);ctx.font=`700 ${Math.round(Math.min(56,CW/8))}px Fredoka,sans-serif`;ctx.textAlign="center";ctx.lineWidth=8;ctx.strokeStyle=OL;const t=feverSuper?"SUPER FEVER!":"FEVER!";const y=PK.oy+600*s;ctx.strokeText(t,CW/2,y);ctx.fillStyle="#FFE08A";ctx.fillText(t,CW/2,y);ctx.restore();}}
 
 // ================= SHEETS =================
 let sheetKind=null,sheetArg=null;
@@ -922,7 +912,7 @@ function renderSheet(){if(!sheetKind)return;let t="",h="";
   if(sheetKind==="prizes"){t=`<img src="${IMG.pk_bell}" alt="" class="tic">Prize Counter`;
     h+=`<div class="pzhead"><img src="${IMG.pk_tray}" alt=""><b>${S.balls}</b><span>balls to spend</span></div><div class="cards">`;
     for(const p of PRIZES){const owned=p.once&&S.prize[p.id],maxed=p.max&&S.prize[p.id]>=p.max;
-      h+=`<div class="bcard ${owned||maxed?"own":""}"><img src="${IMG["pz_"+p.id]}" alt=""><b>${p.n}</b><small class="pzd">${p.d}</small>${owned?`<span class="done">✓ Owned</span>`:maxed?`<span class="done">Max</span>`:`<button class="cbtn pk" data-prize="${p.id}" ${S.balls<p.cost?"disabled":""}><img src="${IMG.pk_ball}" alt="">${p.cost}</button>`}</div>`;}
+      h+=`<div class="bcard ${owned||maxed?"own":""}"><img src="${IMG["pz_"+p.id]}" alt=""><b>${p.n}</b><small class="pzd">${p.d}</small>${owned?`<span class="done">✓ Owned</span>`:maxed?`<span class="done">Max</span>`:`<button class="cbtn pk" data-prize="${p.id}" ${S.balls<p.cost?"disabled":""}><img src="${IMG.pk2_ball}" alt="">${p.cost}</button>`}</div>`;}
     h+=`</div>`;}
   $("stitle").innerHTML=t;const sb=$("sbody"),st=sb.scrollTop;sb.innerHTML=h;sb.scrollTop=st;}
 $("sbody").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.disabled)return;const d=b.dataset;const id=sheetArg,sh=typeof id==="string"&&S.shops[id];
@@ -983,7 +973,7 @@ function renderTray(){$("zoom").hidden=area==="pachi";const T=$("tray");T.classL
     h+=`<button class="fab" data-smenu="1" aria-expanded="${shopMenuOpen}"><span class="ring"><img src="${IMG.ui_shop}" alt=""></span><b>${shopMenuOpen?"Close":"Shops"}</b></button></div>`;}
   else{h=`<div id="pctl"><div class="pcounter"><img src="${IMG.pk_tray}" alt=""><b id="bcount">${S.balls}</b><small>balls</small></div>
     <label class="ppow" for="power"><span>Power <b id="powv">${pctPower}</b></span><input type="range" id="power" min="0" max="100" value="${pctPower}"></label>
-    <button id="fire" aria-label="Hold to fire balls"><img src="${IMG.pk_fire}" alt=""><b>HOLD</b></button>
+    <button id="fire" aria-label="Hold to fire balls"><img src="${IMG.pk2_button}" alt=""><b>HOLD</b></button>
     <div class="pside"><button class="pbtn" data-open="buyballs" ${S.lc>0?"":"disabled"}><img src="${IMG.pk_heart}" alt="">1 ♥ → 25</button><button class="pbtn" data-open="prizes"><img src="${IMG.pk_bell}" alt="">Prizes</button></div></div>`;}
   T.innerHTML=h;
   if(area==="pachi"){const f=$("fire");const on=e=>{e.preventDefault();if(S.balls<=0){toast(S.lc>0?"Out of balls. Swap a loyalty coin for 25.":"Out of balls. Earn loyalty coins by selling in the plaza and buying upgrades.");return;}firing=true;fireT=0;f.classList.add("on");try{f.setPointerCapture(e.pointerId);}catch(_){}};

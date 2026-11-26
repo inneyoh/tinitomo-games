@@ -407,3 +407,5 @@ p.note{margin:0;font-size:13px;color:#8A6748;line-height:1.5}
 #tray.farm .fan .tbtn[aria-pressed="true"] .ring{transform:scale(1.08);box-shadow:0 3px 0 var(--ink),0 0 0 4px rgba(255,236,160,.85)}
 @keyframes fanin{from{transform:scale(.3);opacity:0}}
 @media (prefers-reduced-motion:reduce){#tray.farm .fan .tbtn .ring,#tray.farm .fan .tbtn b{animation:none}}
+#fire b{color:#8A5A10;text-shadow:0 1px 0 #FFF3B0}
+#fire img{filter:drop-shadow(0 4px 0 rgba(94,59,34,.35))}
