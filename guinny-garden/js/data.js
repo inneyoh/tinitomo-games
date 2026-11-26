@@ -35,13 +35,13 @@ export const LEAVES = {
 // Any basket ingredient (flower or tea leaf)
 export const ING = (k) => FLOWERS[k] || LEAVES[k];
 
-// Garden plots: 12 little pots on two wooden step shelves (3 steps × 2 pots each).
-// tier 0 is the top (back) step, tier 2 the front step. Positions live in css/style.css ("Garden v4").
+// Garden plots: 12 little pots on three wooden wall shelves, 4 pots per shelf (front view).
+// The shelves are laid out in js/scenes/garden.js (layout); pots in css/style.css ("Garden v5").
 const POT_COLOURS = ['terra', 'cream', 'sage'];
-export const SHELVES = [0, 1];
-export const PLOTS = SHELVES.flatMap((shelf) => [0, 1, 2].flatMap((tier) => [0, 1].map((slot) => ({
-  type: 'pot', shelf, tier, slot, colour: POT_COLOURS[(shelf * 6 + tier * 2 + slot) % 3], unlock: null,
-}))));
+export const SHELVES = [0, 1, 2];
+export const PLOTS = SHELVES.flatMap((shelf) => [0, 1, 2, 3].map((slot) => ({
+  type: 'pot', shelf, slot, colour: POT_COLOURS[(shelf + slot) % 3], unlock: null,
+})));
 
 // Garden upgrades, sold in the Shop on the garden iPad.
 export const UPGRADES = {

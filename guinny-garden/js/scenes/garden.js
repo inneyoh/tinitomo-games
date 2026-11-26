@@ -1,5 +1,6 @@
 // Scene 3: Garden — cozy farming in real time.
-//  - 12 little pots stand on two wooden step shelves (3 steps × 2 pots)
+//  - Front view: 12 little pots stand on three wooden wall shelves (4 pots each), zoomed in
+//    on the plants; the fence behind is soft and out of focus.
 //  - Tap an empty pot → choose a seed and how many to plant (fills this shelf first)
 //  - Drag the watering can off the work bench and pass it over the pots to water them
 //  - Swipe across grown plants to harvest (a tap works too)
@@ -9,24 +10,23 @@
 import { FLOWERS, LEAVES, PRODUCTS, PLOTS, SHELVES, UPGRADES } from '../data.js';
 import { S, save, add, jot, plotStage, plotRemaining, plotUnlocked, isWet, needsWater, updatePlot, wetMs, fmtTime } from '../state.js';
 import { F, SEED, P, plotArt, coinArt, dropArt } from '../art.js';
-import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint, fitCanvas } from '../ui.js';
+import { $, $$, h, openSheet, toast, floatText, bump, sfx, hint } from '../ui.js';
 import { openTablet } from '../tablet.js';
 import { notepadApp } from '../notepad.js';
 import { MILESTONES } from '../encyclopedia.js';
 
 const IMG = 'assets/img/garden/';
-const SIZE = { landscape: [1672, 941], portrait: [941, 1672] };
-// Part of the canvas that must stay visible (fractions); the rest is lawn that may be cropped.
-const KEEP = { landscape: [0.02, 0.06, 0.98, 0.98], portrait: [0.01, 0.07, 0.99, 0.99] };
+// Each shelf box is ROW × its width tall; the plank's top surface sits at PLANK of the box height.
+const ROW = 0.52;
 let root, view, canvas, game;
 let active = false;
 let orient = '';
 const lastKey = [];
 
 const plotMarkup = (i) => `
-  <div class="plot pot t${PLOTS[i].tier} s${PLOTS[i].slot}" data-i="${i}" role="button" aria-label="Flower pot ${i + 1}">
+  <div class="plot pot s${PLOTS[i].slot}" data-i="${i}" role="button" aria-label="Flower pot ${i + 1}">
     <div class="plant"></div>
-    <img class="pot-img" src="${IMG}minipot-${PLOTS[i].colour}.webp" alt="" draggable="false">
+    <img class="pot-img" src="${IMG}potf-${PLOTS[i].colour}.webp" alt="" draggable="false">
     <div class="plot-badge"></div><div class="plot-bar"><i></i></div>
   </div>`;
 
@@ -35,24 +35,23 @@ export function mount(el, api) {
   root = el;
   root.classList.add('full');
   root.innerHTML = `
-  <div class="view garden-view">
-    <div class="canvas g-canvas">
-      <img class="layer g-lawn" alt="" draggable="false">
-      <img class="layer g-lawn layer-ext" alt="" draggable="false">
+  <div class="view garden-view g-front">
+    <img class="g-bg" alt="" draggable="false">
+    <div class="g-wall">
       ${SHELVES.map((n) => `
         <div class="shelf" data-s="${n}">
-          <img class="shelf-img" src="${IMG}shelf.webp" alt="" draggable="false">
+          <img class="shelf-img" src="${IMG}shelf-front.webp" alt="" draggable="false">
           ${PLOTS.map((p, i) => (p.shelf === n ? plotMarkup(i) : '')).join('')}
         </div>`).join('')}
-      <img class="g-bench" src="${IMG}bench2.webp" alt="" draggable="false">
-      <img class="g-trowel" src="${IMG}trowel.webp" alt="" draggable="false">
-      <button class="tool tool-ipad" aria-label="Garden iPad"><img src="${IMG}ipad.webp" alt="" draggable="false"><span class="hot-tag">Buy seeds</span></button>
+    </div>
+    <div class="g-tools">
       <button class="tool tool-can" aria-label="Watering can — drag over plants"><img src="${IMG}can.webp" alt="" draggable="false"></button>
+      <button class="tool tool-ipad" aria-label="Garden iPad"><img src="${IMG}ipad.webp" alt="" draggable="false"><span class="hot-tag">Buy seeds</span></button>
     </div>
     <div class="shop-hint g-hint" role="status"></div>
   </div>`;
   view = $('.view', root);
-  canvas = $('.canvas', view);
+  canvas = $('.g-wall', view);
 
   setupSwipe();
   setupCan();
@@ -67,9 +66,27 @@ function layout() {
   const vw = view.clientWidth, vh = view.clientHeight;
   if (!vw || !vh) return;
   const o = vw >= vh ? 'landscape' : 'portrait';
-  if (o !== orient) { orient = o; canvas.dataset.o = o; $$('.g-lawn', canvas).forEach((img) => { img.src = `${IMG}lawn3-${o}.webp`; }); }
-  // fence at the top edge; any spare height below continues as lawn
-  fitCanvas(view, canvas, ...SIZE[o], KEEP[o], 0);
+  if (o !== orient) { orient = o; view.dataset.o = o; $('.g-bg', view).src = `${IMG}front-${o}.webp`; }
+  // The shelves fill the screen: try 3 rows, 2 + 1, or 3 side by side and keep whichever
+  // gives the biggest pots. Room is left for the coins (top), tools and hint (bottom).
+  const top = 70, bottom = o === 'portrait' ? 178 : 64, side = o === 'portrait' ? 6 : 104;
+  const aw = vw - side * 2, ah = vh - top - bottom, GAP = 0.05;
+  const opts = [
+    { cols: 1, w: Math.min(aw, ah / (3 * ROW)) },
+    { cols: 2, w: Math.min(aw / (2 + GAP), ah / (2 * ROW)) },
+    { cols: 3, w: Math.min(aw / (3 + 2 * GAP), ah / ROW) },
+  ];
+  const best = opts.reduce((a, b) => (b.w > a.w * 1.03 ? b : a));
+  const w = Math.min(best.w, 640), hgt = w * ROW, gap = w * GAP;
+  const layoutRows = best.cols === 1 ? [[0], [1], [2]] : best.cols === 2 ? [[0, 1], [2]] : [[0, 1, 2]];
+  const y0 = top + Math.max(0, (ah - layoutRows.length * hgt) / 2);
+  layoutRows.forEach((row, r) => {
+    const rowW = row.length * w + (row.length - 1) * gap;
+    row.forEach((n, c) => {
+      const el = $(`.shelf[data-s="${n}"]`, canvas);
+      el.style.cssText = `left:${(vw - rowW) / 2 + c * (w + gap)}px;top:${y0 + r * hgt}px;width:${w}px;height:${hgt}px;z-index:${2 + r}`;
+    });
+  });
 }
 
 export function enter() { active = true; layout(); render(); }
@@ -77,7 +94,7 @@ export function leave() { active = false; }
 export function tick() { if (active) render(); }
 
 const plotEl = (i) => $(`.plot[data-i="${i}"]`, canvas);
-const plotAt = (x, y) => document.elementsFromPoint(x, y).map((e) => e.closest && e.closest('.g-canvas .plot')).find(Boolean);
+const plotAt = (x, y) => document.elementsFromPoint(x, y).map((e) => e.closest && e.closest('.g-wall .plot')).find(Boolean);
 const planterAt = (x, y) => plotAt(x, y);
 const plotsUnder = (el) => [+el.dataset.i];
 
@@ -160,13 +177,16 @@ function setupCan() {
     can.setPointerCapture(e.pointerId);
     const ghost = h(`<div class="can-ghost"><img src="${IMG}can-pour.webp" alt=""><div class="pour"></div></div>`);
     document.body.append(ghost);
-    drag = { id: e.pointerId, ghost, over: null, since: 0, done: new Set() };
+    drag = { id: e.pointerId, ghost, over: null, since: 0, done: new Set(), last: e };
+    // keep checking while the can is held still over a pot
+    drag.timer = setInterval(() => { if (drag) move(drag.last); }, 90);
     can.classList.add('lifted');
     move(e);
     sfx('tap');
   });
   const move = (e) => {
     if (!drag || e.pointerId !== drag.id) return;
+    drag.last = { pointerId: e.pointerId, clientX: e.clientX, clientY: e.clientY };
     drag.ghost.style.left = `${e.clientX}px`;
     drag.ghost.style.top = `${e.clientY}px`;
     const el = planterAt(e.clientX - 34, e.clientY + 6) || planterAt(e.clientX, e.clientY);
@@ -184,6 +204,7 @@ function setupCan() {
   const end = (e) => {
     if (!drag || e.pointerId !== drag.id) return;
     const g = drag.ghost, r = can.getBoundingClientRect();
+    clearInterval(drag.timer);
     drag = null;
     g.classList.remove('pouring');
     g.classList.add('returning');

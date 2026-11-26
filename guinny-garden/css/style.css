@@ -1545,3 +1545,38 @@ body.rb-open .mg-hint { opacity: 0; }
 [data-o="landscape"] .tool-can { left: 75.80%; top: 57.67%; width: 6.80%; z-index: 68; }
 [data-o="landscape"] .g-trowel { left: 83.00%; top: 61.36%; width: 3.60%; z-index: 68; }
 [data-o="landscape"] .tool-ipad { left: 87.40%; top: 56.61%; width: 5.60%; z-index: 68; }
+
+/* ====================================================================
+   Garden v5: front view. Three wall shelves x 4 pots on a soft, out-of-focus fence.
+   Shelf boxes are placed by layout() in js/scenes/garden.js (box height = 0.52 x width);
+   the plank's top surface sits at 76% of the box, the pots stand on it.
+   ==================================================================== */
+.g-front { background: #F4EEE2; overflow: hidden; }
+.g-front .g-bg { position: absolute; inset: -12px; width: calc(100% + 24px); height: calc(100% + 24px); object-fit: cover; object-position: 50% 30%;
+  filter: blur(3px) saturate(.85); pointer-events: none; }
+.g-front::before { content: ""; position: absolute; inset: 0; background: rgba(250, 244, 232, .32); pointer-events: none; z-index: 1; }
+.g-front .g-wall { position: absolute; inset: 0; z-index: 2; touch-action: none; }
+.g-wall .shelf { position: absolute; }
+.g-wall .shelf-img { position: absolute; left: 0; top: 76%; width: 100%; height: auto; pointer-events: none; z-index: 0;
+  filter: drop-shadow(0 8px 6px rgba(94, 69, 53, .25)); }
+.g-wall .plot.pot { position: absolute; bottom: 24%; top: auto; width: 21%; height: auto; aspect-ratio: 300 / 241; z-index: 1; }
+.g-wall .plot.s0 { left: 2.5%; } .g-wall .plot.s1 { left: 27.5%; } .g-wall .plot.s2 { left: 51.5%; } .g-wall .plot.s3 { left: 76.5%; }
+.g-wall .pot-img { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+  filter: drop-shadow(0 3px 2px rgba(94, 69, 53, .25)); transition: filter .6s; }
+.g-wall .plot.wet .pot-img { filter: drop-shadow(0 3px 2px rgba(94, 69, 53, .25)) brightness(.9) saturate(1.12); }
+.g-wall .plot .plant { position: absolute; left: -22%; right: -22%; bottom: 90%; height: 141%; z-index: 0; display: flex; justify-content: center; align-items: flex-end; pointer-events: none; }
+.g-wall .plot .plant img.plant-img { width: auto; max-width: 100%; object-fit: contain; object-position: 50% 100%; transform-origin: 50% 100%; }
+.g-wall .plot.ready .plant img { animation: sway2 2.4s ease-in-out infinite; }
+.g-wall .plot .plot-bar { left: 20%; right: 20%; bottom: 42%; z-index: 2; }
+.g-wall .plot .plot-badge { top: -18%; z-index: 3; }
+.g-wall .plot.empty::after { content: "+"; position: absolute; left: 50%; top: -48%; transform: translateX(-50%); z-index: 2; width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 900; font-size: 1.2rem; color: var(--ink-soft); background: rgba(255, 252, 246, .85); border: 2px dashed var(--line); pointer-events: none; }
+.g-wall .plot.splash::after { top: -60%; }
+.g-front .g-tools { position: absolute; z-index: 6; left: 12px; bottom: 84px; display: flex; gap: 10px; align-items: flex-end; }
+.g-front[data-o="landscape"] .g-tools { bottom: 12px; flex-direction: column; align-items: center; }
+.g-front .g-tools .tool { position: relative; width: 76px; display: grid; place-items: center; }
+.g-front .g-tools .tool-ipad { width: 58px; }
+.g-front .g-tools .tool img { width: 100%; height: auto; display: block; filter: drop-shadow(0 4px 4px rgba(94, 69, 53, .25)); }
+.g-front .g-tools .tool .hot-tag { opacity: 0; transition: opacity .3s; top: auto; bottom: 100%; }
+.g-front .g-tools .tool.attn .hot-tag { opacity: 1; }
+.g-front .g-hint { z-index: 7; }
