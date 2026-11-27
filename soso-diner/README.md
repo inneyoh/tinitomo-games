@@ -1,36 +1,41 @@
 # Soso's Diner
 
-A small, cute portrait diner game. Soso puts on her waiter apron and runs the diner one shift at a time.
-
-Open `index.html` in a browser. It is made for a phone held upright.
+A cute portrait diner rush game. Soso puts on her waiter apron and runs the diner one shift at a time.
 
 ## How to play
-1. **Seat**: tap a group waiting on the bench, then tap a free table with enough seats.
-2. **Order**: tap the table when the group shows a note.
-3. **Serve**: tap their ready dish on the counter, then tap their table.
-4. **Collect**: tap the table when they show a coin.
+1. **Seat**: drag a group from the bench onto a table with enough seats (or tap the group, then the table).
+2. **Order**: tap their table to take the order slip, then tap the bell on the counter to send it to the kitchen.
+3. **Serve**: tap the ready dish on the counter, then tap their table.
+4. **Clear**: tap the table to collect coins and the dirty plates, then tap the bin.
 
-Tables seat 2, 4 or 6, and groups come in sizes 1 to 6. Seating a group at a table that fits them exactly
-gives a **perfect fit** bonus, so plan where everyone sits and keep the big table free for big groups.
-Soso does your taps in order, like a to-do list. Happy guests (more hearts) leave bigger tips.
+Tables seat 2, 4 or 6, and groups come in sizes 1 to 6. A **perfect fit** gives bonus coins.
+Soso does your taps in order, like a to-do list, and can carry 2 things (3 with the Big Tray).
+Quick back-to-back jobs build a **combo** for extra coins. Happy guests (more hearts) tip more.
 Reach the day's coin goal to move on to the next day.
 
 ## Guests
-Momo, Popo, Kew, Bae, Rang, Kuma, Piyo, Gwoof and Bun. A new guest arrives each day until all nine are regulars.
-Each one has their own patience, tipping and eating speed (the group leader sets the group's mood).
+Most guests are everyday folks (hamster, frog, lamb, fox, panda, mouse). Special guests have a ⭐ and their own quirks:
+
+| Guest | Patience | Eating | Special |
+|---|---|---|---|
+| Momo | normal | fast | |
+| Popo | low | normal | tips better |
+| Kew | high | slow | |
+| Bae | high | slow | |
+| Rang | normal | normal | double perfect-fit bonus |
+| Guinny | high | normal | tips better at a perfect-fit table |
+| Kuma | high | slow | small tips |
+| Piyo | low | fast | tips a bit better |
+| Gwoof | low | normal | big tips |
+| Bun | high | normal | small tips |
+
+A new special guest joins each day.
 
 ## Power-ups (shop at the end of each day)
-- Bouncy Shoes: Soso moves faster
-- Comfy Chairs: seated guests stay happy longer
-- Better Air Con: guests in line wait more calmly
-- Speedy Stove: food cooks faster
-- Lo-fi Radio: guests eat faster
-- Cute Tip Jar: bigger tips
-- Big Tray: carry 3 plates
-- Flower Vase: guests pick their orders faster
+Bouncy Shoes, Comfy Chairs, Better Air Con, Speedy Stove, Lo-fi Radio, Cute Tip Jar, Big Tray, Flower Vase.
 
 Progress saves in the browser automatically.
 
 ## Art
-Character sprites in `sprites/` were generated with OpenArt (Seedream 5.5), using the existing
-Momo, Soso and friends artwork from MoSo Farm as the reference.
+All art in `art/` was generated with OpenArt (Seedream 5.5). Characters use the existing tinitomo cast art
+(MoSo Farm, Guinny's Garden) as reference, and props use the Soso Ice Cream and Guinny's Garden props as the style reference.
